@@ -1,0 +1,45 @@
+{
+    "DSF": {
+        "provider_class": "DsfProvider",
+        "layout_family": "DSF",
+        "schema_root": "resources/nfse/schemas/DSF",
+        "xsd_entrypoints": {
+            "enviar_lote_rps": "ReqEnvioLoteRPS.xsd",
+            "consultar_lote": "ReqConsultaLote.xsd",
+            "consultar_nfse_rps": "ReqConsultaNFSeRPS.xsd",
+            "cancelar_nfse": "ReqCancelamentoNFSe.xsd"
+        },
+        "aliquota_format": "percentual",
+        "transport": "soap"
+    },
+    "MANAUS_AM": {
+        "provider_class": "ManausAmProvider",
+        "layout_family": "MANAUS_AM",
+        "schema_root": "resources/nfse/schemas/MANAUS_AM",
+        "xsd_entrypoints": {
+            "enviar_lote_rps": "nfse_v2010.xsd",
+            "consultar_lote": "nfse_v2010.xsd",
+            "consultar_nfse_rps": "nfse_v2010.xsd"
+        },
+        "aliquota_format": "decimal",
+        "transport": "soap"
+    },
+    "PUBLICA": {
+        "provider_class": "PublicaProvider",
+        "layout_family": "PUBLICA",
+        "schema_root": "resources/nfse/schemas/PUBLICA",
+        "xsd_entrypoints": {
+            "enviar_lote_rps": "schema_nfse_v03.xsd",
+            "consultar_lote": "schema_nfse_v03.xsd",
+            "consultar_nfse_rps": "schema_nfse_v03.xsd",
+            "cancelar_nfse": "schema_nfse_v03.xsd"
+        },
+        "aliquota_format": "decimal",
+        "transport": "soap"
+    },
+    "NACIONAL": {
+        "provider_class": "NfseNacionalProvider",
+        "layout_family": "NACIONAL",
+        "transport": "rest"
+    }
+}

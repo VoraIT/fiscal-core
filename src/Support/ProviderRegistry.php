@@ -3,6 +3,8 @@
 namespace freeline\FiscalCore\Support;
 
 use freeline\FiscalCore\Contracts\NFSeProviderConfigInterface;
+use PhpParser\Node\Expr\Cast\Object_;
+use stdClass;
 
 /**
  * Registry para carregar Providers de NFSe baseado em configuração externa
@@ -109,6 +111,22 @@ class ProviderRegistry
         return $this->get(self::NFSE_NATIONAL_KEY);
     }
     
+    public function getByMunicipio(string $municipio): NFSeProviderConfigInterface
+    {
+        $catalog = new NFSeMunicipalCatalog();
+        $resolved = $catalog->resolveMunicipio($municipio);
+
+        if ($resolved === null) {
+            return $this->get(self::NFSE_NATIONAL_KEY);
+        }
+
+        return $this->getFamilyProvider($resolved['provider_family_key'], $resolved);
+    }
+
+    private function getFamilyProvider(string $key, array $municipio): NFSeProviderConfigInterface
+    {
+        return new NFSeProviderConfigInterface();
+    }
     /**
      * Resolve o nome completo da classe do provider
      * 

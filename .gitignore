@@ -23,3 +23,6 @@ files/*
 .phpunit.cache/test-results
 tests/logs/testdox.txt
 tests/logs/testdox.html
+
+
+Uninfe

@@ -1,0 +1,39 @@
+{
+    "municipios": {
+        "1501402": {
+            "nome": "Belem",
+            "uf": "PA",
+            "provider_family": "DSF",
+            "provider_class": "DsfProvider"
+        },
+        "1302603": {
+            "nome": "Manaus",
+            "uf": "AM",
+            "provider_family": "MANAUS_AM",
+            "provider_class": "ManausAmProvider"
+        },
+        "4209102": {
+            "nome": "Joinville",
+            "uf": "SC",
+            "provider_family": "PUBLICA",
+            "provider_class": "PublicaProvider"
+        }
+    },
+    "providers": {
+        "DSF": {
+            "transport": "soap",
+            "schema_root": "resources/nfse/schemas/DSF",
+            "layout_family": "DSF"
+        },
+        "MANAUS_AM": {
+            "transport": "soap",
+            "schema_root": "resources/nfse/schemas/MANAUS_AM",
+            "layout_family": "MANAUS_AM"
+        },
+        "PUBLICA": {
+            "transport": "soap",
+            "schema_root": "resources/nfse/schemas/PUBLICA",
+            "layout_family": "PUBLICA"
+        }
+    }
+}
