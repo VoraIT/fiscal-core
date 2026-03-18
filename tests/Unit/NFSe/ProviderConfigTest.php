@@ -1,155 +1,61 @@
 <?php
 
-namespace Tests\Unit\NFSe;
+declare(strict_types=1);
 
-use PHPUnit\Framework\TestCase;
 use freeline\FiscalCore\Facade\NFSeFacade;
+use PHPUnit\Framework\TestCase;
 
-/**
- * Testes unitários para configuração de providers NFSe
- * Valida carregamento e configuração por município
- */
-class ProviderConfigTest extends TestCase
+final class ProviderConfigTest extends TestCase
 {
-    /** @test */
-    public function deve_carregar_configuracao_municipio_valido(): void
+    public function testFacadeLoadsPilotProviderInfoForBelem(): void
     {
-        $nfse = new NFSeFacade('sao_paulo');
-        $config = $nfse->getProviderInfo();
+        $facade = new NFSeFacade('belem');
+        $response = $facade->getProviderInfo();
 
-        $this->assertTrue($config->isSuccess());
-        
-        $dados = $config->getData();
-        $this->assertArrayHasKey('codigo_municipio', $dados);
-        $this->assertArrayHasKey('provider_class', $dados);
-        $this->assertEquals('3550308', $dados['codigo_municipio']);
+        $this->assertTrue($response->isSuccess());
+
+        $data = $response->getData();
+        $this->assertSame('BELEM_MUNICIPAL_2025', $data['provider_key']);
+        $this->assertSame('1501402', $data['codigo_municipio']);
+        $this->assertStringContainsString('BelemMunicipalProvider', $data['provider_class']);
+        $this->assertContains('consultar_nfse_rps', $data['supported_operations']);
     }
 
-    /** @test */
-    public function deve_rejeitar_municipio_inexistente(): void
+    public function testFacadeListsOnlyPilotMunicipios(): void
     {
-        $nfse = new NFSeFacade('municipio_inexistente');
-        $config = $nfse->getProviderInfo();
+        $facade = new NFSeFacade('belem');
+        $response = $facade->listarMunicipios();
 
-        $this->assertFalse($config->isSuccess());
-        $this->assertStringContainsString('Município não configurado', $config->getError());
+        $this->assertTrue($response->isSuccess());
+        $this->assertSame(
+            ['belem', 'joinville', 'manaus', 'nacional'],
+            $response->getData('municipios')
+        );
     }
 
-    /** @test */
-    public function deve_listar_municipios_disponiveis(): void
+    public function testFacadeMapsJoinvilleToPublica(): void
     {
-        $nfse = new NFSeFacade();
-        $municipios = $nfse->listarMunicipios();
+        $facade = new NFSeFacade('joinville');
+        $response = $facade->getProviderInfo();
 
-        $this->assertTrue($municipios->isSuccess());
-        
-        $dados = $municipios->getData();
-        $this->assertArrayHasKey('municipios', $dados);
-        $this->assertIsArray($dados['municipios']);
-        $this->assertContains('curitiba', $dados['municipios']);
+        $this->assertTrue($response->isSuccess());
+
+        $data = $response->getData();
+        $this->assertSame('PUBLICA', $data['provider_key']);
+        $this->assertSame('4209102', $data['codigo_municipio']);
+        $this->assertStringContainsString('PublicaProvider', $data['provider_class']);
     }
 
-    /** @test */
-    public function deve_validar_configuracao_completa_municipio(): void
+    public function testFacadeFallsBackToNationalForUnknownMunicipio(): void
     {
-        $municipios_teste = ['curitiba'];
-        $registry = \freeline\FiscalCore\Support\ProviderRegistry::getInstance();
+        $facade = new NFSeFacade('municipio-inexistente');
+        $response = $facade->getProviderInfo();
 
-        foreach ($municipios_teste as $municipio) {
-            $validacao = $registry->validarConfiguracao($municipio);
+        $this->assertTrue($response->isSuccess());
 
-            if ($validacao->isSuccess()) {
-                $dados = $validacao->getData();
-                $this->assertTrue($dados['config_valida']);
-                $this->assertEquals($municipio, $dados['municipio']);
-            } else {
-                // Se não tem configuração, apenas verifica que o erro é apropriado
-                $this->assertStringContainsString('não configurado', $validacao->getError());
-            }
-        }
-    }
-
-    /** @test */
-    public function deve_detectar_configuracao_incompleta(): void
-    {
-        // Testa município inexistente
-        $registry = \freeline\FiscalCore\Support\ProviderRegistry::getInstance();
-        $validacao = $registry->validarConfiguracao('municipio_inexistente');
-
-        $this->assertFalse($validacao->isSuccess());
-        $this->assertStringContainsString('não configurado', $validacao->getError());
-    }
-
-    /** @test */
-    public function deve_determinar_ambiente_automaticamente(): void
-    {
-        $registry = \freeline\FiscalCore\Support\ProviderRegistry::getInstance();
-        $ambiente = $registry->determinarAmbiente();
-
-        $this->assertContains($ambiente, ['homologacao', 'producao']);
-        $this->assertIsString($ambiente);
-    }
-
-    /** @test */
-    public function deve_aplicar_regras_especificas_municipio(): void
-    {
-        // Cada município pode ter regras específicas
-        $casos_teste = [
-            'sao_paulo' => [
-                'limite_rps' => 50,
-                'versao_schema' => '1.0',
-                'requer_certificado' => true
-            ],
-            'curitiba' => [
-                'limite_rps' => 100,
-                'versao_schema' => '2.0',
-                'requer_certificado' => false
-            ]
-        ];
-
-        foreach ($casos_teste as $municipio => $regras_esperadas) {
-            $nfse = new NFSeFacade($municipio);
-            $regras = $nfse->obterRegrasEspecificas();
-
-            $this->assertTrue($regras->isSuccess());
-            
-            $dados = $regras->getData();
-            foreach ($regras_esperadas as $regra => $valor_esperado) {
-                $this->assertEquals($valor_esperado, $dados[$regra],
-                    "Regra {$regra} para {$municipio} deveria ser {$valor_esperado}");
-            }
-        }
-    }
-
-    /** @test */
-    public function deve_aplicar_fallback_para_municipio_similar(): void
-    {
-        // Teste de fallback baseado em região
-        $nfse = new NFSeFacade();
-        $fallback = $nfse->buscarFallback('municipio_nao_configurado', 'SP');
-
-        if ($fallback->isSuccess()) {
-            $dados = $fallback->getData();
-            $this->assertArrayHasKey('municipio_sugerido', $dados);
-            $this->assertArrayHasKey('provider_compativel', $dados);
-        }
-    }
-
-    /** @test */
-    public function deve_validar_versao_schema_municipio(): void
-    {
-        $municipios = ['sao_paulo', 'curitiba', 'belo_horizonte'];
-
-        foreach ($municipios as $municipio) {
-            $nfse = new NFSeFacade($municipio);
-            $config = $nfse->getProviderInfo();
-
-            if ($config->isSuccess()) {
-                $dados = $config->getData();
-                $this->assertArrayHasKey('versao_schema', $dados);
-                $this->assertMatchesRegularExpression('/^\d+\.\d+$/', $dados['versao_schema'],
-                    "Versão do schema para {$municipio} deve ter formato X.Y");
-            }
-        }
+        $data = $response->getData();
+        $this->assertSame('nfse_nacional', $data['provider_key']);
+        $this->assertTrue($data['municipio_ignored']);
+        $this->assertStringContainsString('NacionalProvider', $data['provider_class']);
     }
 }

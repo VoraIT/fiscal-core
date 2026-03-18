@@ -1,245 +1,56 @@
-Brasil APIAdapter
- [x] Adapter instancia sem client
- [x] Normaliza resposta array
- [x] Consultar cep formato entrada
- [x] Consultar cnpj formato entrada
- [x] Consultar banco tipo entrada
- [x] Listar bancos estrutura
+Belem Municipal Provider
+ [x] Consultar nfse por rps builds schema valid request and parses response
+ [x] Cancelar nfse builds schema valid request and parses response
+ [x] Cancelar nfse returns false on business rejection
 
-Cobranca DTO (freeline\FiscalCore\Tests\Unit\CobrancaDTO)
- [x] Criar cobranca a vista
- [x] Criar cobranca parcelada
- [x] Criar cobranca em n vezes
- [x] Adicionar desconto
- [ ] Validacao soma duplicatas
- [x] Validacao com soma correta
+NFSe Adapter
+ [x] Joinville uses publica provider
+ [x] Belem uses current municipal provider
+ [x] Manaus uses manaus am provider
+ [x] Unknown uses nacional provider
 
-Default Provider Registrar
- [ ] Register defaults adds expected keys
+NFSe Adapter Facade Nacional (Tests\Unit\NFSe\NFSeAdapterFacadeNacional)
+ [x] Adapter lanca erro quando provider nao suporta capability nacional
+ [x] Facade retorna fiscal response para operacoes nacionais
 
-Documento Adapter
- [x] Valida cpf correto
- [x] Invalida cpf incorreto
- [x] Formata cpf
- [x] Valida cnpj correto
- [x] Invalida cnpj incorreto
- [x] Formata cnpj
+NFSe Belem Routing
+ [x] Belem mei routes automatically to national provider
+ [x] Belem rejects emission when mei classification is missing
+ [x] Belem municipal consult and cancel use municipal provider capabilities
+ [x] Belem facade includes municipal operation metadata
 
-Emitente DTO (Tests\Unit\DTO\EmitenteDTO)
- [x] Criar emitente
- [x] Valores padrao
- [x] Campos opcionais
+NFSe Municipal Catalog
+ [x] Resolve joinville by slug
+ [x] Resolve belem by accented name
+ [x] Resolve manaus by ibge
+ [x] Unknown municipio returns null
 
-GTINAdapter (freeline\FiscalCore\Tests\GTINAdapter)
- [x] Sem gtin is valid
- [x] Gtin8 valid and invalid
- [x] Invalid lengths
- [x] Deve validar GTINs válidos corretamente
- [x] Deve rejeitar GTINs inválidos
- [x] Deve executar checkGTIN sem erros para GTINs válidos
- [x] Deve lançar exceção para GTINs inválidos no checkGTIN
- [x] Deve detectar GTIN com dígito verificador inválido
- [x] Deve requerer certificado para buscar produto
- [x] Deve lançar exceção para GTIN inválido na busca
- [ ] Deve retornar estrutura esperada na busca (simulada)
- [ ] Deve consultar NCM com certificado
- [ ] Tenta encontrar o NCM oficial do produto através do nome
- [ ] Deve obter descrição do produto
- [ ] Deve inicializar com singletons quando disponíveis
+NFSe Nacional Mock Flow (Tests\Integration\NFSeNacionalMockFlow)
+ [ ] Fluxo emissao consulta cancelamento com mock http
 
-ICMSCalculation (Tests\Unit\Tributacao\ICMSCalculation)
- [x] Deve calcular icms operacao interna sp
- [x] Deve calcular icms operacao interestadual
- [x] Deve aplicar substituicao tributaria quando aplicavel
- [x] Deve validar ncm obrigatorio
- [x] Deve validar uf origem valida
+NFSe National Only Mode (Tests\Unit\NFSe\NFSeNationalOnlyMode)
+ [x] Resolver sempre retorna chave nacional
+ [x] Registry faz fallback para provider nacional
+ [x] Facade sinaliza deprecacao de municipio no metadata
 
-Icms DTO (Tests\Unit\DTO\IcmsDTO)
- [x] Simples nacional sem credito
- [x] Simples nacional com credito
- [x] Icms 00
- [x] Icms isento
- [x] Origem personalizada
+NFSe Provider Resolver
+ [x] Resolve joinville to publica
+ [x] Resolve belem to current municipal family
+ [x] Resolve manaus to manaus am
+ [x] Unknown falls back to national
+ [x] Null falls back to national
 
-Identificacao DTO (Tests\Unit\DTO\IdentificacaoDTO)
- [x] Criar identificacao n fe
- [x] Factory method for n fe
- [x] Factory method for n f ce
- [x] C n f gerado automaticamente
+Nacional Catalog Service (Tests\Unit\NFSe\NacionalCatalogService)
+ [x] Lista municipios com cache hit e miss
+ [x] Retorna cache stale quando falha remota
 
-Identificacao Node (Tests\Unit\Nodes\IdentificacaoNode)
- [x] Get node type
- [x] Validate com dados validos
- [x] Validate natureza operacao vazia
- [x] Validate modelo invalido
- [x] Validate numero nota invalido
-
-NCMValidation (Tests\Unit\Tributacao\NCMValidation)
- [x] Deve validar ncm formato correto
- [ ] Deve rejeitar ncm formato invalido
- [ ] Deve consultar dados ncm valido
- [ ] Deve identificar produtos sujeitos substituicao tributaria
- [x] Deve identificar produtos nao sujeitos st
- [ ] Deve obter aliquota ipi por ncm
- [ ] Deve validar hierarquia ncm
-
-NFCe Completo (Tests\Integration\NFCeCompleto)
- [x] Criar n f ce completa via builder
- [x] Criar n f ce com multiplos pagamentos
- [x] Criar n f ce com validacoes
-
-NFe Construcao Manual (Tests\Integration\NFeConstrucaoManual)
- [x] Criar n fe manualmente com impostos completos
- [x] Criar n fe com simples nacional
- [x] Fluxo completo n fe
-
-Nota Fiscal (Tests\Unit\NotaFiscal)
- [x] Add node
- [x] Has node
- [x] Get nodes
- [x] Validate identificacao obrigatoria
- [x] Validate emitente obrigatorio
- [x] Validate com dados minimos
- [x] Add node fluente
-
-Nota Fiscal Builder (Tests\Unit\NotaFiscalBuilder)
- [x] From array com dados completos
- [x] From array com multiplos itens
- [x] Build retorna nota fiscal
-
-Pagamento DTO (Tests\Unit\DTO\PagamentoDTO)
- [x] Pagamento dinheiro
- [x] Pagamento cartao credito
- [x] Pagamento cartao debito
- [x] Pagamento pix
- [x] Pagamento cartao sem dados opcionais
-
-Produto DTO (Tests\Unit\DTO\ProdutoDTO)
- [x] Criar produto
- [x] Factory method simple
- [x] Calculo valor total
- [x] Unidade personalizada
- [x] E a n personalizado
-
-Produto Node (Tests\Unit\Nodes\ProdutoNode)
- [x] Get node type
- [x] Validate com dados validos
- [x] Validate codigo vazio
- [x] Validate descricao vazia
- [x] Validate quantidade zero
- [x] Validate valor unitario zero
-
-Provider Config (Tests\Unit\NFSe\ProviderConfig)
- [ ] Deve carregar configuracao municipio valido
- [ ] Deve rejeitar municipio inexistente
- [x] Deve listar municipios disponiveis
- [ ] Deve validar configuracao completa municipio
- [x] Deve detectar configuracao incompleta
- [x] Deve determinar ambiente automaticamente
- [ ] Deve aplicar regras especificas municipio
- [ ] Deve aplicar fallback para municipio similar
- [ ] Deve validar versao schema municipio
-
-Provider Resolver
- [ ] Resolves registered provider by key
-
-Response Handling (Tests\Unit\Support\ResponseHandling)
- [x] Deve criar resposta sucesso
- [x] Deve criar resposta erro
- [x] Deve adicionar metadata resposta
- [x] Deve tratar excecao com handler
- [x] Deve executar callback sucesso
- [x] Deve capturar excecao em callback
- [x] Deve validar timeout operacao
- [x] Deve implementar retry automatico
- [x] Deve falhar apos esgotar tentativas
- [x] Deve preservar codigo erro original
- [x] Deve serializar resposta json
- [x] Deve implementar cache resposta
-
-Singleton Managers
- [x] Certificate manager singleton instance
- [x] Config manager singleton instance
- [x] Certificate manager initially empty
- [x] Config manager has defaults
- [x] Config manager set and get
- [x] Config manager nfe config
- [x] Config manager nfse config
- [ ] Tools factory requires certificate
- [x] Tools factory setup for development
- [ ] Tools factory setup for production requires configs
- [x] Tools factory setup for production with all configs
- [x] Certificate manager load from invalid file
- [x] Config manager environment methods
- [x] Config manager reset
- [x] Singleton prevent cloning
- [x] Certificate manager clear
-
-Std Class Builder (Tests\Unit\Helpers\StdClassBuilder)
- [x] Create basic
- [x] Create removes nulls by default
- [x] Create with nulls
- [x] From with named arguments
- [x] Merge arrays
- [x] Merge objects
- [x] Merge skips nulls
- [x] Transform applies function
- [x] With formatting
- [x] Real world nfe totals
- [x] Props with simple variables
- [x] Props with object properties
- [x] From vars with compact
-
-Totais DTO (freeline\FiscalCore\Tests\Unit\TotaisDTO)
- [x] Criar totais basico
- [x] Criar totais completo
- [x] From itens calcula automaticamente
-
-Transporte DTO (freeline\FiscalCore\Tests\Unit\TransporteDTO)
- [x] Criar transporte sem frete
- [x] Criar transporte por conta emitente
- [x] Criar transporte por conta destinatario
- [x] Adicionar veiculo
- [x] Adicionar volumes
- [x] Adicionar lacres
-
-Utils Facade (Tests\Unit\Utils\UtilsFacade)
- [x] Deve validar cpf correto
- [x] Deve rejeitar cpf invalido
- [x] Deve validar cnpj correto
- [x] Deve rejeitar cnpj invalido
- [x] Deve consultar cep formato valido
- [ ] Deve listar bancos brasileiros
- [x] Deve consultar banco especifico
- [x] Deve verificar status apis externas
- [x] Deve formatar documentos corretamente
- [x] Deve listar municipios por uf
- [x] Deve consultar ddd valido
- [x] Deve listar feriados nacionais
-
-XMLValidation (Tests\Unit\NFe\XMLValidation)
- [x] Deve validar xml nfe estrutura basica
- [ ] Deve rejeitar xml sem elementos obrigatorios
- [ ] Deve validar chave nfe formato
- [ ] Deve rejeitar chave nfe invalida
- [x] Deve validar cnpj emitente
- [ ] Deve rejeitar cnpj emitente invalido
- [x] Deve validar totais nfe consistencia
- [x] Deve detectar inconsistencia totais
- [x] Deve validar cst icms validos
- [x] Deve rejeitar cst icms invalidos
-
-Xml Parser (Tests\Integration\XmlParser)
- [x] Parse identificacao
- [x] Parse emitente
- [x] Parse destinatario
- [x] Parse produtos
- [x] Parse impostos
- [x] Parse pagamentos
- [x] To array completo
- [x] Builder from xml
- [x] Builder from xml validate
- [x] Builder from xml get make
- [x] Xml invalido lanca excecao
- [x] Builder from xml arquivo nao existente
+Nacional Provider (Tests\Unit\NFSe\NacionalProvider)
+ [ ] Emitir monta xml e envia para endpoint correto
+ [ ] Cancelar retorna true quando resposta indica sucesso
+ [ ] Consultar retorno compnfse com xml real
+ [x] Consultar por rps valida campos obrigatorios
+ [ ] Emitir resolve rota por servico configurado
+ [ ] Catalogo resolve rota por servico configurado
+ [ ] Consulta cnc resolve rota por servico
+ [ ] Consulta cnc contribuinte e habilitacao
 

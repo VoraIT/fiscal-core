@@ -6,24 +6,62 @@ final class NFSeSchemaValidator
 {
     public function validate(string $xml, string $schemaPath): array
     {
-        libxml_use_internal_errors(true);
+        if (!is_file($schemaPath)) {
+            return [
+                'valid' => false,
+                'schema' => $schemaPath,
+                'errors' => ["Schema não encontrado: {$schemaPath}"],
+            ];
+        }
+
+        $previous = libxml_use_internal_errors(true);
+        libxml_clear_errors();
 
         $dom = new \DOMDocument();
-        $dom->loadXML($xml);
+        $loaded = $dom->loadXML($xml, LIBXML_NONET);
 
-        $valid = $dom->schemaValidate($schemaPath);
+        $errors = $this->normalizeErrors(libxml_get_errors());
+        libxml_clear_errors();
 
-        $errors = array_map(
-            fn (\LibXMLError $e) => trim($e->message),
-            libxml_get_errors()
-        );
+        $valid = false;
+
+        if ($loaded) {
+            $valid = $dom->schemaValidate($schemaPath);
+            $errors = array_merge($errors, $this->normalizeErrors(libxml_get_errors()));
+            $errors = array_values(array_unique($errors));
+        }
 
         libxml_clear_errors();
+        libxml_use_internal_errors($previous);
 
         return [
             'valid' => $valid,
             'schema' => $schemaPath,
             'errors' => $errors,
         ];
+    }
+
+    /**
+     * @param \LibXMLError[] $errors
+     * @return string[]
+     */
+    private function normalizeErrors(array $errors): array
+    {
+        $messages = [];
+
+        foreach ($errors as $error) {
+            $message = trim($error->message);
+            $line = $error->line > 0 ? "line {$error->line}" : null;
+            $column = $error->column > 0 ? "column {$error->column}" : null;
+            $location = implode(', ', array_filter([$line, $column]));
+
+            $messages[] = $location !== ''
+                ? "{$message} ({$location})"
+                : $message;
+        }
+
+        sort($messages);
+
+        return $messages;
     }
 }

@@ -12,6 +12,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
 {
     private NacionalCatalogService $catalogService;
     private $httpClient;
+    protected array $config;
 
     public function __construct(array $config)
     {
@@ -1696,5 +1697,24 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         libxml_clear_errors();
         return ['ok' => false, 'errors' => $errs];
 
+    }
+
+    public function consultarContribuinteCnc(string $cnc): array
+    {
+        return [
+            'suportado' => false,
+            'mensagem' => 'Operação consultarContribuinteCnc não suportada por este provider.',
+            'cnc' => $cnc,
+        ];
+    }
+
+    public function verificarHabilitacaoCnc(string $cnc): bool
+    {
+        return false;
+    }
+
+    public function getConfig(): array
+    {
+        return $this->config;
     }
 }

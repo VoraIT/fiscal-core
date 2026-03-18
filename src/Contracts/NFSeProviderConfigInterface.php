@@ -74,4 +74,7 @@ interface NFSeProviderConfigInterface extends NFSeProviderInterface
      * @throws \InvalidArgumentException Se dados inválidos
      */
     public function validarDados(array $dados): bool;
+    public function consultarContribuinteCnc(string $cnc): array;
+    public function verificarHabilitacaoCnc(string $cnc): bool;
+    public function getConfig(): array;
 }

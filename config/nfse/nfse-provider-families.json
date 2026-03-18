@@ -1,45 +1,100 @@
 {
-    "DSF": {
-        "provider_class": "DsfProvider",
-        "layout_family": "DSF",
-        "schema_root": "resources/nfse/schemas/DSF",
+    "BELEM_MUNICIPAL_2025": {
+        "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\Municipal\\BelemMunicipalProvider",
+        "layout_family": "ABRASF_203",
+        "schema_root": "resources/nfse/schemas/BELEM_MUNICIPAL_2025",
         "xsd_entrypoints": {
-            "enviar_lote_rps": "ReqEnvioLoteRPS.xsd",
-            "consultar_lote": "ReqConsultaLote.xsd",
-            "consultar_nfse_rps": "ReqConsultaNFSeRPS.xsd",
-            "cancelar_nfse": "ReqCancelamentoNFSe.xsd"
+            "emitir": "enviar_lote_rps_sincrono_envio.xsd",
+            "enviar_lote_rps": "enviar_lote_rps_sincrono_envio.xsd",
+            "consultar_lote": "consultar_lote_rps_envio.xsd",
+            "consultar_nfse_rps": "consultar_nfse_rps_envio.xsd",
+            "cancelar_nfse": "cancelar_nfse_envio.xsd"
         },
-        "aliquota_format": "percentual",
-        "transport": "soap"
+        "aliquota_format": "decimal",
+        "transport": "soap",
+        "versao": "2.03",
+        "codigo_municipio": "1501402",
+        "wsdl_homologacao": "https://sefin-hml.belem.pa.gov.br/notafiscal-abrasfv203-ws/NotaFiscalSoap?wsdl",
+        "wsdl_producao": "https://notafiscal.belem.pa.gov.br/notafiscal-abrasfv203-ws/NotaFiscalSoap?wsdl",
+        "signature_mode": "required",
+        "soap_operation": "RecepcionarLoteRpsSincrono",
+        "supported_operations": [
+            "emitir_sincrono",
+            "consultar_lote",
+            "consultar_nfse_rps",
+            "cancelar_nfse"
+        ],
+        "municipio_nome": "Belem",
+        "source": "custom_override"
+    },
+    "DSF": {
+        "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\Municipal\\DsfProvider",
+        "layout_family": "LEGACY_ALIAS",
+        "schema_root": "resources/nfse/schemas/BELEM_MUNICIPAL_2025",
+        "xsd_entrypoints": {
+            "emitir": "enviar_lote_rps_sincrono_envio.xsd",
+            "consultar_lote": "consultar_lote_rps_envio.xsd",
+            "consultar_nfse_rps": "consultar_nfse_rps_envio.xsd",
+            "cancelar_nfse": "cancelar_nfse_envio.xsd"
+        },
+        "aliquota_format": "decimal",
+        "transport": "soap",
+        "versao": "2.03",
+        "codigo_municipio": "1501402",
+        "wsdl_homologacao": "https://sefin-hml.belem.pa.gov.br/notafiscal-abrasfv203-ws/NotaFiscalSoap?wsdl",
+        "wsdl_producao": "https://notafiscal.belem.pa.gov.br/notafiscal-abrasfv203-ws/NotaFiscalSoap?wsdl",
+        "signature_mode": "required",
+        "soap_operation": "RecepcionarLoteRpsSincrono",
+        "supported_operations": [
+            "emitir_sincrono",
+            "consultar_lote",
+            "consultar_nfse_rps",
+            "cancelar_nfse"
+        ],
+        "municipio_nome": "Belem",
+        "source": "legacy_alias"
     },
     "MANAUS_AM": {
-        "provider_class": "ManausAmProvider",
+        "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\Municipal\\ManausAmProvider",
         "layout_family": "MANAUS_AM",
         "schema_root": "resources/nfse/schemas/MANAUS_AM",
         "xsd_entrypoints": {
+            "emitir": "nfse_v2010.xsd",
             "enviar_lote_rps": "nfse_v2010.xsd",
             "consultar_lote": "nfse_v2010.xsd",
             "consultar_nfse_rps": "nfse_v2010.xsd"
         },
         "aliquota_format": "decimal",
-        "transport": "soap"
+        "transport": "soap",
+        "versao": "2010",
+        "codigo_municipio": "1302603",
+        "municipio_nome": "Manaus",
+        "wsdl": ""
     },
     "PUBLICA": {
-        "provider_class": "PublicaProvider",
+        "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\Municipal\\PublicaProvider",
         "layout_family": "PUBLICA",
         "schema_root": "resources/nfse/schemas/PUBLICA",
         "xsd_entrypoints": {
+            "emitir": "schema_nfse_v03.xsd",
             "enviar_lote_rps": "schema_nfse_v03.xsd",
             "consultar_lote": "schema_nfse_v03.xsd",
             "consultar_nfse_rps": "schema_nfse_v03.xsd",
             "cancelar_nfse": "schema_nfse_v03.xsd"
         },
         "aliquota_format": "decimal",
-        "transport": "soap"
+        "transport": "soap",
+        "versao": "3.00",
+        "codigo_municipio": "4209102",
+        "municipio_nome": "Joinville",
+        "wsdl": ""
     },
-    "NACIONAL": {
-        "provider_class": "NfseNacionalProvider",
+    "nfse_nacional": {
+        "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\NacionalProvider",
         "layout_family": "NACIONAL",
-        "transport": "rest"
+        "transport": "rest",
+        "codigo_municipio": "1001058",
+        "wsdl": "",
+        "api_base_url": ""
     }
 }

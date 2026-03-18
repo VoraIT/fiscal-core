@@ -32,7 +32,7 @@ class NFSeFacade
         $this->providerKey = $compat['provider_key'];
         $this->municipioIgnored = $compat['municipio_ignored'];
         $this->deprecationWarnings = $compat['warnings'];
-        
+
         if ($nfse !== null) {
             $this->nfse = $nfse;
         } else {
@@ -87,10 +87,15 @@ class NFSeFacade
 
         try {
             $resultado = $this->nfse->emitir($dados);
+            $lastEmission = method_exists($this->nfse, 'getLastEmissionInfo')
+                ? $this->nfse->getLastEmissionInfo()
+                : [];
+
             return FiscalResponse::success([
                 'resultado' => $resultado,
                 'type' => 'nfse_xml',
-                'municipio' => $this->municipio
+                'municipio' => $this->municipio,
+                'emissao' => $lastEmission,
             ], 'nfse_emission', [
                 'municipio' => $this->municipio,
                 'provider_key' => $this->providerKey,
@@ -142,12 +147,16 @@ class NFSeFacade
 
         try {
             $resultado = $this->nfse->cancelar($chave, $motivo, $protocolo);
+            $operation = method_exists($this->nfse, 'getLastOperationInfo')
+                ? $this->nfse->getLastOperationInfo()
+                : [];
             return FiscalResponse::success([
                 'canceled' => $resultado,
                 'type' => 'nfse_cancelamento',
                 'chave' => $chave,
                 'motivo' => $motivo,
-                'municipio' => $this->municipio
+                'municipio' => $this->municipio,
+                'cancelamento' => $operation,
             ], 'nfse_cancellation', [
                 'chave' => $chave,
                 'motivo' => $motivo,
@@ -191,10 +200,14 @@ class NFSeFacade
 
         try {
             $resultado = $this->nfse->consultarPorRps($identificacaoRps);
+            $operation = method_exists($this->nfse, 'getLastOperationInfo')
+                ? $this->nfse->getLastOperationInfo()
+                : [];
             return FiscalResponse::success([
                 'resultado' => $resultado,
                 'type' => 'nfse_consulta_rps',
                 'municipio' => $this->municipio,
+                'consulta' => $operation,
             ], 'nfse_query_by_rps', $this->buildCompatibilityMetadata());
         } catch (\Exception $e) {
             return $this->responseHandler->handle($e, 'nfse_query_by_rps');
@@ -209,11 +222,15 @@ class NFSeFacade
 
         try {
             $resultado = $this->nfse->consultarLote($protocolo);
+            $operation = method_exists($this->nfse, 'getLastOperationInfo')
+                ? $this->nfse->getLastOperationInfo()
+                : [];
             return FiscalResponse::success([
                 'resultado' => $resultado,
                 'type' => 'nfse_consulta_lote',
                 'protocolo' => $protocolo,
                 'municipio' => $this->municipio,
+                'consulta' => $operation,
             ], 'nfse_query_lote', $this->buildCompatibilityMetadata());
         } catch (\Exception $e) {
             return $this->responseHandler->handle($e, 'nfse_query_lote');
@@ -285,8 +302,7 @@ class NFSeFacade
         ?string $codigoServico = null,
         ?string $competencia = null,
         bool $forceRefresh = false
-    ): FiscalResponse
-    {
+    ): FiscalResponse {
         if ($check = $this->checkNFSeInitialization()) {
             return $check;
         }
@@ -335,6 +351,40 @@ class NFSeFacade
             ]);
         } catch (\Exception $e) {
             return $this->responseHandler->handle($e, 'nfse_nacional_convenio');
+        }
+    }
+
+    public static function consultarContribuinteCnc(string $municipio, string $cnc): FiscalResponse
+    {
+        try {
+            $adapter = new NFSeAdapter($municipio);
+            $data = $adapter->consultarContribuinteCnc($cnc);
+
+            if (!is_array($data)) {
+                $data = ['resultado' => $data];
+            }
+
+            $data['codigoMunicipio'] = $municipio;
+
+            return FiscalResponse::success($data, 'nfse_consultar_contribuinte_cnc');
+        } catch (\Throwable $e) {
+            return FiscalResponse::fromException($e, 'nfse_consultar_contribuinte_cnc');
+        }
+    }
+
+    public static function verificarHabilitacaoCnc(string $municipio, string $cnc): FiscalResponse
+    {
+        try {
+            $adapter = new NFSeAdapter($municipio);
+            $habilitado = $adapter->verificarHabilitacaoCnc($cnc);
+
+            return FiscalResponse::success([
+                'habilitado' => $habilitado,
+                'cnc' => $cnc,
+                'codigoMunicipio' => $municipio,
+            ], 'nfse_verificar_habilitacao_cnc');
+        } catch (\Throwable $e) {
+            return FiscalResponse::fromException($e, 'nfse_verificar_habilitacao_cnc');
         }
     }
 
@@ -406,7 +456,7 @@ class NFSeFacade
         try {
             $registry = ProviderRegistry::getInstance();
             $municipios = $registry->listMunicipios();
-            
+
             return FiscalResponse::success(['municipios' => $municipios], 'nfse_list_municipios', [
                 'total' => count($municipios),
                 'current_municipio' => $this->municipio,
@@ -444,37 +494,37 @@ class NFSeFacade
      */
     public function validarXML(string $xml): FiscalResponse
     {
-        return $this->responseHandler->handle(function() use ($xml) {
+        return $this->responseHandler->handle(function () use ($xml) {
             if (empty($xml)) {
                 throw new \InvalidArgumentException("XML não pode estar vazio");
             }
-            
+
             // Validação básica de XML
             $dom = new \DOMDocument();
             libxml_use_internal_errors(true);
-            
+
             if (!$dom->loadXML($xml)) {
                 $errors = libxml_get_errors();
                 $errorMsg = "XML inválido: " . $errors[0]->message ?? 'Erro desconhecido';
                 libxml_clear_errors();
                 throw new \InvalidArgumentException($errorMsg);
             }
-            
+
             // Tenta identificar tipo de NFSe
             $tiposNFSe = ['CompNfse', 'Nfse', 'InfNfse', 'GerarNfseEnvio'];
             $tipoDetectado = null;
-            
+
             foreach ($tiposNFSe as $tipo) {
                 if ($dom->getElementsByTagName($tipo)->length > 0) {
                     $tipoDetectado = $tipo;
                     break;
                 }
             }
-            
+
             if (!$tipoDetectado) {
                 throw new \InvalidArgumentException("XML não é uma NFSe válida");
             }
-            
+
             return [
                 'xml_valido' => true,
                 'tipo_nfse' => $tipoDetectado,
@@ -483,15 +533,15 @@ class NFSeFacade
             ];
         }, 'validacao_xml_nfse');
     }
-    
+
     /**
      * Valida dados do prestador NFSe
      */
     public function validarPrestador(array $prestador): FiscalResponse
     {
-        return $this->responseHandler->handle(function() use ($prestador) {
+        return $this->responseHandler->handle(function () use ($prestador) {
             $erros = [];
-            
+
             // Valida campos obrigatórios
             if (empty($prestador['cnpj'])) {
                 $erros[] = 'CNPJ do prestador é obrigatório';
@@ -502,19 +552,19 @@ class NFSeFacade
                     $erros[] = 'CNPJ deve ter 14 dígitos';
                 }
             }
-            
+
             if (empty($prestador['inscricaoMunicipal'])) {
                 $erros[] = 'Inscrição Municipal é obrigatória';
             }
-            
+
             if (empty($prestador['razaoSocial'])) {
                 $erros[] = 'Razão Social é obrigatória';
             }
-            
+
             if (!empty($erros)) {
                 throw new \InvalidArgumentException("Prestador inválido: " . implode(', ', $erros));
             }
-            
+
             return [
                 'prestador_valido' => true,
                 'cnpj_formatado' => isset($prestador['cnpj']) ? preg_replace('/\D/', '', $prestador['cnpj']) : null,
@@ -533,7 +583,7 @@ class NFSeFacade
     public function validarMunicipio(?string $municipio = null): FiscalResponse
     {
         $municipioToValidate = $municipio ?? $this->municipio;
-        
+
         try {
             $registry = ProviderRegistry::getInstance();
 
@@ -566,7 +616,7 @@ class NFSeFacade
             ], 'nfse_municipality_validation', [
                 'warnings' => $this->deprecationWarnings
             ]);
-            
+
         } catch (\Exception $e) {
             return $this->responseHandler->handle($e, 'nfse_municipality_validation');
         }

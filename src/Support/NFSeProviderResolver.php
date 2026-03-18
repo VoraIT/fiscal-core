@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace freeline\FiscalCore\Support;
 
 final class NFSeProviderResolver
@@ -14,21 +16,28 @@ final class NFSeProviderResolver
 
     public function resolveKey(?string $input): string
     {
-        if ($input === null || trim($input) === '') {
+        if ($this->isBlank($input)) {
             return self::NATIONAL_KEY;
         }
 
         $resolved = $this->catalog->resolveMunicipio($input);
 
-        if ($resolved !== null) {
-            return $resolved['provider_family_key'];
-        }
-
-        return self::NATIONAL_KEY;
+        return $resolved['provider_family_key'] ?? self::NATIONAL_KEY;
     }
 
     public function buildMetadata(?string $input): array
     {
+        if ($this->isBlank($input)) {
+            return [
+                'provider_key' => self::NATIONAL_KEY,
+                'municipio_input' => $input,
+                'municipio_ignored' => false,
+                'municipio_resolved' => null,
+                'routing_mode' => 'nacional',
+                'warnings' => [],
+            ];
+        }
+
         $resolved = $this->catalog->resolveMunicipio($input);
 
         if ($resolved !== null) {
@@ -45,11 +54,17 @@ final class NFSeProviderResolver
         return [
             'provider_key' => self::NATIONAL_KEY,
             'municipio_input' => $input,
-            'municipio_ignored' => $input !== null && $input !== '',
+            'municipio_ignored' => true,
+            'municipio_resolved' => null,
             'routing_mode' => 'nacional_fallback',
-            'warnings' => $input ? [
-                "Município '{$input}' não encontrado no catálogo municipal. Aplicado fallback nacional."
-            ] : [],
+            'warnings' => [
+                "Município '{$input}' não encontrado no catálogo municipal. Aplicado fallback nacional.",
+            ],
         ];
+    }
+
+    private function isBlank(?string $value): bool
+    {
+        return $value === null || trim($value) === '';
     }
 }

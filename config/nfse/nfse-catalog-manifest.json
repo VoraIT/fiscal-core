@@ -1,0 +1,26 @@
+{
+    "generated_at": "2026-03-18T19:28:51+00:00",
+    "source_xml": "Uninfe/source/NFe.Components.Wsdl/NFse/WSDL/Webservice.xml",
+    "mode": "selected",
+    "processed_municipios": 3,
+    "skipped_entries": 0,
+    "families_count": 5,
+    "selected_ibges": [
+        "1501402",
+        "1302603",
+        "4209102"
+    ],
+    "municipio_overrides": {
+        "1501402": {
+            "provider_family": "BELEM_MUNICIPAL_2025",
+            "schema_package": "BELEM_MUNICIPAL_2025",
+            "slug": "belem",
+            "nome": "Belem",
+            "uf": "PA",
+            "provider_note": "Belém migrado para provider municipal atual; override local sobre catálogo UniNFe."
+        }
+    },
+    "extra_provider_families": [
+        "DSF"
+    ]
+}

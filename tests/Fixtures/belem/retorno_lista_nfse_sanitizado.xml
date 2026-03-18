@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ListaNotaFiscal xmlns="http://www.abrasf.org.br/nfse.xsd" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#">
+  <Nfse>
+    <InfNfse Id="406526257">
+      <Numero>1105</Numero>
+      <CodigoVerificacao>ABC123XYZ</CodigoVerificacao>
+      <DataEmissao>2026-03-11T12:15:02</DataEmissao>
+      <NaturezaOperacao>1</NaturezaOperacao>
+      <OptanteSimplesNacional>1</OptanteSimplesNacional>
+      <IncentivadorCultural>2</IncentivadorCultural>
+      <Competencia>2026-03-01T00:00:00</Competencia>
+      <Servico>
+        <Valores>
+          <ValorServicos>3000</ValorServicos>
+          <ValorDeducoes>0</ValorDeducoes>
+          <ValorPis>0</ValorPis>
+          <ValorCofins>0</ValorCofins>
+          <ValorInss>0</ValorInss>
+          <ValorIr>0</ValorIr>
+          <ValorCsll>0</ValorCsll>
+          <IssRetido>2</IssRetido>
+          <ValorIss>0</ValorIss>
+          <OutrasRetencoes>0</OutrasRetencoes>
+          <BaseCalculo>3000</BaseCalculo>
+          <Aliquota>0</Aliquota>
+          <ValorLiquidoNfse>3000</ValorLiquidoNfse>
+          <DescontoIncondicionado>0</DescontoIncondicionado>
+          <DescontoCondicionado>0</DescontoCondicionado>
+        </Valores>
+        <ItemListaServico>0107</ItemListaServico>
+        <CodigoCnae>620910000</CodigoCnae>
+        <Discriminacao>Servicos de tecnologia da informacao prestados pela empresa sanitizada.</Discriminacao>
+        <CodigoMunicipio>1501402</CodigoMunicipio>
+      </Servico>
+      <PrestadorServico>
+        <IdentificacaoPrestador>
+          <Cnpj>00000000000191</Cnpj>
+          <InscricaoMunicipal>4007197</InscricaoMunicipal>
+        </IdentificacaoPrestador>
+        <RazaoSocial>PRESTADOR SANITIZADO LTDA</RazaoSocial>
+        <Endereco>
+          <Endereco>RUA EXEMPLO</Endereco>
+          <Numero>191</Numero>
+          <Complemento>SALA 17</Complemento>
+          <Bairro>MARAMBAIA</Bairro>
+          <CodigoMunicipio>1501402</CodigoMunicipio>
+          <Uf>PA</Uf>
+          <Cep>66645880</Cep>
+        </Endereco>
+        <Contato>
+          <Telefone>91900000000</Telefone>
+          <Email>prestador@example.com</Email>
+        </Contato>
+      </PrestadorServico>
+      <TomadorServico>
+        <IdentificacaoTomador>
+          <CpfCnpj>
+            <Cnpj>00000000000272</Cnpj>
+          </CpfCnpj>
+          <InscricaoMunicipal>2257152</InscricaoMunicipal>
+        </IdentificacaoTomador>
+        <RazaoSocial>TOMADOR SANITIZADO A LTDA</RazaoSocial>
+        <Endereco>
+          <Endereco>RUA TOMADOR A</Endereco>
+          <Numero>585</Numero>
+          <Bairro>CIDADE VELHA</Bairro>
+          <CodigoMunicipio>1501402</CodigoMunicipio>
+          <Uf>PA</Uf>
+          <Cep>66020710</Cep>
+        </Endereco>
+        <Contato/>
+      </TomadorServico>
+      <IntermediarioServico/>
+      <OrgaoGerador>
+        <CodigoMunicipio>1501402</CodigoMunicipio>
+        <Uf>PA</Uf>
+      </OrgaoGerador>
+      <ContrucaoCivil/>
+    </InfNfse>
+  </Nfse>
+  <Nfse>
+    <InfNfse Id="406526149">
+      <Numero>1104</Numero>
+      <CodigoVerificacao>XYZ987ABC</CodigoVerificacao>
+      <DataEmissao>2026-03-11T12:09:04</DataEmissao>
+      <NaturezaOperacao>1</NaturezaOperacao>
+      <OptanteSimplesNacional>1</OptanteSimplesNacional>
+      <IncentivadorCultural>2</IncentivadorCultural>
+      <Competencia>2026-03-01T00:00:00</Competencia>
+      <Servico>
+        <Valores>
+          <ValorServicos>2500</ValorServicos>
+          <ValorDeducoes>0</ValorDeducoes>
+          <ValorPis>0</ValorPis>
+          <ValorCofins>0</ValorCofins>
+          <ValorInss>0</ValorInss>
+          <ValorIr>0</ValorIr>
+          <ValorCsll>0</ValorCsll>
+          <IssRetido>2</IssRetido>
+          <ValorIss>0</ValorIss>
+          <OutrasRetencoes>0</OutrasRetencoes>
+          <BaseCalculo>2500</BaseCalculo>
+          <Aliquota>0</Aliquota>
+          <ValorLiquidoNfse>2500</ValorLiquidoNfse>
+          <DescontoIncondicionado>0</DescontoIncondicionado>
+          <DescontoCondicionado>0</DescontoCondicionado>
+        </Valores>
+        <ItemListaServico>0107</ItemListaServico>
+        <CodigoCnae>620910000</CodigoCnae>
+        <Discriminacao>Servico sanitizado para regressao estrutural.</Discriminacao>
+        <CodigoMunicipio>1501402</CodigoMunicipio>
+      </Servico>
+      <PrestadorServico>
+        <IdentificacaoPrestador>
+          <Cnpj>00000000000191</Cnpj>
+          <InscricaoMunicipal>4007197</InscricaoMunicipal>
+        </IdentificacaoPrestador>
+        <RazaoSocial>PRESTADOR SANITIZADO LTDA</RazaoSocial>
+        <Endereco>
+          <Endereco>RUA EXEMPLO</Endereco>
+          <Numero>191</Numero>
+          <Complemento>SALA 17</Complemento>
+          <Bairro>MARAMBAIA</Bairro>
+          <CodigoMunicipio>1501402</CodigoMunicipio>
+          <Uf>PA</Uf>
+          <Cep>66645880</Cep>
+        </Endereco>
+        <Contato>
+          <Telefone>91900000000</Telefone>
+          <Email>prestador@example.com</Email>
+        </Contato>
+      </PrestadorServico>
+      <TomadorServico>
+        <IdentificacaoTomador>
+          <CpfCnpj>
+            <Cnpj>00000000000353</Cnpj>
+          </CpfCnpj>
+        </IdentificacaoTomador>
+        <RazaoSocial>TOMADOR SANITIZADO B LTDA</RazaoSocial>
+        <Endereco>
+          <Endereco>AVENIDA TESTE</Endereco>
+          <Numero>0</Numero>
+          <Bairro>IANETAMA</Bairro>
+          <CodigoMunicipio>1502400</CodigoMunicipio>
+          <Uf>PA</Uf>
+          <Cep>68745000</Cep>
+        </Endereco>
+        <Contato>
+          <Telefone>91911111111</Telefone>
+          <Email>tomador@example.com</Email>
+        </Contato>
+      </TomadorServico>
+      <IntermediarioServico/>
+      <OrgaoGerador>
+        <CodigoMunicipio>1501402</CodigoMunicipio>
+        <Uf>PA</Uf>
+      </OrgaoGerador>
+      <ContrucaoCivil/>
+    </InfNfse>
+  </Nfse>
+</ListaNotaFiscal>

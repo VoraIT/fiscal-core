@@ -51,278 +51,71 @@
         </style>
     </head>
     <body>
-        <h2>Brasil APIAdapter</h2>
+        <h2>Belem Municipal Provider</h2>
         <ul>
-            <li class="success">Adapter instancia sem client</li>
-            <li class="success">Normaliza resposta array</li>
-            <li class="success">Consultar cep formato entrada</li>
-            <li class="success">Consultar cnpj formato entrada</li>
-            <li class="success">Consultar banco tipo entrada</li>
-            <li class="success">Listar bancos estrutura</li>
+            <li class="success">Consultar nfse por rps builds schema valid request and parses response</li>
+            <li class="success">Cancelar nfse builds schema valid request and parses response</li>
+            <li class="success">Cancelar nfse returns false on business rejection</li>
         </ul>
-        <h2>Cobranca DTO (freeline\FiscalCore\Tests\Unit\CobrancaDTO)</h2>
+        <h2>NFSe Adapter</h2>
         <ul>
-            <li class="success">Criar cobranca a vista</li>
-            <li class="success">Criar cobranca parcelada</li>
-            <li class="success">Criar cobranca em n vezes</li>
-            <li class="success">Adicionar desconto</li>
-            <li class="defect">Validacao soma duplicatas</li>
-            <li class="success">Validacao com soma correta</li>
+            <li class="success">Joinville uses publica provider</li>
+            <li class="success">Belem uses current municipal provider</li>
+            <li class="success">Manaus uses manaus am provider</li>
+            <li class="success">Unknown uses nacional provider</li>
         </ul>
-        <h2>Default Provider Registrar</h2>
+        <h2>NFSe Adapter Facade Nacional (Tests\Unit\NFSe\NFSeAdapterFacadeNacional)</h2>
         <ul>
-            <li class="defect">Register defaults adds expected keys</li>
+            <li class="success">Adapter lanca erro quando provider nao suporta capability nacional</li>
+            <li class="success">Facade retorna fiscal response para operacoes nacionais</li>
         </ul>
-        <h2>Documento Adapter</h2>
+        <h2>NFSe Belem Routing</h2>
         <ul>
-            <li class="success">Valida cpf correto</li>
-            <li class="success">Invalida cpf incorreto</li>
-            <li class="success">Formata cpf</li>
-            <li class="success">Valida cnpj correto</li>
-            <li class="success">Invalida cnpj incorreto</li>
-            <li class="success">Formata cnpj</li>
+            <li class="success">Belem mei routes automatically to national provider</li>
+            <li class="success">Belem rejects emission when mei classification is missing</li>
+            <li class="success">Belem municipal consult and cancel use municipal provider capabilities</li>
+            <li class="success">Belem facade includes municipal operation metadata</li>
         </ul>
-        <h2>Emitente DTO (Tests\Unit\DTO\EmitenteDTO)</h2>
+        <h2>NFSe Municipal Catalog</h2>
         <ul>
-            <li class="success">Criar emitente</li>
-            <li class="success">Valores padrao</li>
-            <li class="success">Campos opcionais</li>
+            <li class="success">Resolve joinville by slug</li>
+            <li class="success">Resolve belem by accented name</li>
+            <li class="success">Resolve manaus by ibge</li>
+            <li class="success">Unknown municipio returns null</li>
         </ul>
-        <h2>GTINAdapter (freeline\FiscalCore\Tests\GTINAdapter)</h2>
+        <h2>NFSe Nacional Mock Flow (Tests\Integration\NFSeNacionalMockFlow)</h2>
         <ul>
-            <li class="success">Sem gtin is valid</li>
-            <li class="success">Gtin8 valid and invalid</li>
-            <li class="success">Invalid lengths</li>
-            <li class="success">Deve validar GTINs válidos corretamente</li>
-            <li class="success">Deve rejeitar GTINs inválidos</li>
-            <li class="success">Deve executar checkGTIN sem erros para GTINs válidos</li>
-            <li class="success">Deve lançar exceção para GTINs inválidos no checkGTIN</li>
-            <li class="success">Deve detectar GTIN com dígito verificador inválido</li>
-            <li class="success">Deve requerer certificado para buscar produto</li>
-            <li class="success">Deve lançar exceção para GTIN inválido na busca</li>
-            <li class="defect">Deve retornar estrutura esperada na busca (simulada)</li>
-            <li class="defect">Deve consultar NCM com certificado</li>
-            <li class="defect">Tenta encontrar o NCM oficial do produto através do nome</li>
-            <li class="defect">Deve obter descrição do produto</li>
-            <li class="defect">Deve inicializar com singletons quando disponíveis</li>
+            <li class="defect">Fluxo emissao consulta cancelamento com mock http</li>
         </ul>
-        <h2>ICMSCalculation (Tests\Unit\Tributacao\ICMSCalculation)</h2>
+        <h2>NFSe National Only Mode (Tests\Unit\NFSe\NFSeNationalOnlyMode)</h2>
         <ul>
-            <li class="success">Deve calcular icms operacao interna sp</li>
-            <li class="success">Deve calcular icms operacao interestadual</li>
-            <li class="success">Deve aplicar substituicao tributaria quando aplicavel</li>
-            <li class="success">Deve validar ncm obrigatorio</li>
-            <li class="success">Deve validar uf origem valida</li>
+            <li class="success">Resolver sempre retorna chave nacional</li>
+            <li class="success">Registry faz fallback para provider nacional</li>
+            <li class="success">Facade sinaliza deprecacao de municipio no metadata</li>
         </ul>
-        <h2>Icms DTO (Tests\Unit\DTO\IcmsDTO)</h2>
+        <h2>NFSe Provider Resolver</h2>
         <ul>
-            <li class="success">Simples nacional sem credito</li>
-            <li class="success">Simples nacional com credito</li>
-            <li class="success">Icms 00</li>
-            <li class="success">Icms isento</li>
-            <li class="success">Origem personalizada</li>
+            <li class="success">Resolve joinville to publica</li>
+            <li class="success">Resolve belem to current municipal family</li>
+            <li class="success">Resolve manaus to manaus am</li>
+            <li class="success">Unknown falls back to national</li>
+            <li class="success">Null falls back to national</li>
         </ul>
-        <h2>Identificacao DTO (Tests\Unit\DTO\IdentificacaoDTO)</h2>
+        <h2>Nacional Catalog Service (Tests\Unit\NFSe\NacionalCatalogService)</h2>
         <ul>
-            <li class="success">Criar identificacao n fe</li>
-            <li class="success">Factory method for n fe</li>
-            <li class="success">Factory method for n f ce</li>
-            <li class="success">C n f gerado automaticamente</li>
+            <li class="success">Lista municipios com cache hit e miss</li>
+            <li class="success">Retorna cache stale quando falha remota</li>
         </ul>
-        <h2>Identificacao Node (Tests\Unit\Nodes\IdentificacaoNode)</h2>
+        <h2>Nacional Provider (Tests\Unit\NFSe\NacionalProvider)</h2>
         <ul>
-            <li class="success">Get node type</li>
-            <li class="success">Validate com dados validos</li>
-            <li class="success">Validate natureza operacao vazia</li>
-            <li class="success">Validate modelo invalido</li>
-            <li class="success">Validate numero nota invalido</li>
-        </ul>
-        <h2>NCMValidation (Tests\Unit\Tributacao\NCMValidation)</h2>
-        <ul>
-            <li class="success">Deve validar ncm formato correto</li>
-            <li class="defect">Deve rejeitar ncm formato invalido</li>
-            <li class="defect">Deve consultar dados ncm valido</li>
-            <li class="defect">Deve identificar produtos sujeitos substituicao tributaria</li>
-            <li class="success">Deve identificar produtos nao sujeitos st</li>
-            <li class="defect">Deve obter aliquota ipi por ncm</li>
-            <li class="defect">Deve validar hierarquia ncm</li>
-        </ul>
-        <h2>NFCe Completo (Tests\Integration\NFCeCompleto)</h2>
-        <ul>
-            <li class="success">Criar n f ce completa via builder</li>
-            <li class="success">Criar n f ce com multiplos pagamentos</li>
-            <li class="success">Criar n f ce com validacoes</li>
-        </ul>
-        <h2>NFe Construcao Manual (Tests\Integration\NFeConstrucaoManual)</h2>
-        <ul>
-            <li class="success">Criar n fe manualmente com impostos completos</li>
-            <li class="success">Criar n fe com simples nacional</li>
-            <li class="success">Fluxo completo n fe</li>
-        </ul>
-        <h2>Nota Fiscal (Tests\Unit\NotaFiscal)</h2>
-        <ul>
-            <li class="success">Add node</li>
-            <li class="success">Has node</li>
-            <li class="success">Get nodes</li>
-            <li class="success">Validate identificacao obrigatoria</li>
-            <li class="success">Validate emitente obrigatorio</li>
-            <li class="success">Validate com dados minimos</li>
-            <li class="success">Add node fluente</li>
-        </ul>
-        <h2>Nota Fiscal Builder (Tests\Unit\NotaFiscalBuilder)</h2>
-        <ul>
-            <li class="success">From array com dados completos</li>
-            <li class="success">From array com multiplos itens</li>
-            <li class="success">Build retorna nota fiscal</li>
-        </ul>
-        <h2>Pagamento DTO (Tests\Unit\DTO\PagamentoDTO)</h2>
-        <ul>
-            <li class="success">Pagamento dinheiro</li>
-            <li class="success">Pagamento cartao credito</li>
-            <li class="success">Pagamento cartao debito</li>
-            <li class="success">Pagamento pix</li>
-            <li class="success">Pagamento cartao sem dados opcionais</li>
-        </ul>
-        <h2>Produto DTO (Tests\Unit\DTO\ProdutoDTO)</h2>
-        <ul>
-            <li class="success">Criar produto</li>
-            <li class="success">Factory method simple</li>
-            <li class="success">Calculo valor total</li>
-            <li class="success">Unidade personalizada</li>
-            <li class="success">E a n personalizado</li>
-        </ul>
-        <h2>Produto Node (Tests\Unit\Nodes\ProdutoNode)</h2>
-        <ul>
-            <li class="success">Get node type</li>
-            <li class="success">Validate com dados validos</li>
-            <li class="success">Validate codigo vazio</li>
-            <li class="success">Validate descricao vazia</li>
-            <li class="success">Validate quantidade zero</li>
-            <li class="success">Validate valor unitario zero</li>
-        </ul>
-        <h2>Provider Config (Tests\Unit\NFSe\ProviderConfig)</h2>
-        <ul>
-            <li class="defect">Deve carregar configuracao municipio valido</li>
-            <li class="defect">Deve rejeitar municipio inexistente</li>
-            <li class="success">Deve listar municipios disponiveis</li>
-            <li class="defect">Deve validar configuracao completa municipio</li>
-            <li class="success">Deve detectar configuracao incompleta</li>
-            <li class="success">Deve determinar ambiente automaticamente</li>
-            <li class="defect">Deve aplicar regras especificas municipio</li>
-            <li class="defect">Deve aplicar fallback para municipio similar</li>
-            <li class="defect">Deve validar versao schema municipio</li>
-        </ul>
-        <h2>Provider Resolver</h2>
-        <ul>
-            <li class="defect">Resolves registered provider by key</li>
-        </ul>
-        <h2>Response Handling (Tests\Unit\Support\ResponseHandling)</h2>
-        <ul>
-            <li class="success">Deve criar resposta sucesso</li>
-            <li class="success">Deve criar resposta erro</li>
-            <li class="success">Deve adicionar metadata resposta</li>
-            <li class="success">Deve tratar excecao com handler</li>
-            <li class="success">Deve executar callback sucesso</li>
-            <li class="success">Deve capturar excecao em callback</li>
-            <li class="success">Deve validar timeout operacao</li>
-            <li class="success">Deve implementar retry automatico</li>
-            <li class="success">Deve falhar apos esgotar tentativas</li>
-            <li class="success">Deve preservar codigo erro original</li>
-            <li class="success">Deve serializar resposta json</li>
-            <li class="success">Deve implementar cache resposta</li>
-        </ul>
-        <h2>Singleton Managers</h2>
-        <ul>
-            <li class="success">Certificate manager singleton instance</li>
-            <li class="success">Config manager singleton instance</li>
-            <li class="success">Certificate manager initially empty</li>
-            <li class="success">Config manager has defaults</li>
-            <li class="success">Config manager set and get</li>
-            <li class="success">Config manager nfe config</li>
-            <li class="success">Config manager nfse config</li>
-            <li class="defect">Tools factory requires certificate</li>
-            <li class="success">Tools factory setup for development</li>
-            <li class="defect">Tools factory setup for production requires configs</li>
-            <li class="success">Tools factory setup for production with all configs</li>
-            <li class="success">Certificate manager load from invalid file</li>
-            <li class="success">Config manager environment methods</li>
-            <li class="success">Config manager reset</li>
-            <li class="success">Singleton prevent cloning</li>
-            <li class="success">Certificate manager clear</li>
-        </ul>
-        <h2>Std Class Builder (Tests\Unit\Helpers\StdClassBuilder)</h2>
-        <ul>
-            <li class="success">Create basic</li>
-            <li class="success">Create removes nulls by default</li>
-            <li class="success">Create with nulls</li>
-            <li class="success">From with named arguments</li>
-            <li class="success">Merge arrays</li>
-            <li class="success">Merge objects</li>
-            <li class="success">Merge skips nulls</li>
-            <li class="success">Transform applies function</li>
-            <li class="success">With formatting</li>
-            <li class="success">Real world nfe totals</li>
-            <li class="success">Props with simple variables</li>
-            <li class="success">Props with object properties</li>
-            <li class="success">From vars with compact</li>
-        </ul>
-        <h2>Totais DTO (freeline\FiscalCore\Tests\Unit\TotaisDTO)</h2>
-        <ul>
-            <li class="success">Criar totais basico</li>
-            <li class="success">Criar totais completo</li>
-            <li class="success">From itens calcula automaticamente</li>
-        </ul>
-        <h2>Transporte DTO (freeline\FiscalCore\Tests\Unit\TransporteDTO)</h2>
-        <ul>
-            <li class="success">Criar transporte sem frete</li>
-            <li class="success">Criar transporte por conta emitente</li>
-            <li class="success">Criar transporte por conta destinatario</li>
-            <li class="success">Adicionar veiculo</li>
-            <li class="success">Adicionar volumes</li>
-            <li class="success">Adicionar lacres</li>
-        </ul>
-        <h2>Utils Facade (Tests\Unit\Utils\UtilsFacade)</h2>
-        <ul>
-            <li class="success">Deve validar cpf correto</li>
-            <li class="success">Deve rejeitar cpf invalido</li>
-            <li class="success">Deve validar cnpj correto</li>
-            <li class="success">Deve rejeitar cnpj invalido</li>
-            <li class="success">Deve consultar cep formato valido</li>
-            <li class="defect">Deve listar bancos brasileiros</li>
-            <li class="defect">Deve consultar banco especifico</li>
-            <li class="success">Deve verificar status apis externas</li>
-            <li class="success">Deve formatar documentos corretamente</li>
-            <li class="defect">Deve listar municipios por uf</li>
-            <li class="success">Deve consultar ddd valido</li>
-            <li class="success">Deve listar feriados nacionais</li>
-        </ul>
-        <h2>XMLValidation (Tests\Unit\NFe\XMLValidation)</h2>
-        <ul>
-            <li class="success">Deve validar xml nfe estrutura basica</li>
-            <li class="defect">Deve rejeitar xml sem elementos obrigatorios</li>
-            <li class="defect">Deve validar chave nfe formato</li>
-            <li class="defect">Deve rejeitar chave nfe invalida</li>
-            <li class="success">Deve validar cnpj emitente</li>
-            <li class="defect">Deve rejeitar cnpj emitente invalido</li>
-            <li class="success">Deve validar totais nfe consistencia</li>
-            <li class="success">Deve detectar inconsistencia totais</li>
-            <li class="success">Deve validar cst icms validos</li>
-            <li class="success">Deve rejeitar cst icms invalidos</li>
-        </ul>
-        <h2>Xml Parser (Tests\Integration\XmlParser)</h2>
-        <ul>
-            <li class="success">Parse identificacao</li>
-            <li class="success">Parse emitente</li>
-            <li class="success">Parse destinatario</li>
-            <li class="success">Parse produtos</li>
-            <li class="success">Parse impostos</li>
-            <li class="success">Parse pagamentos</li>
-            <li class="success">To array completo</li>
-            <li class="success">Builder from xml</li>
-            <li class="success">Builder from xml validate</li>
-            <li class="success">Builder from xml get make</li>
-            <li class="success">Xml invalido lanca excecao</li>
-            <li class="success">Builder from xml arquivo nao existente</li>
+            <li class="defect">Emitir monta xml e envia para endpoint correto</li>
+            <li class="defect">Cancelar retorna true quando resposta indica sucesso</li>
+            <li class="defect">Consultar retorno compnfse com xml real</li>
+            <li class="success">Consultar por rps valida campos obrigatorios</li>
+            <li class="defect">Emitir resolve rota por servico configurado</li>
+            <li class="defect">Catalogo resolve rota por servico configurado</li>
+            <li class="defect">Consulta cnc resolve rota por servico</li>
+            <li class="defect">Consulta cnc contribuinte e habilitacao</li>
         </ul>
     </body>
 </html>

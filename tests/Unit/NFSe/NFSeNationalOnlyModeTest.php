@@ -25,7 +25,7 @@ class NFSeNationalOnlyModeTest extends TestCase
     public function test_registry_faz_fallback_para_provider_nacional(): void
     {
         $registry = ProviderRegistry::getInstance();
-        $provider = $registry->get('qualquer_valor');
+        $provider = $registry->getByMunicipio('qualquer_valor');
 
         $this->assertInstanceOf(NacionalProvider::class, $provider);
     }
@@ -51,9 +51,14 @@ class NFSeNationalOnlyModeTest extends TestCase
             public function baixarXml(string $chave): string { return '<ok />'; }
             public function baixarDanfse(string $chave): string { return '<ok />'; }
             public function listarMunicipiosNacionais(bool $forceRefresh = false): array { return ['data' => [], 'metadata' => []]; }
-            public function consultarAliquotasMunicipio(string $codigoMunicipio, bool $forceRefresh = false): array { return ['data' => [], 'metadata' => []]; }
+            public function consultarAliquotasMunicipio(string $codigoMunicipio, ?string $codigoServico = null, ?string $competencia = null, bool $forceRefresh = false): array { return ['data' => [], 'metadata' => []]; }
             public function consultarContribuinteCnc(string $cpfCnpj): array { return ['documento' => $cpfCnpj, 'habilitado' => true]; }
-            public function verificarHabilitacaoCnc(string $cpfCnpj, ?string $codigoMunicipio = null): array { return ['documento' => $cpfCnpj, 'codigo_municipio' => $codigoMunicipio, 'habilitado' => true]; }
+            public function verificarHabilitacaoCnc(string $cpfCnpj): bool { return true; }
+            public function getConfig(): array { return []; }
+            public function consultarConvenioMunicipio(string $codigoMunicipio, bool $forceRefresh = false): array { return ['data' => [], 'metadata' => []]; }
+            public function validarLayoutDps(array $payload, bool $checkCatalog = true): array { return ['valid' => true, 'errors' => []]; }
+            public function gerarXmlDpsPreview(array $payload): string { return '<preview />'; }
+            public function validarXmlDps(array $payload): array { return ['valid' => true, 'errors' => []]; }
         };
 
         $adapter = new NFSeAdapter('curitiba', $provider);

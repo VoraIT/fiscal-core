@@ -166,6 +166,12 @@ abstract class AbstractNFSeProvider implements NFSeProviderConfigInterface
     {
         return rtrim((string)($this->config['services']['sefin'][$this->ambiente] ?? ''), '/');
     }
+
+    public function getConfig(): array
+    {
+        return $this->config;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -201,5 +207,81 @@ abstract class AbstractNFSeProvider implements NFSeProviderConfigInterface
         }
         
         return $aliquota; // 0.02
+    }
+
+    protected function appendXmlNode(
+        \DOMDocument $dom,
+        \DOMElement $parent,
+        string $name,
+        ?string $value = null,
+        ?string $namespace = null
+    ): \DOMElement {
+        $node = $namespace !== null
+            ? $dom->createElementNS($namespace, $name)
+            : $dom->createElement($name);
+
+        if ($value !== null) {
+            $node->appendChild($dom->createTextNode($value));
+        }
+
+        $parent->appendChild($node);
+
+        return $node;
+    }
+
+    protected function normalizeDigits(?string $value): string
+    {
+        return preg_replace('/\D+/', '', (string) $value) ?? '';
+    }
+
+    protected function decimal(float $value, int $precision = 2): string
+    {
+        return number_format($value, $precision, '.', '');
+    }
+
+    protected function booleanCode(bool $value): string
+    {
+        return $value ? '1' : '2';
+    }
+
+    protected function xmlDateTime(?string $value = null): string
+    {
+        if (is_string($value) && trim($value) !== '') {
+            return (new \DateTimeImmutable($value))->format(DATE_ATOM);
+        }
+
+        return (new \DateTimeImmutable())->format(DATE_ATOM);
+    }
+
+    protected function xmlDate(?string $value = null): string
+    {
+        if (is_string($value) && trim($value) !== '') {
+            return (new \DateTimeImmutable($value))->format('Y-m-d');
+        }
+
+        return (new \DateTimeImmutable())->format('Y-m-d');
+    }
+
+    protected function gYearMonth(?string $value = null): string
+    {
+        if (is_string($value) && trim($value) !== '') {
+            return (new \DateTimeImmutable($value))->format('Y-m');
+        }
+
+        return (new \DateTimeImmutable())->format('Y-m');
+    }
+
+    public function consultarContribuinteCnc(string $cnc): array
+    {
+        throw new \BadMethodCallException(
+            static::class . ' não suporta consultarContribuinteCnc.'
+        );
+    }
+
+    public function verificarHabilitacaoCnc(string $cnc): bool
+    {
+        throw new \BadMethodCallException(
+            static::class . ' não suporta verificarHabilitacaoCnc.'
+        );
     }
 }

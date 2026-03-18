@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="/Users/johnsabba/Projects/Freeline/fiscal-core/phpunit.xml" tests="54" assertions="147" errors="3" failures="12" skipped="0" time="4.508239">
+    <testsuite name="Unit" tests="27" assertions="67" errors="1" failures="6" skipped="0" time="2.305243">
+      <testsuite name="BelemMunicipalProviderTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/BelemMunicipalProviderTest.php" tests="3" assertions="13" errors="0" failures="0" skipped="0" time="0.014727">
+        <testcase name="testConsultarNfsePorRpsBuildsSchemaValidRequestAndParsesResponse" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/BelemMunicipalProviderTest.php" line="126" class="BelemMunicipalProviderTest" classname="BelemMunicipalProviderTest" assertions="4" time="0.013678"/>
+        <testcase name="testCancelarNfseBuildsSchemaValidRequestAndParsesResponse" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/BelemMunicipalProviderTest.php" line="160" class="BelemMunicipalProviderTest" classname="BelemMunicipalProviderTest" assertions="6" time="0.000595"/>
+        <testcase name="testCancelarNfseReturnsFalseOnBusinessRejection" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/BelemMunicipalProviderTest.php" line="199" class="BelemMunicipalProviderTest" classname="BelemMunicipalProviderTest" assertions="3" time="0.000453"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\NFSe\NFSeAdapterFacadeNacionalTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeAdapterFacadeNacionalTest.php" tests="2" assertions="11" errors="0" failures="0" skipped="0" time="0.017708">
+        <testcase name="test_adapter_lanca_erro_quando_provider_nao_suporta_capability_nacional" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeAdapterFacadeNacionalTest.php" line="13" class="Tests\Unit\NFSe\NFSeAdapterFacadeNacionalTest" classname="Tests.Unit.NFSe.NFSeAdapterFacadeNacionalTest" assertions="2" time="0.007031"/>
+        <testcase name="test_facade_retorna_fiscal_response_para_operacoes_nacionais" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeAdapterFacadeNacionalTest.php" line="129" class="Tests\Unit\NFSe\NFSeAdapterFacadeNacionalTest" classname="Tests.Unit.NFSe.NFSeAdapterFacadeNacionalTest" assertions="9" time="0.010677"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\NFSe\NFSeNationalOnlyModeTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeNationalOnlyModeTest.php" tests="3" assertions="8" errors="0" failures="0" skipped="0" time="0.006751">
+        <testcase name="test_resolver_sempre_retorna_chave_nacional" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeNationalOnlyModeTest.php" line="16" class="Tests\Unit\NFSe\NFSeNationalOnlyModeTest" classname="Tests.Unit.NFSe.NFSeNationalOnlyModeTest" assertions="3" time="0.002099"/>
+        <testcase name="test_registry_faz_fallback_para_provider_nacional" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeNationalOnlyModeTest.php" line="25" class="Tests\Unit\NFSe\NFSeNationalOnlyModeTest" classname="Tests.Unit.NFSe.NFSeNationalOnlyModeTest" assertions="1" time="0.001081"/>
+        <testcase name="test_facade_sinaliza_deprecacao_de_municipio_no_metadata" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeNationalOnlyModeTest.php" line="33" class="Tests\Unit\NFSe\NFSeNationalOnlyModeTest" classname="Tests.Unit.NFSe.NFSeNationalOnlyModeTest" assertions="4" time="0.003570"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\NFSe\NacionalCatalogServiceTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalCatalogServiceTest.php" tests="2" assertions="9" errors="0" failures="0" skipped="0" time="2.006310">
+        <testcase name="test_lista_municipios_com_cache_hit_e_miss" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalCatalogServiceTest.php" line="11" class="Tests\Unit\NFSe\NacionalCatalogServiceTest" classname="Tests.Unit.NFSe.NacionalCatalogServiceTest" assertions="6" time="0.000490"/>
+        <testcase name="test_retorna_cache_stale_quando_falha_remota" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalCatalogServiceTest.php" line="43" class="Tests\Unit\NFSe\NacionalCatalogServiceTest" classname="Tests.Unit.NFSe.NacionalCatalogServiceTest" assertions="3" time="2.005820"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\NFSe\NacionalProviderTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" tests="8" assertions="12" errors="1" failures="6" skipped="0" time="0.254506">
+        <testcase name="test_emitir_monta_xml_e_envia_para_endpoint_correto" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="10" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="4" time="0.009807">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Unit\NFSe\NacionalProviderTest::test_emitir_monta_xml_e_envia_para_endpoint_correto
+Failed asserting that '{"dpsXmlGZipB64":"H4sIAAAAAAAAE5VU246bMBB971dEvFbBBprdbDTxKtpNpFTdKC30A1hwspbAdoGSqD/UD+mP7dimXLp92SjCZ85czowHAffXspi1vKqFkmsv8Kk34zJTuZDntfc92c2X3j37AIddzGcYKuu199I0ekXI5XLxa81z/5T+4jJP/bNq/eeKyFPNPVsyVbYi9RgIebIl9vnaMyBaLGhEl2EQhGEYRRGlNFgG1Bx08gsw+fEY/6eeYU05PN9VTeTsXSlAMAMavSmfWQjEAchftqVgIQ1v5jSaB8skpKvF3YqGHyldUQrEBQD2vdGFyJiQrRIZPxXqMschgPQeqHklOOvEnAESe2RvOrEs5A+q1LwZqaNcx2GjqNuwwHRqEWRfVGZ66UYG8pcAXfEaAx4Ox89sehFALAn7JxaE0acFEERQ8XNSCZxe6ViU+pBmRmcwTMC21jYGJxxZ1uhQp9qoMkXt484p3Nwu78yIhoDrQZWcJRiRq2qWYDwH4kicyybiPbUMCpUdXTkzlIVplqrprAMNZJQQ2wqZ6co0j4u/NQ30BFwfee2izEP8+a1mOcd/zXGXRStKLhuFffVhmNydrrs2LRSKITB0p2sxM2+Zb96TtssYhzT2oszz6ad0YB/HXw92q72Bq/7Gm8ExWKA3hfjBQivgsEt05VTjNtEm/6Idz1nX1ojp3Vtsbure2ok6w1Sfuq0eGXT0GzQojpnePSiOmd49KOqJ4qBDmgG5o18KcR8RBO7ZfaMQ2eMVcLKkbhsFAAA="}' [ASCII](length: 792) contains "&lt;GerarNfseEnvio" [ASCII](length: 15).
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:23</failure>
+        </testcase>
+        <testcase name="test_cancelar_retorna_true_quando_resposta_indica_sucesso" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="27" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="3" time="0.002718">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Unit\NFSe\NacionalProviderTest::test_cancelar_retorna_true_quando_resposta_indica_sucesso
+Failed asserting that two strings are identical.
+--- Expected
++++ Actual
+@@ @@
+-'/nfse/NFSE123/eventos'
++'/nfse/{id}/eventos'
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:40</failure>
+        </testcase>
+        <testcase name="test_consultar_retorno_compnfse_com_xml_real" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="43" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="1" time="0.000878">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Unit\NFSe\NacionalProviderTest::test_consultar_retorno_compnfse_com_xml_real
+Failed asserting that false is not false.
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:46</failure>
+        </testcase>
+        <testcase name="test_consultar_por_rps_valida_campos_obrigatorios" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="56" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="1" time="0.000255"/>
+        <testcase name="test_emitir_resolve_rota_por_servico_configurado" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="64" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="1" time="0.000790">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Unit\NFSe\NacionalProviderTest::test_emitir_resolve_rota_por_servico_configurado
+Failed asserting that two strings are identical.
+--- Expected
++++ Actual
+@@ @@
+-'https://adn.producaorestrita.nfse.gov.br/api/v1/nfse'
++'/adn:/nfse'
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:82</failure>
+        </testcase>
+        <testcase name="test_catalogo_resolve_rota_por_servico_configurado" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="85" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="0" time="0.238700">
+          <error type="RuntimeException">Tests\Unit\NFSe\NacionalProviderTest::test_catalogo_resolve_rota_por_servico_configurado
+RuntimeException: Falha ao obter catálogo nacional: HTTP 496 ao consultar https://adn.producaorestrita.nfse.gov.br/parametrizacao/catalogos/municipios
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/src/Services/NFSe/NacionalCatalogService.php:188
+/Users/johnsabba/Projects/Freeline/fiscal-core/src/Services/NFSe/NacionalCatalogService.php:36
+/Users/johnsabba/Projects/Freeline/fiscal-core/src/Providers/NFSe/NacionalProvider.php:150
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:112</error>
+        </testcase>
+        <testcase name="test_consulta_cnc_resolve_rota_por_servico" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="119" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="1" time="0.000778">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Unit\NFSe\NacionalProviderTest::test_consulta_cnc_resolve_rota_por_servico
+Failed asserting that null is identical to 'GET'.
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:141</failure>
+        </testcase>
+        <testcase name="test_consulta_cnc_contribuinte_e_habilitacao" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="147" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="1" time="0.000579">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Unit\NFSe\NacionalProviderTest::test_consulta_cnc_contribuinte_e_habilitacao
+Failed asserting that null is true.
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:175</failure>
+        </testcase>
+      </testsuite>
+      <testsuite name="NFSeMunicipalCatalogTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/Support/NFSeMunicipalCatalogTest.php" tests="4" assertions="9" errors="0" failures="0" skipped="0" time="0.002741">
+        <testcase name="testResolveJoinvilleBySlug" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/Support/NFSeMunicipalCatalogTest.php" line="15" class="NFSeMunicipalCatalogTest" classname="NFSeMunicipalCatalogTest" assertions="3" time="0.000621"/>
+        <testcase name="testResolveBelemByAccentedName" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/Support/NFSeMunicipalCatalogTest.php" line="26" class="NFSeMunicipalCatalogTest" classname="NFSeMunicipalCatalogTest" assertions="3" time="0.000363"/>
+        <testcase name="testResolveManausByIbge" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/Support/NFSeMunicipalCatalogTest.php" line="37" class="NFSeMunicipalCatalogTest" classname="NFSeMunicipalCatalogTest" assertions="2" time="0.000316"/>
+        <testcase name="testUnknownMunicipioReturnsNull" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/Support/NFSeMunicipalCatalogTest.php" line="47" class="NFSeMunicipalCatalogTest" classname="NFSeMunicipalCatalogTest" assertions="1" time="0.001440"/>
+      </testsuite>
+      <testsuite name="NFSeProviderResolverTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/Support/NFSeProviderResolverTest.php" tests="5" assertions="5" errors="0" failures="0" skipped="0" time="0.002501">
+        <testcase name="testResolveJoinvilleToPublica" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/Support/NFSeProviderResolverTest.php" line="18" class="NFSeProviderResolverTest" classname="NFSeProviderResolverTest" assertions="1" time="0.000350"/>
+        <testcase name="testResolveBelemToCurrentMunicipalFamily" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/Support/NFSeProviderResolverTest.php" line="25" class="NFSeProviderResolverTest" classname="NFSeProviderResolverTest" assertions="1" time="0.000282"/>
+        <testcase name="testResolveManausToManausAm" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/Support/NFSeProviderResolverTest.php" line="32" class="NFSeProviderResolverTest" classname="NFSeProviderResolverTest" assertions="1" time="0.000260"/>
+        <testcase name="testUnknownFallsBackToNational" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/Support/NFSeProviderResolverTest.php" line="39" class="NFSeProviderResolverTest" classname="NFSeProviderResolverTest" assertions="1" time="0.001436"/>
+        <testcase name="testNullFallsBackToNational" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/Support/NFSeProviderResolverTest.php" line="46" class="NFSeProviderResolverTest" classname="NFSeProviderResolverTest" assertions="1" time="0.000173"/>
+      </testsuite>
+    </testsuite>
+    <testsuite name="Integration" tests="9" assertions="27" errors="1" failures="0" skipped="0" time="0.015052">
+      <testsuite name="NFSeAdapterTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/Adapter/NFSeAdapterTest.php" tests="4" assertions="10" errors="0" failures="0" skipped="0" time="0.005908">
+        <testcase name="testJoinvilleUsesPublicaProvider" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/Adapter/NFSeAdapterTest.php" line="10" class="NFSeAdapterTest" classname="NFSeAdapterTest" assertions="2" time="0.000697"/>
+        <testcase name="testBelemUsesCurrentMunicipalProvider" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/Adapter/NFSeAdapterTest.php" line="20" class="NFSeAdapterTest" classname="NFSeAdapterTest" assertions="4" time="0.000708"/>
+        <testcase name="testManausUsesManausAmProvider" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/Adapter/NFSeAdapterTest.php" line="32" class="NFSeAdapterTest" classname="NFSeAdapterTest" assertions="2" time="0.000687"/>
+        <testcase name="testUnknownUsesNacionalProvider" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/Adapter/NFSeAdapterTest.php" line="42" class="NFSeAdapterTest" classname="NFSeAdapterTest" assertions="2" time="0.003816"/>
+      </testsuite>
+      <testsuite name="NFSeBelemRoutingTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/Adapter/NFSeBelemRoutingTest.php" tests="4" assertions="17" errors="0" failures="0" skipped="0" time="0.004299">
+        <testcase name="testBelemMeiRoutesAutomaticallyToNationalProvider" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/Adapter/NFSeBelemRoutingTest.php" line="24" class="NFSeBelemRoutingTest" classname="NFSeBelemRoutingTest" assertions="4" time="0.000718"/>
+        <testcase name="testBelemRejectsEmissionWhenMeiClassificationIsMissing" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/Adapter/NFSeBelemRoutingTest.php" line="51" class="NFSeBelemRoutingTest" classname="NFSeBelemRoutingTest" assertions="2" time="0.000555"/>
+        <testcase name="testBelemMunicipalConsultAndCancelUseMunicipalProviderCapabilities" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/Adapter/NFSeBelemRoutingTest.php" line="61" class="NFSeBelemRoutingTest" classname="NFSeBelemRoutingTest" assertions="7" time="0.001568"/>
+        <testcase name="testBelemFacadeIncludesMunicipalOperationMetadata" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/Adapter/NFSeBelemRoutingTest.php" line="106" class="NFSeBelemRoutingTest" classname="NFSeBelemRoutingTest" assertions="4" time="0.001457"/>
+      </testsuite>
+      <testsuite name="Tests\Integration\NFSeNacionalMockFlowTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/NFSeNacionalMockFlowTest.php" tests="1" assertions="0" errors="1" failures="0" skipped="0" time="0.004845">
+        <testcase name="test_fluxo_emissao_consulta_cancelamento_com_mock_http" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/NFSeNacionalMockFlowTest.php" line="12" class="Tests\Integration\NFSeNacionalMockFlowTest" classname="Tests.Integration.NFSeNacionalMockFlowTest" assertions="0" time="0.004845">
+          <error type="TypeError">Tests\Integration\NFSeNacionalMockFlowTest::test_fluxo_emissao_consulta_cancelamento_com_mock_http
+TypeError: freeline\FiscalCore\Providers\NFSe\AbstractNFSeProvider::getWsdlUrl(): Return value must be of type string, null returned
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/src/Providers/NFSe/AbstractNFSeProvider.php:102
+/Users/johnsabba/Projects/Freeline/fiscal-core/src/Adapters/NF/NFSeAdapter.php:218
+/Users/johnsabba/Projects/Freeline/fiscal-core/src/Facade/NFSeFacade.php:104
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/NFSeNacionalMockFlowTest.php:51</error>
+        </testcase>
+      </testsuite>
+    </testsuite>
+    <testsuite name="NFSe" tests="18" assertions="53" errors="1" failures="6" skipped="0" time="2.187944">
+      <testsuite name="BelemMunicipalProviderTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/BelemMunicipalProviderTest.php" tests="3" assertions="13" errors="0" failures="0" skipped="0" time="0.002053">
+        <testcase name="testConsultarNfsePorRpsBuildsSchemaValidRequestAndParsesResponse" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/BelemMunicipalProviderTest.php" line="126" class="BelemMunicipalProviderTest" classname="BelemMunicipalProviderTest" assertions="4" time="0.000830"/>
+        <testcase name="testCancelarNfseBuildsSchemaValidRequestAndParsesResponse" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/BelemMunicipalProviderTest.php" line="160" class="BelemMunicipalProviderTest" classname="BelemMunicipalProviderTest" assertions="6" time="0.000747"/>
+        <testcase name="testCancelarNfseReturnsFalseOnBusinessRejection" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/BelemMunicipalProviderTest.php" line="199" class="BelemMunicipalProviderTest" classname="BelemMunicipalProviderTest" assertions="3" time="0.000476"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\NFSe\NFSeAdapterFacadeNacionalTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeAdapterFacadeNacionalTest.php" tests="2" assertions="11" errors="0" failures="0" skipped="0" time="0.012135">
+        <testcase name="test_adapter_lanca_erro_quando_provider_nao_suporta_capability_nacional" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeAdapterFacadeNacionalTest.php" line="13" class="Tests\Unit\NFSe\NFSeAdapterFacadeNacionalTest" classname="Tests.Unit.NFSe.NFSeAdapterFacadeNacionalTest" assertions="2" time="0.002260"/>
+        <testcase name="test_facade_retorna_fiscal_response_para_operacoes_nacionais" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeAdapterFacadeNacionalTest.php" line="129" class="Tests\Unit\NFSe\NFSeAdapterFacadeNacionalTest" classname="Tests.Unit.NFSe.NFSeAdapterFacadeNacionalTest" assertions="9" time="0.009874"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\NFSe\NFSeNationalOnlyModeTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeNationalOnlyModeTest.php" tests="3" assertions="8" errors="0" failures="0" skipped="0" time="0.006583">
+        <testcase name="test_resolver_sempre_retorna_chave_nacional" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeNationalOnlyModeTest.php" line="16" class="Tests\Unit\NFSe\NFSeNationalOnlyModeTest" classname="Tests.Unit.NFSe.NFSeNationalOnlyModeTest" assertions="3" time="0.002135"/>
+        <testcase name="test_registry_faz_fallback_para_provider_nacional" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeNationalOnlyModeTest.php" line="25" class="Tests\Unit\NFSe\NFSeNationalOnlyModeTest" classname="Tests.Unit.NFSe.NFSeNationalOnlyModeTest" assertions="1" time="0.001065"/>
+        <testcase name="test_facade_sinaliza_deprecacao_de_municipio_no_metadata" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NFSeNationalOnlyModeTest.php" line="33" class="Tests\Unit\NFSe\NFSeNationalOnlyModeTest" classname="Tests.Unit.NFSe.NFSeNationalOnlyModeTest" assertions="4" time="0.003383"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\NFSe\NacionalCatalogServiceTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalCatalogServiceTest.php" tests="2" assertions="9" errors="0" failures="0" skipped="0" time="2.007633">
+        <testcase name="test_lista_municipios_com_cache_hit_e_miss" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalCatalogServiceTest.php" line="11" class="Tests\Unit\NFSe\NacionalCatalogServiceTest" classname="Tests.Unit.NFSe.NacionalCatalogServiceTest" assertions="6" time="0.000775"/>
+        <testcase name="test_retorna_cache_stale_quando_falha_remota" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalCatalogServiceTest.php" line="43" class="Tests\Unit\NFSe\NacionalCatalogServiceTest" classname="Tests.Unit.NFSe.NacionalCatalogServiceTest" assertions="3" time="2.006858"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\NFSe\NacionalProviderTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" tests="8" assertions="12" errors="1" failures="6" skipped="0" time="0.159541">
+        <testcase name="test_emitir_monta_xml_e_envia_para_endpoint_correto" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="10" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="4" time="0.004019">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Unit\NFSe\NacionalProviderTest::test_emitir_monta_xml_e_envia_para_endpoint_correto
+Failed asserting that '{"dpsXmlGZipB64":"H4sIAAAAAAAAE5VU246bMBB971dEvFbBBja72WjiVbSbSKm6UVroB7DgZC2B7QIlUX+oH9If69imXLp92SjCZ85czowHAQ/Xspi1vKqFkmsv8Kk34zJTuZDntfct2c2X3gP7AIddzGcYKuu199o0ekXI5XLxa81z/5T+5DJP/bNq/ZeKyFPNPVsyVbYi9RgIebIl9vnaMyBaLGhEl2EQhGEYRRGlNFgG1Bx08gsw+ekY/6eeYU05PN9VTeTsXSlAMAMavSlfWAjEAchft6VgIQ1v5zSaB8skpKvF/YrefKR0RSkQFwDY90YXImNCtkpk/FSoyxyHANJ7oOaV4KwTcwZI7JG96cSykD+qUvNmpI5yHYeNom7DAtOpRZB9VpnppRsZyF8CdMVrDHg8HD+x6UUAsSTsn1kQRjcLIIig4uekEji90rEo9SHNjM5gmIBtrW0MTjiyrNGhTrVRZYrax51TuL1b3psRDQHXgyo5SzAiV9UswXgOxJE4l03Ee2oZFCo7unJmKAvTLFXTWQcayCghthUy05VpHhd/ZxroCbg+8dpFmYf4/UvNco7/muMui1aUXDYK++rDMLk7XXdtWigUQ2DoTtdiZt4y37wnbZcxDmnsRZnn8w/pwD6OvxzsVnsDV/2VN4NjsEBvCvGdhVbAYZfoyqnGbaJN/kU7nrOurRHTu7fY3NS9tRN1hqk+dVs9MujoN2hQHDO9e1AcM717UNQTxUGHNANyR78U4j4iCNyz+0YhsscfJkoQxBsFAAA="}' [ASCII](length: 792) contains "&lt;GerarNfseEnvio" [ASCII](length: 15).
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:23</failure>
+        </testcase>
+        <testcase name="test_cancelar_retorna_true_quando_resposta_indica_sucesso" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="27" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="3" time="0.002371">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Unit\NFSe\NacionalProviderTest::test_cancelar_retorna_true_quando_resposta_indica_sucesso
+Failed asserting that two strings are identical.
+--- Expected
++++ Actual
+@@ @@
+-'/nfse/NFSE123/eventos'
++'/nfse/{id}/eventos'
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:40</failure>
+        </testcase>
+        <testcase name="test_consultar_retorno_compnfse_com_xml_real" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="43" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="1" time="0.001056">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Unit\NFSe\NacionalProviderTest::test_consultar_retorno_compnfse_com_xml_real
+Failed asserting that false is not false.
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:46</failure>
+        </testcase>
+        <testcase name="test_consultar_por_rps_valida_campos_obrigatorios" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="56" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="1" time="0.000568"/>
+        <testcase name="test_emitir_resolve_rota_por_servico_configurado" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="64" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="1" time="0.001457">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Unit\NFSe\NacionalProviderTest::test_emitir_resolve_rota_por_servico_configurado
+Failed asserting that two strings are identical.
+--- Expected
++++ Actual
+@@ @@
+-'https://adn.producaorestrita.nfse.gov.br/api/v1/nfse'
++'/adn:/nfse'
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:82</failure>
+        </testcase>
+        <testcase name="test_catalogo_resolve_rota_por_servico_configurado" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="85" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="0" time="0.146387">
+          <error type="RuntimeException">Tests\Unit\NFSe\NacionalProviderTest::test_catalogo_resolve_rota_por_servico_configurado
+RuntimeException: Falha ao obter catálogo nacional: HTTP 496 ao consultar https://adn.producaorestrita.nfse.gov.br/parametrizacao/catalogos/municipios
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/src/Services/NFSe/NacionalCatalogService.php:188
+/Users/johnsabba/Projects/Freeline/fiscal-core/src/Services/NFSe/NacionalCatalogService.php:36
+/Users/johnsabba/Projects/Freeline/fiscal-core/src/Providers/NFSe/NacionalProvider.php:150
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:112</error>
+        </testcase>
+        <testcase name="test_consulta_cnc_resolve_rota_por_servico" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="119" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="1" time="0.002104">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Unit\NFSe\NacionalProviderTest::test_consulta_cnc_resolve_rota_por_servico
+Failed asserting that null is identical to 'GET'.
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:141</failure>
+        </testcase>
+        <testcase name="test_consulta_cnc_contribuinte_e_habilitacao" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php" line="147" class="Tests\Unit\NFSe\NacionalProviderTest" classname="Tests.Unit.NFSe.NacionalProviderTest" assertions="1" time="0.001580">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Unit\NFSe\NacionalProviderTest::test_consulta_cnc_contribuinte_e_habilitacao
+Failed asserting that null is true.
+
+/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/NacionalProviderTest.php:175</failure>
+        </testcase>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

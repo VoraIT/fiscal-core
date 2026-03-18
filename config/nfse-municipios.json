@@ -1,5 +1,5 @@
 {
-  "_comment": "Configuração de providers NFSe nacional",
+  "_comment": "ARQUIVO LEGADO. Mantido temporariamente para compatibilidade. O source of truth atual está em config/nfse/.",
   "_instructions": "NFSe é resolvida pelo provider nacional. Chaves municipais abaixo são aliases legados.",
   "nfse_nacional": {
     "_comment": "Provedor Nacional - Modelo NFSe Nacional",
