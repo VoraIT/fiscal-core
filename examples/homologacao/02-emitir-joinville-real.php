@@ -9,9 +9,9 @@ $projectRoot = dirname(__DIR__, 2);
 
 exit(nfseMunicipalRunScript('joinville', $argv, [
     'FISCAL_ENVIRONMENT' => 'homologacao',
-    'FISCAL_CERT_PATH' => $projectRoot . '/certs/cert2026-senha-free2026.pfx',
-    'FISCAL_CERT_PASSWORD' => 'free2026',
-    'FISCAL_CNPJ' => '83188342000104',
+    'FISCAL_CERT_PATH' => $projectRoot . '/certs/...',
+    'FISCAL_CERT_PASSWORD' => '...',
+    'FISCAL_CNPJ' => '',
     'FISCAL_RAZAO_SOCIAL' => 'FREELINE INFORMATICA LTDA',
     'FISCAL_UF' => 'SC',
 ]));
