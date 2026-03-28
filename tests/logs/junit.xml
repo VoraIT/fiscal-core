@@ -1,24 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="CLI Arguments" tests="5" assertions="0" errors="0" failures="0" skipped="5" time="0.000000">
-    <testsuite name="Tests\Integration\NFeConsultaNotasEmitidasParaEstabelecimentoTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/NFeConsultaNotasEmitidasParaEstabelecimentoTest.php" tests="2" assertions="0" errors="0" failures="0" skipped="2" time="0.000000">
-      <testcase name="test_consulta_notas_emitidas_para_estabelecimento_por_nsu" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/NFeConsultaNotasEmitidasParaEstabelecimentoTest.php" line="42" class="Tests\Integration\NFeConsultaNotasEmitidasParaEstabelecimentoTest" classname="Tests.Integration.NFeConsultaNotasEmitidasParaEstabelecimentoTest" assertions="0" time="0.000000">
-        <skipped/>
-      </testcase>
-      <testcase name="test_consulta_notas_emitidas_para_estabelecimento_por_chave" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/NFeConsultaNotasEmitidasParaEstabelecimentoTest.php" line="54" class="Tests\Integration\NFeConsultaNotasEmitidasParaEstabelecimentoTest" classname="Tests.Integration.NFeConsultaNotasEmitidasParaEstabelecimentoTest" assertions="0" time="0.000000">
-        <skipped/>
-      </testcase>
-    </testsuite>
-    <testsuite name="NFSeMunicipalHomologationRealTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/NFSeMunicipalHomologationRealTest.php" tests="3" assertions="0" errors="0" failures="0" skipped="3" time="0.000000">
-      <testcase name="testBelemRealHomologationSend" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/NFSeMunicipalHomologationRealTest.php" line="28" class="NFSeMunicipalHomologationRealTest" classname="NFSeMunicipalHomologationRealTest" assertions="0" time="0.000000">
-        <skipped/>
-      </testcase>
-      <testcase name="testBelemRealHomologationConsultarLote" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/NFSeMunicipalHomologationRealTest.php" line="49" class="NFSeMunicipalHomologationRealTest" classname="NFSeMunicipalHomologationRealTest" assertions="0" time="0.000000">
-        <skipped/>
-      </testcase>
-      <testcase name="testJoinvilleRealHomologationSend" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Integration/NFSeMunicipalHomologationRealTest.php" line="67" class="NFSeMunicipalHomologationRealTest" classname="NFSeMunicipalHomologationRealTest" assertions="0" time="0.000000">
-        <skipped/>
-      </testcase>
-    </testsuite>
+  <testsuite name="FiscalCorePlatformContractTest" file="/workspace/tests/Unit/Facade/FiscalCorePlatformContractTest.php" tests="4" assertions="19" errors="0" failures="0" skipped="0" time="0.014600">
+    <testcase name="test_nfe_facade_keeps_platform_required_contract_methods" file="/workspace/tests/Unit/Facade/FiscalCorePlatformContractTest.php" line="12" class="FiscalCorePlatformContractTest" classname="FiscalCorePlatformContractTest" assertions="5" time="0.010749"/>
+    <testcase name="test_nfce_facade_keeps_platform_required_contract_methods" file="/workspace/tests/Unit/Facade/FiscalCorePlatformContractTest.php" line="23" class="FiscalCorePlatformContractTest" classname="FiscalCorePlatformContractTest" assertions="4" time="0.000889"/>
+    <testcase name="test_nfse_facade_keeps_platform_required_contract_methods" file="/workspace/tests/Unit/Facade/FiscalCorePlatformContractTest.php" line="33" class="FiscalCorePlatformContractTest" classname="FiscalCorePlatformContractTest" assertions="6" time="0.001415"/>
+    <testcase name="test_support_components_keep_platform_required_entrypoints" file="/workspace/tests/Unit/Facade/FiscalCorePlatformContractTest.php" line="45" class="FiscalCorePlatformContractTest" classname="FiscalCorePlatformContractTest" assertions="4" time="0.001547"/>
   </testsuite>
 </testsuites>

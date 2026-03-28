@@ -1,0 +1,6 @@
+Fiscal Core Platform Contract
+ [x] Nfe facade keeps platform required contract methods
+ [x] Nfce facade keeps platform required contract methods
+ [x] Nfse facade keeps platform required contract methods
+ [x] Support components keep platform required entrypoints
+

@@ -1,4 +1,4 @@
-name: PHP Composer
+name: PHP CI
 
 on:
   push:
@@ -10,12 +10,16 @@ permissions:
   contents: read
 
 jobs:
-  build:
-
+  fiscal-core:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+    - uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.4'
+        extensions: dom, mbstring, openssl
+        coverage: none
 
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
@@ -32,8 +36,28 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
 
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
+    - name: Run fiscal-core test suite
+      run: vendor/bin/phpunit --no-coverage
 
-    # - name: Run test suite
-    #   run: composer run-script test
+  invoice-flow-platform:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.4'
+        extensions: ctype, dom, filter, hash, mbstring, openssl, pdo, pdo_sqlite, session, sqlite3, tokenizer
+        coverage: none
+
+    - name: Validate Laravel platform composer.json
+      working-directory: NotaAgil/invoice-flow/backend/laravel-api
+      run: composer validate --strict
+
+    - name: Install Laravel platform dependencies
+      working-directory: NotaAgil/invoice-flow/backend/laravel-api
+      run: composer install --prefer-dist --no-progress
+
+    - name: Run Laravel platform test suite
+      working-directory: NotaAgil/invoice-flow/backend/laravel-api
+      run: vendor/bin/phpunit --no-coverage
