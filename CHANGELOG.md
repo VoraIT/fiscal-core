@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.2.0 - 2026-03-30
+
+### Changed
+- `UtilsFacade::consultarCNPJ()` passou a mapear o payload atual da BrasilAPI com cobertura expandida dos dados cadastrais.
+- Mantidos aliases legados como `situacao`, `atividade_principal`, `telefone` e `endereco` para compatibilidade com consumidores existentes.
+- Expostos campos adicionais relevantes, incluindo `qsa`, `cnaes_secundarios`, dados de enquadramento, capital social e metadados completos de endereço.
+
+### Tests
+- Validacao de sintaxe executada com `php -l src/Facade/UtilsFacade.php`.
+
 ## v1.1.4 - 2026-02-16
 
 ### Changed

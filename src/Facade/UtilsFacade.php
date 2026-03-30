@@ -73,23 +73,7 @@ class UtilsFacade
                 throw new \Exception('CNPJ não encontrado');
             }
 
-            return [
-                'cnpj' => $this->formatarCNPJ($cnpj),
-                'razao_social' => $resultado['company']['name'] ?? $resultado['nome'] ?? '',
-                'nome_fantasia' => $resultado['alias'] ?? $resultado['fantasia'] ?? '',
-                'situacao' => $resultado['status'] ?? $resultado['situacao'] ?? '',
-                'atividade_principal' => $resultado['primary_activity'] ?? $resultado['atividade_principal'] ?? '',
-                'telefone' => $resultado['phone'] ?? $resultado['telefone'] ?? '',
-                'email' => $resultado['email'] ?? '',
-                'endereco' => [
-                    'logradouro' => $resultado['address']['street'] ?? $resultado['logradouro'] ?? '',
-                    'numero' => $resultado['address']['number'] ?? $resultado['numero'] ?? '',
-                    'bairro' => $resultado['address']['district'] ?? $resultado['bairro'] ?? '',
-                    'municipio' => $resultado['address']['city'] ?? $resultado['municipio'] ?? '',
-                    'uf' => $resultado['address']['state'] ?? $resultado['uf'] ?? '',
-                    'cep' => $resultado['address']['zip'] ?? $resultado['cep'] ?? ''
-                ]
-            ];
+            return $this->mapearConsultaCNPJ($cnpj, $resultado);
         });
     }
 
@@ -307,6 +291,88 @@ class UtilsFacade
     private function formatarCNPJ(string $cnpj): string
     {
         return preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $cnpj);
+    }
+
+    private function mapearConsultaCNPJ(string $cnpj, array $resultado): array
+    {
+        $telefone = trim(
+            implode(' / ', array_filter([
+                $resultado['ddd_telefone_1'] ?? null,
+                $resultado['ddd_telefone_2'] ?? null,
+                $resultado['ddd_fax'] ?? null,
+                $resultado['phone'] ?? null,
+                $resultado['telefone'] ?? null,
+            ], fn($valor) => $valor !== null && $valor !== ''))
+        );
+
+        $endereco = [
+            'logradouro' => $resultado['address']['street'] ?? $resultado['logradouro'] ?? '',
+            'numero' => $resultado['address']['number'] ?? $resultado['numero'] ?? '',
+            'complemento' => $resultado['address']['details'] ?? $resultado['complemento'] ?? '',
+            'bairro' => $resultado['address']['district'] ?? $resultado['bairro'] ?? '',
+            'municipio' => $resultado['address']['city'] ?? $resultado['municipio'] ?? '',
+            'codigo_municipio' => $resultado['codigo_municipio'] ?? '',
+            'codigo_municipio_ibge' => $resultado['codigo_municipio_ibge'] ?? '',
+            'uf' => $resultado['address']['state'] ?? $resultado['uf'] ?? '',
+            'cep' => $resultado['address']['zip'] ?? $resultado['cep'] ?? '',
+            'pais' => $resultado['pais'] ?? '',
+            'codigo_pais' => $resultado['codigo_pais'] ?? '',
+            'nome_cidade_no_exterior' => $resultado['nome_cidade_no_exterior'] ?? '',
+            'tipo_logradouro' => $resultado['descricao_tipo_de_logradouro'] ?? '',
+        ];
+
+        return [
+            'cnpj' => $this->formatarCNPJ($cnpj),
+            'cnpj_limpo' => $cnpj,
+            'razao_social' => $resultado['razao_social'] ?? $resultado['company']['name'] ?? $resultado['nome'] ?? '',
+            'nome_fantasia' => $resultado['nome_fantasia'] ?? $resultado['alias'] ?? $resultado['fantasia'] ?? '',
+            'situacao' => $resultado['descricao_situacao_cadastral'] ?? $resultado['status'] ?? $resultado['situacao'] ?? '',
+            'situacao_cadastral' => $resultado['situacao_cadastral'] ?? '',
+            'descricao_situacao_cadastral' => $resultado['descricao_situacao_cadastral'] ?? '',
+            'motivo_situacao_cadastral' => $resultado['motivo_situacao_cadastral'] ?? '',
+            'descricao_motivo_situacao_cadastral' => $resultado['descricao_motivo_situacao_cadastral'] ?? '',
+            'data_situacao_cadastral' => $resultado['data_situacao_cadastral'] ?? '',
+            'situacao_especial' => $resultado['situacao_especial'] ?? '',
+            'data_situacao_especial' => $resultado['data_situacao_especial'] ?? '',
+            'atividade_principal' => $resultado['cnae_fiscal_descricao'] ?? $resultado['primary_activity'] ?? $resultado['atividade_principal'] ?? '',
+            'cnae_fiscal' => $resultado['cnae_fiscal'] ?? '',
+            'cnae_fiscal_descricao' => $resultado['cnae_fiscal_descricao'] ?? '',
+            'cnaes_secundarios' => $resultado['cnaes_secundarios'] ?? [],
+            'natureza_juridica' => $resultado['natureza_juridica'] ?? '',
+            'codigo_natureza_juridica' => $resultado['codigo_natureza_juridica'] ?? '',
+            'porte' => $resultado['porte'] ?? '',
+            'codigo_porte' => $resultado['codigo_porte'] ?? '',
+            'capital_social' => $resultado['capital_social'] ?? '',
+            'telefone' => $telefone,
+            'ddd_telefone_1' => $resultado['ddd_telefone_1'] ?? '',
+            'ddd_telefone_2' => $resultado['ddd_telefone_2'] ?? '',
+            'ddd_fax' => $resultado['ddd_fax'] ?? '',
+            'email' => $resultado['email'] ?? '',
+            'qsa' => $resultado['qsa'] ?? [],
+            'regime_tributario' => $resultado['regime_tributario'] ?? [],
+            'opcao_pelo_simples' => $resultado['opcao_pelo_simples'] ?? false,
+            'data_opcao_pelo_simples' => $resultado['data_opcao_pelo_simples'] ?? null,
+            'data_exclusao_do_simples' => $resultado['data_exclusao_do_simples'] ?? null,
+            'opcao_pelo_mei' => $resultado['opcao_pelo_mei'] ?? false,
+            'data_opcao_pelo_mei' => $resultado['data_opcao_pelo_mei'] ?? null,
+            'data_exclusao_do_mei' => $resultado['data_exclusao_do_mei'] ?? null,
+            'data_inicio_atividade' => $resultado['data_inicio_atividade'] ?? '',
+            'identificador_matriz_filial' => $resultado['identificador_matriz_filial'] ?? '',
+            'descricao_identificador_matriz_filial' => $resultado['descricao_identificador_matriz_filial'] ?? '',
+            'qualificacao_do_responsavel' => $resultado['qualificacao_do_responsavel'] ?? '',
+            'ente_federativo_responsavel' => $resultado['ente_federativo_responsavel'] ?? '',
+            'endereco' => $endereco,
+            'logradouro' => $endereco['logradouro'],
+            'numero' => $endereco['numero'],
+            'complemento' => $endereco['complemento'],
+            'bairro' => $endereco['bairro'],
+            'municipio' => $endereco['municipio'],
+            'uf' => $endereco['uf'],
+            'cep' => $endereco['cep'],
+            'pais' => $endereco['pais'],
+            'codigo_pais' => $endereco['codigo_pais'],
+            'nome_cidade_no_exterior' => $endereco['nome_cidade_no_exterior'],
+        ];
     }
 
     private function validarDigitosCPF(string $cpf): bool
