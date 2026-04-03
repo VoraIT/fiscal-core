@@ -30,7 +30,7 @@ final class NFSeRuntimeBootstrap
         $resolver = $this->resolver ?? new NFSeProviderResolver();
         $providerKey = $resolver->resolveKey($municipio);
         $metadata = $resolver->buildMetadata($municipio);
-        $config = $registry->getConfig($providerKey);
+        $config = $registry->getConfigForMunicipio($municipio);
 
         $config['ambiente'] = $configManager->isProduction() ? 'producao' : 'homologacao';
         $config['timeout'] = (int) ($configManager->get('nfse.timeout') ?? $configManager->get('timeout') ?? $config['timeout'] ?? 30);

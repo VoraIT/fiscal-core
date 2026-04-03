@@ -83,6 +83,37 @@
         "municipio_nome": "Manaus",
         "wsdl": ""
     },
+    "ISSWEB_AM": {
+        "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\Municipal\\IsswebProvider",
+        "layout_family": "ISSWEB",
+        "schema_root": "resources/nfse/schemas/ISSWEB",
+        "xsd_entrypoints": {
+            "emitir": "XSDNFEletronica.xsd",
+            "consultar": "XSDISSEConsultaNota.xsd",
+            "cancelar_nfse": "XSDISSECancelaNFe.xsd",
+            "retorno": "XSDRetorno.xsd"
+        },
+        "aliquota_format": "decimal",
+        "transport": "soap",
+        "versao": "ISSWEB",
+        "municipio_uf": "AM",
+        "wsdl_homologacao": "",
+        "wsdl_producao": "",
+        "service_base_homologacao": "",
+        "service_base_producao": "",
+        "signature_mode": "optional",
+        "supported_operations": [
+            "emitir",
+            "consultar",
+            "cancelar"
+        ],
+        "printing_mode": "official_url",
+        "official_validation_url_template": "",
+        "auth": {
+            "chave": ""
+        },
+        "source": "custom_override"
+    },
     "PUBLICA": {
         "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\Municipal\\PublicaProvider",
         "layout_family": "PUBLICA",

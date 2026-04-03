@@ -445,9 +445,10 @@ Arquivos de referencia:
 
 Use Manaus como caso de cobertura parcial:
 
-- catalogado e com familia registrada
-- util para validar o checklist de classificacao
-- nao deve ser tratado como exemplo de provider concluido enquanto operacoes, parser, homologacao e DANFSe nao estiverem fechados
+- o provider `MANAUS_AM` permanece apenas como referencia historica
+- nao e mais rota ativa no catalogo municipal
+- fatos geradores a partir de `2026-01-01` devem seguir pelo provider `nfse_nacional`
+- fatos geradores ate `2025-12-31` permanecem fora do fluxo suportado pelo roteamento padrao e ficam no sistema legado `Nota Manaus`
 
 Arquivo de referencia:
 

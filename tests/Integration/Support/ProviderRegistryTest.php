@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use freeline\FiscalCore\Providers\NFSe\Municipal\BelemMunicipalProvider;
-use freeline\FiscalCore\Providers\NFSe\Municipal\ManausAmProvider;
+use freeline\FiscalCore\Providers\NFSe\Municipal\IsswebProvider;
 use freeline\FiscalCore\Providers\NFSe\Municipal\PublicaProvider;
 use freeline\FiscalCore\Providers\NFSe\NacionalProvider;
 use freeline\FiscalCore\Support\ProviderRegistry;
@@ -29,13 +29,32 @@ final class ProviderRegistryTest extends TestCase
         $this->assertInstanceOf(BelemMunicipalProvider::class, $provider);
     }
 
-    public function testGetByMunicipioManausReturnsManausAmProvider(): void
+    public function testGetByMunicipioManausReturnsNacionalProvider(): void
     {
         $registry = ProviderRegistry::getInstance();
 
         $provider = $registry->getByMunicipio('manaus');
 
-        $this->assertInstanceOf(ManausAmProvider::class, $provider);
+        $this->assertInstanceOf(NacionalProvider::class, $provider);
+    }
+
+    public function testGetByMunicipioPresidenteFigueiredoReturnsIsswebProvider(): void
+    {
+        $registry = ProviderRegistry::getInstance();
+
+        $provider = $registry->getByMunicipio('presidente-figueiredo');
+
+        $this->assertInstanceOf(IsswebProvider::class, $provider);
+    }
+
+    public function testGetByMunicipioRioPretoDaEvaReturnsIsswebProvider(): void
+    {
+        $registry = ProviderRegistry::getInstance();
+
+        $provider = $registry->getByMunicipio('rio-preto-da-eva');
+
+        $this->assertInstanceOf(IsswebProvider::class, $provider);
+        $this->assertSame('1303569', $provider->getCodigoMunicipio());
     }
 
     public function testGetByUnknownMunicipioReturnsNacionalProvider(): void

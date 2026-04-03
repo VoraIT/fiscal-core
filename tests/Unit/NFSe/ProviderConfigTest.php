@@ -71,7 +71,7 @@ final class ProviderConfigTest extends TestCase
 
         $this->assertTrue($response->isSuccess());
         $this->assertSame(
-            ['belem', 'joinville', 'manaus', 'nacional'],
+            ['belem', 'joinville', 'manaus', 'nacional', 'presidente-figueiredo', 'rio-preto-da-eva'],
             $response->getData('municipios')
         );
     }
@@ -101,6 +101,34 @@ final class ProviderConfigTest extends TestCase
         $this->assertSame('nfse_nacional', $data['provider_key']);
         $this->assertTrue($data['municipio_ignored']);
         $this->assertStringContainsString('NacionalProvider', $data['provider_class']);
+    }
+
+    public function testFacadeMapsPresidenteFigueiredoToIssweb(): void
+    {
+        $facade = new NFSeFacade('presidente-figueiredo');
+        $response = $facade->getProviderInfo();
+
+        $this->assertTrue($response->isSuccess());
+
+        $data = $response->getData();
+        $this->assertSame('ISSWEB_AM', $data['provider_key']);
+        $this->assertSame('1303536', $data['codigo_municipio']);
+        $this->assertStringContainsString('IsswebProvider', $data['provider_class']);
+        $this->assertContains('consultar', $data['supported_operations']);
+    }
+
+    public function testFacadeMapsRioPretoDaEvaToIssweb(): void
+    {
+        $facade = new NFSeFacade('rio-preto-da-eva');
+        $response = $facade->getProviderInfo();
+
+        $this->assertTrue($response->isSuccess());
+
+        $data = $response->getData();
+        $this->assertSame('ISSWEB_AM', $data['provider_key']);
+        $this->assertSame('1303569', $data['codigo_municipio']);
+        $this->assertStringContainsString('IsswebProvider', $data['provider_class']);
+        $this->assertContains('consultar', $data['supported_operations']);
     }
 
     private function bootstrapEnvironment(): void

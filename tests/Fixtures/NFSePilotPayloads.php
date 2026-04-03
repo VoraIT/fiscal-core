@@ -67,31 +67,34 @@ final class NFSePilotPayloads
     public static function manaus(): array
     {
         return [
-            'id' => 'RPS-MANAUS-1',
-            'lote' => [
-                'id' => 'LOTE-MANAUS-1',
-                'numero' => '1',
-            ],
-            'rps' => [
-                'numero' => '1',
-                'serie' => 'NF',
-                'tipo' => '1',
-                'data_emissao' => '2026-03-18T10:00:00-04:00',
-            ],
+            'id' => 'DPS130260312345678000195000010000000000001',
+            'tpAmb' => '2',
+            'dhEmi' => '2026-03-18T10:00:00-04:00',
+            'verAplic' => 'fiscal-core',
+            'serie' => '1',
+            'nDPS' => '1',
+            'dCompet' => '2026-03-18',
+            'tpEmit' => '1',
+            'cLocEmi' => '1302603',
             'prestador' => [
                 'cnpj' => '12345678000195',
                 'inscricaoMunicipal' => '123456',
                 'razao_social' => 'Freeline Manaus Servicos Ltda',
-                'simples_nacional' => false,
+                'opSimpNac' => '1',
+                'regEspTrib' => '0',
             ],
             'tomador' => [
                 'documento' => '12345678901',
-                'razao_social' => 'Cliente Manaus',
+                'razaoSocial' => 'Cliente Manaus',
             ],
             'servico' => [
-                'codigo' => '1401',
+                'codigo' => '010101',
+                'cTribNac' => '010101',
                 'descricao' => 'Consultoria tecnica em sistemas',
+                'cLocPrestacao' => '1302603',
                 'codigo_municipio' => '1302603',
+                'tribISSQN' => '1',
+                'tpRetISSQN' => '1',
                 'aliquota' => 0.02,
             ],
             'valor_servicos' => 150.00,

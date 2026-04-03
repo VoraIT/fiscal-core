@@ -2,15 +2,33 @@
     "generated_at": "2026-03-19T11:14:17+00:00",
     "source_xml": "Uninfe/source/NFe.Components.Wsdl/NFse/WSDL/Webservice.xml",
     "mode": "selected",
-    "processed_municipios": 3,
+    "processed_municipios": 5,
     "skipped_entries": 0,
-    "families_count": 5,
+    "families_count": 6,
     "selected_ibges": [
         "1501402",
         "1302603",
+        "1303536",
+        "1303569",
         "4209102"
     ],
     "municipio_overrides": {
+        "1303536": {
+            "provider_family": "ISSWEB_AM",
+            "schema_package": "ISSWEB",
+            "slug": "presidente-figueiredo",
+            "nome": "Presidente Figueiredo",
+            "uf": "AM",
+            "provider_note": "Município preparado para integração municipal via família compartilhada ISSWEB_AM."
+        },
+        "1303569": {
+            "provider_family": "ISSWEB_AM",
+            "schema_package": "ISSWEB",
+            "slug": "rio-preto-da-eva",
+            "nome": "Rio Preto da Eva",
+            "uf": "AM",
+            "provider_note": "Hipótese atual de integração municipal via ISSWEB, pendente de validação oficial."
+        },
         "1501402": {
             "provider_family": "BELEM_MUNICIPAL_2025",
             "schema_package": "BELEM_MUNICIPAL_2025",

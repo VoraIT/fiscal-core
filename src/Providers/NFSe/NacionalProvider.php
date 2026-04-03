@@ -220,6 +220,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
             'tpEmit' => (string)($payload['tpEmit'] ?? ''),
             'cLocEmi' => (string)($payload['cLocEmi'] ?? ''),
             'prestador.cnpj' => (string)($payload['prestador']['cnpj'] ?? ''),
+            'prestador.inscricaoMunicipal' => (string)($payload['prestador']['inscricaoMunicipal'] ?? ''),
             'prestador.regTrib.opSimpNac' => (string)($payload['prestador']['opSimpNac'] ?? ''),
             'prestador.regTrib.regEspTrib' => (string)($payload['prestador']['regEspTrib'] ?? ''),
             'serv.cLocPrestacao' => (string)($payload['servico']['cLocPrestacao'] ?? ''),
@@ -722,6 +723,10 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
 
         if (empty($dados['prestador']['cnpj']) || strlen($this->onlyDigits((string) $dados['prestador']['cnpj'])) !== 14) {
             throw new \InvalidArgumentException('CNPJ do prestador inválido');
+        }
+
+        if (trim((string) ($dados['prestador']['inscricaoMunicipal'] ?? '')) === '') {
+            throw new \InvalidArgumentException('Campo obrigatório ausente: prestador.inscricaoMunicipal');
         }
 
         $codigoServico = (string)($dados['servico']['codigo'] ?? $dados['servico']['cTribNac'] ?? $dados['servico']['codigoServicoNacional'] ?? '');

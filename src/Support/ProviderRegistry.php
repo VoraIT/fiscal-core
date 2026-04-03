@@ -75,13 +75,39 @@ class ProviderRegistry
 
     public function getByMunicipio(?string $municipio): NFSeProviderConfigInterface
     {
-        $providerKey = $this->resolver->resolveKey($municipio);
+        $metadata = $this->resolver->buildMetadata($municipio);
+        $providerKey = $metadata['provider_key'] ?? self::NFSE_NATIONAL_KEY;
 
         if (!$this->has($providerKey)) {
             return $this->getNfseNacional();
         }
 
-        return $this->get($providerKey);
+        if ($providerKey === self::NFSE_NATIONAL_KEY || !is_array($metadata['municipio_resolved'] ?? null)) {
+            return $this->get($providerKey);
+        }
+
+        $config = $this->applyMunicipioConfig($this->getConfig($providerKey), $metadata['municipio_resolved']);
+        $providerClass = $config['provider_class'] ?? null;
+
+        if (!is_string($providerClass) || trim($providerClass) === '') {
+            throw new RuntimeException("Provider class não especificado para chave '{$providerKey}'.");
+        }
+
+        $providerClass = $this->resolveProviderClass($providerClass);
+
+        if (!class_exists($providerClass)) {
+            throw new RuntimeException("Provider class não encontrado: {$providerClass}");
+        }
+
+        $provider = new $providerClass($config);
+
+        if (!$provider instanceof NFSeProviderConfigInterface) {
+            throw new RuntimeException(
+                "Provider '{$providerClass}' deve implementar NFSeProviderConfigInterface."
+            );
+        }
+
+        return $provider;
     }
 
     public function has(string $providerKey): bool
@@ -96,6 +122,21 @@ class ProviderRegistry
         }
 
         return $this->config[$providerKey];
+    }
+
+    public function getConfigForMunicipio(?string $municipio): array
+    {
+        $metadata = $this->resolver->buildMetadata($municipio);
+        $providerKey = $metadata['provider_key'] ?? self::NFSE_NATIONAL_KEY;
+
+        if (!$this->has($providerKey)) {
+            return $this->getConfig(self::NFSE_NATIONAL_KEY);
+        }
+
+        return $this->applyMunicipioConfig(
+            $this->getConfig($providerKey),
+            is_array($metadata['municipio_resolved'] ?? null) ? $metadata['municipio_resolved'] : null
+        );
     }
 
     public function listProviders(): array
@@ -218,6 +259,19 @@ class ProviderRegistry
         }
 
         return "freeline\\FiscalCore\\Providers\\NFSe\\{$providerName}";
+    }
+
+    private function applyMunicipioConfig(array $config, ?array $municipio): array
+    {
+        if ($municipio === null) {
+            return $config;
+        }
+
+        $config['codigo_municipio'] = (string) ($municipio['ibge'] ?? $config['codigo_municipio'] ?? '');
+        $config['municipio_nome'] = (string) ($municipio['nome'] ?? $config['municipio_nome'] ?? '');
+        $config['municipio_uf'] = (string) ($municipio['uf'] ?? $config['municipio_uf'] ?? '');
+
+        return $config;
     }
 
     private function __clone(): void

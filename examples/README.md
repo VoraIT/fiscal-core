@@ -21,7 +21,11 @@ examples/
 ├── 📁 homologacao/                   # Scripts seguros para prefeitura
 │   ├── 01-emitir-belem-real.php      # Belém com certificado Faives
 │   ├── 02-emitir-joinville-real.php  # Joinville com certificado Freeline
-│   └── 03-emitir-belem-completo.php  # Fluxo facade: emissão + disponibilidade + URL oficial
+│   ├── 03-emitir-belem-completo.php  # Fluxo facade: emissão + disponibilidade + URL oficial
+│   ├── 04-manaus-emitir-nacional.php # Preview e emissão nacional de Manaus
+│   ├── 05-manaus-operacoes-nacionais.php # Consulta, lote, RPS, download e cancelamento de Manaus
+│   ├── 06-presidente-figueiredo-issweb.php # Preview e envio ISSWEB de Presidente Figueiredo
+│   └── 07-rio-preto-da-eva-issweb.php      # Preview e envio ISSWEB de Rio Preto da Eva
 └── 📁 producao/                      # Scripts seguros para ambiente produtivo
     ├── 01-emitir-belem-real.php      # Belém produção com alíquota de 5%
     ├── 02-consultar-e-imprimir-belem.php # Disponibilidade + URL oficial do DANFSe
@@ -56,6 +60,17 @@ php examples/avancado/03-emissao-municipal-funcional.php
 php examples/homologacao/01-emitir-belem-real.php
 php examples/homologacao/02-emitir-joinville-real.php
 php examples/homologacao/03-emitir-belem-completo.php
+php examples/homologacao/04-manaus-emitir-nacional.php
+php examples/homologacao/04-manaus-emitir-nacional.php --send
+php examples/homologacao/05-manaus-operacoes-nacionais.php --consultar-rps-numero=123 --consultar-rps-serie=1
+php examples/homologacao/05-manaus-operacoes-nacionais.php --consultar-lote=SEU_PROTOCOLO
+php examples/homologacao/05-manaus-operacoes-nacionais.php --baixar-xml=SUA_CHAVE
+php examples/homologacao/05-manaus-operacoes-nacionais.php --baixar-danfse=SUA_CHAVE
+php examples/homologacao/05-manaus-operacoes-nacionais.php --cancelar-chave=SUA_CHAVE --motivo="Cancelamento de teste"
+php examples/homologacao/06-presidente-figueiredo-issweb.php
+php examples/homologacao/06-presidente-figueiredo-issweb.php --send
+php examples/homologacao/07-rio-preto-da-eva-issweb.php
+php examples/homologacao/07-rio-preto-da-eva-issweb.php --send
 php examples/homologacao/consulta.php
 
 # Script de produção municipal
@@ -81,6 +96,10 @@ php examples/homologacao/02-emitir-joinville-real.php --tomador-doc=12345678909 
 | **03-emissao-municipal-funcional** | Preview local de emissão municipal | Providers municipais |
 | **homologacao/** | Scripts reais com preview seguro e `--send` explícito | NFSeMunicipalHomologationService |
 | **03-emitir-belem-completo** | Facade pronta com emissão, disponibilidade e URL oficial | FiscalFacade + NFSeFacade |
+| **04-manaus-emitir-nacional** | Preview DPS e emissão completa para Manaus no fluxo nacional | FiscalFacade + NFSeFacade |
+| **05-manaus-operacoes-nacionais** | Operações nacionais de Manaus: consulta, lote, RPS, download e cancelamento | FiscalFacade + NFSeFacade |
+| **06-presidente-figueiredo-issweb** | Preview local e envio ISSWEB municipal | FiscalFacade + IsswebProvider |
+| **07-rio-preto-da-eva-issweb** | Preview local e envio ISSWEB municipal compartilhado | FiscalFacade + IsswebProvider |
 
 ## 🎭 Separação de Responsabilidades
 
@@ -128,6 +147,8 @@ export IBPT_UF="SP"
 - Os scripts de homologação usam preview por padrão e só enviam com `--send`
 - O script de produção de Belém também usa preview por padrão e só envia com `--send`
 - Em Belém, o acesso ao DANFSe segue a URL oficial da prefeitura; a biblioteca expõe disponibilidade e metadados para polling externo
+- Para Manaus, use os scripts `04` e `05` em homologação com fatos geradores a partir de `2026-01-01`
+- Para Presidente Figueiredo e Rio Preto da Eva, use `NFSE_ISSWEB_CHAVE` e confirme os endpoints reais antes de homologar com `--send`
 
 ## 🎯 Casos de Uso por Público
 

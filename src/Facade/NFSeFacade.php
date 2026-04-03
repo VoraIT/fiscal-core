@@ -24,6 +24,7 @@ class NFSeFacade
     private string $providerKey;
     private bool $municipioIgnored = false;
     private array $deprecationWarnings = [];
+    private ?array $municipioResolved = null;
     private array $runtimeContext = [];
 
     public function __construct(string $municipio = 'curitiba', ?NFSeAdapter $nfse = null)
@@ -35,6 +36,9 @@ class NFSeFacade
         $this->providerKey = $compat['provider_key'];
         $this->municipioIgnored = $compat['municipio_ignored'];
         $this->deprecationWarnings = $compat['warnings'];
+        $this->municipioResolved = is_array($compat['municipio_resolved'] ?? null)
+            ? $compat['municipio_resolved']
+            : null;
 
         if ($nfse !== null) {
             $this->nfse = $nfse;
@@ -90,6 +94,10 @@ class NFSeFacade
             return $check;
         }
 
+        if ($check = $this->validateManausNationalEmissionWindow($dados)) {
+            return $check;
+        }
+
         try {
             $resultado = $this->nfse->emitir($dados);
             $lastEmission = method_exists($this->nfse, 'getLastEmissionInfo')
@@ -116,6 +124,10 @@ class NFSeFacade
     public function emitirCompleto(array $dados, array $options = []): FiscalResponse
     {
         if ($check = $this->checkNFSeInitialization()) {
+            return $check;
+        }
+
+        if ($check = $this->validateManausNationalEmissionWindow($dados)) {
             return $check;
         }
 
@@ -168,6 +180,12 @@ class NFSeFacade
                 } else {
                     $warnings[] = $danfse->getError();
                 }
+            } elseif (($officialUrl = $this->resolveOfficialDocumentUrl($consultaData, $emissaoData)) !== null) {
+                $danfseData = [
+                    'url' => $officialUrl,
+                    'source' => 'official_url',
+                ];
+                $flowStatus = 'completo';
             } else {
                 $warnings[] = 'Nao foi possivel resolver o XML final da NFSe apos a emissao.';
             }
@@ -779,6 +797,48 @@ class NFSeFacade
         return $this->providerKey === 'BELEM_MUNICIPAL_2025';
     }
 
+    private function validateManausNationalEmissionWindow(array $dados): ?FiscalResponse
+    {
+        $ibge = (string) ($this->municipioResolved['ibge'] ?? '');
+        if ($ibge !== '1302603') {
+            return null;
+        }
+
+        $referenceDate = $this->extractManausEmissionReferenceDate($dados);
+        if ($referenceDate === null || $referenceDate >= '2026-01-01') {
+            return null;
+        }
+
+        return FiscalResponse::error(
+            'Manaus utiliza exclusivamente o emissor nacional para fatos geradores a partir de 2026-01-01. Competências até 2025-12-31 permanecem no sistema legado Nota Manaus.',
+            'NFSE_MANAUS_LEGACY_PERIOD',
+            'nfse_emission',
+            $this->buildCompatibilityMetadata() + [
+                'reference_date' => $referenceDate,
+                'legacy_cutoff' => '2026-01-01',
+            ]
+        );
+    }
+
+    private function extractManausEmissionReferenceDate(array $dados): ?string
+    {
+        $candidates = [
+            (string) ($dados['dCompet'] ?? ''),
+            substr((string) ($dados['dhEmi'] ?? ''), 0, 10),
+            (string) ($dados['competencia'] ?? ''),
+            substr((string) ($dados['rps']['data_emissao'] ?? ''), 0, 10),
+        ];
+
+        foreach ($candidates as $candidate) {
+            $candidate = trim($candidate);
+            if ($candidate !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $candidate) === 1) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
     private function emitirCompletoBelem(array $dados, FiscalResponse $emissao, array $emissaoData): FiscalResponse
     {
         $warnings = [];
@@ -1164,6 +1224,22 @@ class NFSeFacade
         $emissaoParsed = $emissaoData['emissao']['parsed_response']['nfse'][$field] ?? null;
         if (is_string($emissaoParsed) && trim($emissaoParsed) !== '') {
             return trim($emissaoParsed);
+        }
+
+        return null;
+    }
+
+    private function resolveOfficialDocumentUrl(?array $consultaData, array $emissaoData): ?string
+    {
+        $candidates = [
+            $consultaData['consulta']['parsed_response']['nfse_url'] ?? null,
+            $emissaoData['emissao']['parsed_response']['nfse_url'] ?? null,
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_string($candidate) && trim($candidate) !== '') {
+                return trim($candidate);
+            }
         }
 
         return null;
