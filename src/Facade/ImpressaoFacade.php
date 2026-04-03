@@ -27,6 +27,20 @@ class ImpressaoFacade
     public function gerarDanfe(string $xmlNfe): FiscalResponse
     {
         try {
+            if (!function_exists('imagefontheight')) {
+                return FiscalResponse::error(
+                    'GD_EXTENSION_MISSING',
+                    'Extensão GD não disponível no runtime PHP para gerar DANFE.',
+                    'impressao_danfe',
+                    [
+                        'suggestions' => [
+                            'Rebuild do container PHP com a extensão gd habilitada',
+                            'Verifique se imagefontheight() está disponível no PHP em execução',
+                        ],
+                    ]
+                );
+            }
+
             if (empty($xmlNfe)) {
                 return FiscalResponse::error(
                     'XML_EMPTY',
@@ -51,7 +65,7 @@ class ImpressaoFacade
                 'xml_size' => strlen($xmlNfe)
             ]);
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $this->responseHandler->handle($e, 'impressao_danfe');
         }
     }
@@ -62,6 +76,20 @@ class ImpressaoFacade
     public function gerarDanfce(string $xmlNfce): FiscalResponse
     {
         try {
+            if (!function_exists('imagefontheight')) {
+                return FiscalResponse::error(
+                    'GD_EXTENSION_MISSING',
+                    'Extensão GD não disponível no runtime PHP para gerar DANFCE.',
+                    'impressao_danfce',
+                    [
+                        'suggestions' => [
+                            'Rebuild do container PHP com a extensão gd habilitada',
+                            'Verifique se imagefontheight() está disponível no PHP em execução',
+                        ],
+                    ]
+                );
+            }
+
             if (empty($xmlNfce)) {
                 return FiscalResponse::error(
                     'XML_EMPTY',
@@ -86,7 +114,7 @@ class ImpressaoFacade
                 'xml_size' => strlen($xmlNfce)
             ]);
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $this->responseHandler->handle($e, 'impressao_danfce');
         }
     }
@@ -97,6 +125,19 @@ class ImpressaoFacade
     public function gerarDacte(string $xmlCte): FiscalResponse
     {
         try {
+            if (!function_exists('imagefontheight')) {
+                return FiscalResponse::error(
+                    'GD_EXTENSION_MISSING',
+                    'Extensão GD não disponível no runtime PHP para gerar DACTE.',
+                    'impressao_dacte',
+                    [
+                        'suggestions' => [
+                            'Rebuild do container PHP com a extensão gd habilitada',
+                        ],
+                    ]
+                );
+            }
+
             if (empty($xmlCte)) {
                 return FiscalResponse::error(
                     'XML_EMPTY',
@@ -121,7 +162,7 @@ class ImpressaoFacade
                 'xml_size' => strlen($xmlCte)
             ]);
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $this->responseHandler->handle($e, 'impressao_dacte');
         }
     }
@@ -132,6 +173,19 @@ class ImpressaoFacade
     public function gerarDamdfe(string $xmlMdfe): FiscalResponse
     {
         try {
+            if (!function_exists('imagefontheight')) {
+                return FiscalResponse::error(
+                    'GD_EXTENSION_MISSING',
+                    'Extensão GD não disponível no runtime PHP para gerar DAMDFE.',
+                    'impressao_damdfe',
+                    [
+                        'suggestions' => [
+                            'Rebuild do container PHP com a extensão gd habilitada',
+                        ],
+                    ]
+                );
+            }
+
             if (empty($xmlMdfe)) {
                 return FiscalResponse::error(
                     'XML_EMPTY',
@@ -156,7 +210,7 @@ class ImpressaoFacade
                 'xml_size' => strlen($xmlMdfe)
             ]);
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $this->responseHandler->handle($e, 'impressao_damdfe');
         }
     }

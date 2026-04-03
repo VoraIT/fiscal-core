@@ -93,6 +93,8 @@ class NFeFacade
             
             return [
                 'xml_response' => $result,
+                'xmlAssinado' => $this->nfe->getLastSignedXml(),
+                'xmlRetorno' => $this->nfe->getLastResponseXml() ?? $result,
                 'modelo' => 55,
                 'ambiente' => $dados['identificacao']['tpAmb'] ?? 2,
                 'chave_acesso' => $this->extrairChaveAcesso($result)

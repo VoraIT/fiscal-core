@@ -15,6 +15,8 @@ use NFePHP\NFe\Tools;
 class NFCeAdapter implements NotaFiscalInterface
 {
 	private Tools $tools;
+	private ?string $lastSignedXml = null;
+	private ?string $lastResponseXml = null;
 
 	public function __construct(Tools $tools)
 	{
@@ -26,11 +28,13 @@ class NFCeAdapter implements NotaFiscalInterface
 	 * Usa o Builder para construir a nota de forma type-safe
 	 * 
 	 * @param array $dados Dados da nota fiscal de consumidor
-	 * @return string Resposta da SEFAZ (XML do protocolo)
+	 * @return string XML de retorno da SEFAZ
 	 * @throws \Exception Se houver erro na construção ou envio
 	 */
 	public function emitir(array $dados): string
 	{
+		$this->tools->model(65);
+
 		// Garante que é modelo 65 (NFCe)
 		if (!isset($dados['identificacao']['mod'])) {
 			$dados['identificacao']['mod'] = 65;
@@ -44,12 +48,32 @@ class NFCeAdapter implements NotaFiscalInterface
 		
 		// Assina o XML
 		$xmlAssinado = $this->tools->signNFe($xml);
+
+		$lote = is_array($dados['lote'] ?? null) ? $dados['lote'] : [];
+		$idLote = preg_replace('/\D/', '', (string) ($lote['idLote'] ?? '')) ?: '1';
+		$indSinc = (int) ($lote['indSinc'] ?? 1);
+		if (!in_array($indSinc, [0, 1], true)) {
+			$indSinc = 1;
+		}
 		
 		// Para NFCe, precisa adicionar QR Code antes do envio
 		// O Tools deve estar configurado com CSC/CSRT
 		
 		// Envia para SEFAZ
-		return $this->tools->sefazEnviaLote([$xmlAssinado]);
+		$this->lastSignedXml = $xmlAssinado;
+		$this->lastResponseXml = $this->tools->sefazEnviaLote([$xmlAssinado], $idLote, $indSinc);
+
+		return $this->lastResponseXml;
+	}
+
+	public function getLastSignedXml(): ?string
+	{
+		return $this->lastSignedXml;
+	}
+
+	public function getLastResponseXml(): ?string
+	{
+		return $this->lastResponseXml;
 	}
 
 	/**
@@ -67,6 +91,8 @@ class NFCeAdapter implements NotaFiscalInterface
 	 */
 	public function criarNota(array $dados): NotaFiscal
 	{
+		$this->tools->model(65);
+
 		if (!isset($dados['identificacao']['mod'])) {
 			$dados['identificacao']['mod'] = 65;
 		}
@@ -75,16 +101,22 @@ class NFCeAdapter implements NotaFiscalInterface
 
 	public function consultar(string $chave): string
 	{
+		$this->tools->model(65);
+
 		return $this->tools->sefazConsultaChave($chave);
 	}
 
 	public function cancelar(string $chave, string $motivo, string $protocolo): string
 	{
+		$this->tools->model(65);
+
 		return $this->tools->sefazCancela($chave, $motivo, $protocolo);
 	}
 
 	public function inutilizar(int $ano, int $cnpj, int $modelo, int $serie, int $numeroInicial, int $numeroFinal, string $justificativa): string
 	{
+		$this->tools->model(65);
+
 		// sped-nfe v5 usa (serie, numeroInicial, numeroFinal, justificativa, tpAmb, ano[2])
 		$ano2Digitos = str_pad((string) ($ano % 100), 2, '0', STR_PAD_LEFT);
 		return $this->tools->sefazInutiliza($serie, $numeroInicial, $numeroFinal, $justificativa, null, $ano2Digitos);
@@ -92,6 +124,8 @@ class NFCeAdapter implements NotaFiscalInterface
 
 	public function sefazStatus(string $uf = '', ?int $ambiente = null, bool $ignorarContigencia = true): string
 	{
+		$this->tools->model(65);
+
 		return $this->tools->sefazStatus($uf, $ambiente, $ignorarContigencia);
 	}
 
