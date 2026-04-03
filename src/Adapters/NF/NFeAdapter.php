@@ -15,6 +15,8 @@ use NFePHP\NFe\Tools;
 class NFeAdapter implements NotaFiscalInterface
 {
     private Tools $tools;
+    private ?string $lastSignedXml = null;
+    private ?string $lastResponseXml = null;
 
     public function __construct(Tools $tools)
     {
@@ -26,7 +28,7 @@ class NFeAdapter implements NotaFiscalInterface
      * Usa o Builder para construir a nota de forma type-safe
      * 
      * @param array $dados Dados da nota fiscal
-     * @return string Resposta da SEFAZ (XML do protocolo)
+     * @return string XML de retorno da SEFAZ
      * @throws \Exception Se houver erro na construção ou envio
      */
     public function emitir(array $dados): string
@@ -39,9 +41,29 @@ class NFeAdapter implements NotaFiscalInterface
         
         // Assina o XML
         $xmlAssinado = $this->tools->signNFe($xml);
+
+        $lote = is_array($dados['lote'] ?? null) ? $dados['lote'] : [];
+        $idLote = preg_replace('/\D/', '', (string) ($lote['idLote'] ?? '')) ?: '1';
+        $indSinc = (int) ($lote['indSinc'] ?? 1);
+        if (!in_array($indSinc, [0, 1], true)) {
+            $indSinc = 1;
+        }
         
         // Envia para SEFAZ
-        return $this->tools->sefazEnviaLote([$xmlAssinado]);
+        $this->lastSignedXml = $xmlAssinado;
+        $this->lastResponseXml = $this->tools->sefazEnviaLote([$xmlAssinado], $idLote, $indSinc);
+
+        return $this->lastResponseXml;
+    }
+
+    public function getLastSignedXml(): ?string
+    {
+        return $this->lastSignedXml;
+    }
+
+    public function getLastResponseXml(): ?string
+    {
+        return $this->lastResponseXml;
     }
 
     /**

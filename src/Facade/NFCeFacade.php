@@ -8,7 +8,6 @@ use freeline\FiscalCore\Support\ResponseHandler;
 use freeline\FiscalCore\Support\FiscalResponse;
 use freeline\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
 use freeline\FiscalCore\Support\ToolsFactory;
-
 /**
  * Facade para NFCe - Interface simplificada com tratamento de erros
  * Evita que aplicações recebam erros 500 fornecendo responses padronizados
@@ -90,6 +89,8 @@ class NFCeFacade
             
             return [
                 'xml_response' => $result,
+                'xmlAssinado' => $this->nfce->getLastSignedXml(),
+                'xmlRetorno' => $this->nfce->getLastResponseXml() ?? $result,
                 'modelo' => 65,
                 'ambiente' => $dados['identificacao']['tpAmb'] ?? 2,
                 'chave_acesso' => $this->extrairChaveAcesso($result)
