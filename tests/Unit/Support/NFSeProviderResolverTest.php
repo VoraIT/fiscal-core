@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use freeline\FiscalCore\Support\NFSeMunicipalCatalog;
-use freeline\FiscalCore\Support\NFSeProviderResolver;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalCatalog;
+use sabbajohn\FiscalCore\Support\NFSeProviderResolver;
 use PHPUnit\Framework\TestCase;
 
 final class NFSeProviderResolverTest extends TestCase

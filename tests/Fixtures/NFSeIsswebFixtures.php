@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use freeline\FiscalCore\Support\NFSeSoapTransportInterface;
+use sabbajohn\FiscalCore\Support\NFSeSoapTransportInterface;
 
 final class NFSeIsswebFixtures
 {
@@ -39,7 +39,7 @@ final class NFSeIsswebFixtures
         $municipio = self::municipio((string) ($overrides['municipio_slug'] ?? 'presidente-figueiredo'));
 
         return array_replace_recursive([
-            'provider_class' => 'freeline\\FiscalCore\\Providers\\NFSe\\Municipal\\IsswebProvider',
+            'provider_class' => 'sabbajohn\\FiscalCore\\Providers\\NFSe\\Municipal\\IsswebProvider',
             'layout_family' => 'ISSWEB',
             'schema_root' => 'resources/nfse/schemas/ISSWEB',
             'xsd_entrypoints' => [

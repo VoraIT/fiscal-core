@@ -3,7 +3,7 @@
 namespace Tests\Unit\DTO;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\NF\DTO\PagamentoDTO;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\PagamentoDTO;
 
 class PagamentoDTOTest extends TestCase
 {

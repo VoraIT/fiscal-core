@@ -6,13 +6,13 @@ require_once dirname(__DIR__, 2) . '/Fixtures/NFSePilotPayloads.php';
 require_once dirname(__DIR__, 2) . '/Fixtures/NFSeBelemMunicipalFixtures.php';
 require_once dirname(__DIR__, 2) . '/Fixtures/NFSeJoinvilleMunicipalFixtures.php';
 
-use freeline\FiscalCore\Providers\NFSe\Municipal\BelemMunicipalProvider;
-use freeline\FiscalCore\Providers\NFSe\Municipal\PublicaProvider;
-use freeline\FiscalCore\Providers\NFSe\NacionalProvider;
-use freeline\FiscalCore\Support\NFSeSchemaResolver;
-use freeline\FiscalCore\Support\NFSeSchemaValidator;
-use freeline\FiscalCore\Support\NFSeSoapTransportInterface;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Providers\NFSe\Municipal\BelemMunicipalProvider;
+use sabbajohn\FiscalCore\Providers\NFSe\Municipal\PublicaProvider;
+use sabbajohn\FiscalCore\Providers\NFSe\NacionalProvider;
+use sabbajohn\FiscalCore\Support\NFSeSchemaResolver;
+use sabbajohn\FiscalCore\Support\NFSeSchemaValidator;
+use sabbajohn\FiscalCore\Support\NFSeSoapTransportInterface;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

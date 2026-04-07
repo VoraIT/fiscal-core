@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use freeline\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
-use freeline\FiscalCore\Support\NFSeMunicipalPayloadFactory;
-use freeline\FiscalCore\Support\NFSeMunicipalPreviewSupport;
-use freeline\FiscalCore\Support\NFSeSchemaResolver;
-use freeline\FiscalCore\Support\NFSeSchemaValidator;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalPayloadFactory;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalPreviewSupport;
+use sabbajohn\FiscalCore\Support\NFSeSchemaResolver;
+use sabbajohn\FiscalCore\Support\NFSeSchemaValidator;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

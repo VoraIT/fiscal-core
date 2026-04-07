@@ -2,12 +2,12 @@
 
 namespace Tests\Integration;
 
-use freeline\FiscalCore\Adapters\NF\NFeAdapter;
-use freeline\FiscalCore\Support\CertificateManager;
-use freeline\FiscalCore\Support\ConfigManager;
-use freeline\FiscalCore\Support\ToolsFactory;
+use sabbajohn\FiscalCore\Adapters\NF\NFeAdapter;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\ConfigManager;
+use sabbajohn\FiscalCore\Support\ToolsFactory;
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Support\XmlUtils;
+use sabbajohn\FiscalCore\Support\XmlUtils;
 /**
  * @group integration
  */

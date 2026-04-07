@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace freeline\FiscalCore\Support;
+namespace sabbajohn\FiscalCore\Support;
 
-use freeline\FiscalCore\Contracts\NFSeProviderConfigInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
 use JsonException;
 use RuntimeException;
 
@@ -258,7 +258,7 @@ class ProviderRegistry
             return $providerName;
         }
 
-        return "freeline\\FiscalCore\\Providers\\NFSe\\{$providerName}";
+        return "sabbajohn\\FiscalCore\\Providers\\NFSe\\{$providerName}";
     }
 
     private function applyMunicipioConfig(array $config, ?array $municipio): array

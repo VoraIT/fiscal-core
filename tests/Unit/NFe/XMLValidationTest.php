@@ -3,7 +3,7 @@
 namespace Tests\Unit\NFe;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Facade\NFeFacade;
+use sabbajohn\FiscalCore\Facade\NFeFacade;
 
 /**
  * Testes unitários para validação de XML NFe

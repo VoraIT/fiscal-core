@@ -23,7 +23,7 @@ Executar via facade:
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-use freeline\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
 
 $nfse = NFSeFacade::nacional();
 $ready = $nfse->verificarProntidaoHomologacao();

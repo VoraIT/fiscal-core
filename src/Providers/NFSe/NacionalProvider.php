@@ -1,11 +1,11 @@
 <?php
 
-namespace freeline\FiscalCore\Providers\NFSe;
+namespace sabbajohn\FiscalCore\Providers\NFSe;
 
-use freeline\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
-use freeline\FiscalCore\Services\NFSe\NacionalCatalogService;
-use freeline\FiscalCore\Support\Cache\FileCacheStore;
-use freeline\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
+use sabbajohn\FiscalCore\Services\NFSe\NacionalCatalogService;
+use sabbajohn\FiscalCore\Support\Cache\FileCacheStore;
+use sabbajohn\FiscalCore\Support\CertificateManager;
 use NFePHP\Common\Signer;
 
 class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapabilitiesInterface

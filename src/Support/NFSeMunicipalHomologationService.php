@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace freeline\FiscalCore\Support;
+namespace sabbajohn\FiscalCore\Support;
 
-use freeline\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
 use InvalidArgumentException;
 use NFePHP\Common\Certificate;
 use NFePHP\Common\Certificate\CertificationChain;
@@ -261,7 +261,7 @@ final class NFSeMunicipalHomologationService
             $lookup = $this->mergeRecursiveDistinct($lookup, $result);
         }
 
-        $utils = new \freeline\FiscalCore\Facade\UtilsFacade();
+        $utils = new \sabbajohn\FiscalCore\Facade\UtilsFacade();
 
         if (strlen($documento) === 14 && !$this->hasMinimumTomadorIdentity($lookup)) {
             $response = $utils->consultarCNPJ($documento);

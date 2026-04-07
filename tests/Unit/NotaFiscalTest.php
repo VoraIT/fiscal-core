@@ -3,9 +3,9 @@
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\NF\Core\NotaFiscal;
-use freeline\FiscalCore\Adapters\NF\DTO\{IdentificacaoDTO, EmitenteDTO, DestinatarioDTO};
-use freeline\FiscalCore\Adapters\NF\Nodes\{IdentificacaoNode, EmitenteNode, DestinatarioNode};
+use sabbajohn\FiscalCore\Adapters\NF\Core\NotaFiscal;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\{IdentificacaoDTO, EmitenteDTO, DestinatarioDTO};
+use sabbajohn\FiscalCore\Adapters\NF\Nodes\{IdentificacaoNode, EmitenteNode, DestinatarioNode};
 
 class NotaFiscalTest extends TestCase
 {

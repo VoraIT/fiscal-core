@@ -5,10 +5,10 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/common.php';
 
-use freeline\FiscalCore\Facade\FiscalFacade;
-use freeline\FiscalCore\Providers\NFSe\Municipal\IsswebProvider;
-use freeline\FiscalCore\Support\NFSeSoapTransportInterface;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Providers\NFSe\Municipal\IsswebProvider;
+use sabbajohn\FiscalCore\Support\NFSeSoapTransportInterface;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 
 function rioPretoDaEvaIsswebUsage(string $scriptName): string
 {

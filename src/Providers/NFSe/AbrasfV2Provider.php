@@ -1,6 +1,6 @@
 <?php
 
-namespace freeline\FiscalCore\Providers\NFSe;
+namespace sabbajohn\FiscalCore\Providers\NFSe;
 
 /**
  * Provider para municípios que seguem padrão ABRASF v2.02/v2.03

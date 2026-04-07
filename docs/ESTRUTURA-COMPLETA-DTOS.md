@@ -273,8 +273,8 @@ $this->assertEquals(100.00, $cobranca->duplicatas[0]['vDup']);
 ## 📝 Exemplo de Uso Completo
 
 ```php
-use freeline\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
-use freeline\FiscalCore\Adapters\NF\DTO\*;
+use sabbajohn\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\*;
 
 // 1. Construir NFCe completa com todos os blocos
 $nota = NotaFiscalBuilder::fromArray([

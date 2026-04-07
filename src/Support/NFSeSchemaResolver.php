@@ -1,5 +1,5 @@
 <?php 
-namespace freeline\FiscalCore\Support;
+namespace sabbajohn\FiscalCore\Support;
 
 final class NFSeSchemaResolver
 {

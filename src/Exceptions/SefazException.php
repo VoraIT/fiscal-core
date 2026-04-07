@@ -1,6 +1,6 @@
 <?php
 
-namespace freeline\FiscalCore\Exceptions;
+namespace sabbajohn\FiscalCore\Exceptions;
 
 /**
  * Exceção para erros relacionados à comunicação com SEFAZ

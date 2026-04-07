@@ -1,10 +1,10 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF\Nodes;
+namespace sabbajohn\FiscalCore\Adapters\NF\Nodes;
 
-use freeline\FiscalCore\Adapters\NF\Core\NotaNodeInterface;
-use freeline\FiscalCore\Adapters\NF\DTO\InfoAdicionalDTO;
-use freeline\FiscalCore\Adapters\NF\Helpers\StdClassBuilder;
+use sabbajohn\FiscalCore\Adapters\NF\Core\NotaNodeInterface;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\InfoAdicionalDTO;
+use sabbajohn\FiscalCore\Adapters\NF\Helpers\StdClassBuilder;
 use NFePHP\NFe\Make;
 
 /**

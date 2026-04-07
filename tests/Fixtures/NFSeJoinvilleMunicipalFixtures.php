@@ -104,7 +104,7 @@ final class NFSeJoinvilleMunicipalFixtures
 
     public static function joinvilleConfig(array $overrides = []): array
     {
-        $config = \freeline\FiscalCore\Support\ProviderRegistry::getInstance()->getConfig('PUBLICA');
+        $config = \sabbajohn\FiscalCore\Support\ProviderRegistry::getInstance()->getConfig('PUBLICA');
         $config['prestador'] = [
             'cnpj' => self::payload()['prestador']['cnpj'],
             'inscricaoMunicipal' => self::payload()['prestador']['inscricaoMunicipal'],

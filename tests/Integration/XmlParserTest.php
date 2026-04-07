@@ -3,9 +3,9 @@
 namespace Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
-use freeline\FiscalCore\Adapters\NF\XmlParser;
-use freeline\FiscalCore\Adapters\NF\Core\NotaFiscal;
+use sabbajohn\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
+use sabbajohn\FiscalCore\Adapters\NF\XmlParser;
+use sabbajohn\FiscalCore\Adapters\NF\Core\NotaFiscal;
 
 /**
  * Testes para parsing de XML e reconstrução de NotaFiscal

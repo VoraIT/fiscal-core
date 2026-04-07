@@ -1,8 +1,8 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters;
+namespace sabbajohn\FiscalCore\Adapters;
 
-use freeline\FiscalCore\Contracts\ConsultaPublicaInterface;
+use sabbajohn\FiscalCore\Contracts\ConsultaPublicaInterface;
 use BrasilApi\Client;
 
 class BrasilAPIAdapter implements ConsultaPublicaInterface

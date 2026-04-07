@@ -1,9 +1,9 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF\Nodes;
+namespace sabbajohn\FiscalCore\Adapters\NF\Nodes;
 
-use freeline\FiscalCore\Adapters\NF\Core\NotaNodeInterface;
-use freeline\FiscalCore\Adapters\NF\DTO\{IcmsDTO, PisDTO, CofinsDTO};
+use sabbajohn\FiscalCore\Adapters\NF\Core\NotaNodeInterface;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\{IcmsDTO, PisDTO, CofinsDTO};
 use NFePHP\NFe\Make;
 
 /**

@@ -6,7 +6,7 @@
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-use freeline\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
 
 $fiscal = new FiscalFacade();
 $status = $fiscal->verificarStatus();

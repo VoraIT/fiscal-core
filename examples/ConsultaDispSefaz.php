@@ -1,9 +1,9 @@
 <?php
-namespace freeline\Examples;
+namespace sabbajohn\Examples;
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use freeline\FiscalCore\Facade\NFeFacade;
-use freeline\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Facade\NFeFacade;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
 
 function consultaDispSefaz(): FiscalResponse
 {

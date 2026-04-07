@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\NFSe;
 
-use freeline\FiscalCore\Adapters\NF\NFSeAdapter;
-use freeline\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
-use freeline\FiscalCore\Contracts\NFSeProviderConfigInterface;
-use freeline\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Adapters\NF\NFSeAdapter;
+use sabbajohn\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
 use PHPUnit\Framework\TestCase;
 
 class NFSeAdapterFacadeNacionalTest extends TestCase

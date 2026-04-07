@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace freeline\FiscalCore\Renderers\NFSe;
+namespace sabbajohn\FiscalCore\Renderers\NFSe;
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use freeline\FiscalCore\Contracts\MunicipalDanfseRendererInterface;
+use sabbajohn\FiscalCore\Contracts\MunicipalDanfseRendererInterface;
 use RuntimeException;
 
 final class BelemMunicipalDanfseRenderer implements MunicipalDanfseRendererInterface

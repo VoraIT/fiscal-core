@@ -1,10 +1,10 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters;
+namespace sabbajohn\FiscalCore\Adapters;
 
-use freeline\FiscalCore\Contracts\ProdutoInterface;
-use freeline\FiscalCore\Support\CertificateManager;
-use freeline\FiscalCore\Support\ConfigManager;
+use sabbajohn\FiscalCore\Contracts\ProdutoInterface;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\ConfigManager;
 use NFePHP\Gtin\Gtin;
 use stdClass;
 

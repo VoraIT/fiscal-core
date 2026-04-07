@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use freeline\FiscalCore\Providers\NFSe\Municipal\BelemMunicipalProvider;
-use freeline\FiscalCore\Providers\NFSe\Municipal\IsswebProvider;
-use freeline\FiscalCore\Providers\NFSe\Municipal\PublicaProvider;
-use freeline\FiscalCore\Providers\NFSe\NacionalProvider;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Providers\NFSe\Municipal\BelemMunicipalProvider;
+use sabbajohn\FiscalCore\Providers\NFSe\Municipal\IsswebProvider;
+use sabbajohn\FiscalCore\Providers\NFSe\Municipal\PublicaProvider;
+use sabbajohn\FiscalCore\Providers\NFSe\NacionalProvider;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use PHPUnit\Framework\TestCase;
 
 final class ProviderRegistryTest extends TestCase

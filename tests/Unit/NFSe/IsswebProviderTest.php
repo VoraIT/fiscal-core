@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/Fixtures/NFSeIsswebFixtures.php';
 
-use freeline\FiscalCore\Providers\NFSe\Municipal\IsswebProvider;
-use freeline\FiscalCore\Support\NFSeSchemaResolver;
-use freeline\FiscalCore\Support\NFSeSchemaValidator;
+use sabbajohn\FiscalCore\Providers\NFSe\Municipal\IsswebProvider;
+use sabbajohn\FiscalCore\Support\NFSeSchemaResolver;
+use sabbajohn\FiscalCore\Support\NFSeSchemaValidator;
 use PHPUnit\Framework\TestCase;
 
 final class IsswebProviderTest extends TestCase

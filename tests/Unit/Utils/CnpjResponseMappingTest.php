@@ -3,8 +3,8 @@
 namespace Tests\Unit\Utils;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\BrasilAPIAdapter;
-use freeline\FiscalCore\Facade\UtilsFacade;
+use sabbajohn\FiscalCore\Adapters\BrasilAPIAdapter;
+use sabbajohn\FiscalCore\Facade\UtilsFacade;
 
 class CnpjResponseMappingTest extends TestCase
 {

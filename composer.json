@@ -1,5 +1,5 @@
 {
-  "name": "freeline/fiscal-core",
+  "name": "sabbajohn/fiscal-core",
   "version": "1.2.1",
   "authors": [
     {
@@ -12,7 +12,7 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "freeline\\FiscalCore\\": "src/"
+      "sabbajohn\\FiscalCore\\": "src/"
     }
   },
   "require": {

@@ -39,7 +39,7 @@ composer require fiscal/fiscal-core
   2) Instale a dependência:
   
   ```bash
-  composer require freeline/fiscal-core:@dev
+  composer require sabbajohn/fiscal-core:@dev
   ```
 
 Desenvolvimento local
@@ -220,7 +220,7 @@ file_put_contents('danfe.pdf', $danfePdf->dados);
 ### 3) **NFSe: múltiplos municípios**
 
 ```php
-use freeline\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
 
 $nfse = new NFSeFacade('joinville');
 
@@ -240,7 +240,7 @@ $consulta = $nfse->consultarPorRps([
 ### 4) **NFSe municipal pronta para uso**
 
 ```php
-use freeline\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
 
 $fiscal = new FiscalFacade();
 $nfse = $fiscal->nfse('belem');
@@ -256,7 +256,7 @@ if ($resultado->isSuccess()) {
 ### 5) **DANFSe municipal**
 
 ```php
-use freeline\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
 
 $nfse = new NFSeFacade('belem');
 $danfse = $nfse->gerarDanfse($xmlNfse);
@@ -372,7 +372,7 @@ vendor/bin/phpunit
 
 // App\Providers\AppServiceProvider.php
 use NfePHP\NFe\Tools;
-use freeline\FiscalCore\Adapters\NFeAdapter;
+use sabbajohn\FiscalCore\Adapters\NFeAdapter;
 
 public function register()
 {
@@ -482,8 +482,8 @@ vendor/bin/phpunit
 ### Gerenciamento Centralizado (Singletons)
 
 ```php
-use freeline\FiscalCore\Support\CertificateManager;
-use freeline\FiscalCore\Support\ConfigManager;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\ConfigManager;
 
 // Certificados centralizados
 $certManager = CertificateManager::getInstance();
@@ -531,7 +531,7 @@ $nfeConfig = $configManager->getNFeConfig();
 
 ### ToolsFactory
 ```php
-use freeline\FiscalCore\Support\ToolsFactory;
+use sabbajohn\FiscalCore\Support\ToolsFactory;
 
 // Setup rápido para desenvolvimento
 ToolsFactory::setupForDevelopment(['uf' => 'SP']);

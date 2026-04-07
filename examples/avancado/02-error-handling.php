@@ -8,8 +8,8 @@
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-use freeline\FiscalCore\Facade\FiscalFacade;
-use freeline\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
 
 echo "🛡️ EXEMPLO AVANÇADO: Error Handling Robusto\n";
 echo "============================================\n\n";

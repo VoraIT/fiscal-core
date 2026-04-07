@@ -1,10 +1,10 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF\NFCe;
+namespace sabbajohn\FiscalCore\Adapters\NF\NFCe;
 
-use freeline\FiscalCore\Contracts\NotaFiscalInterface;
-use freeline\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
-use freeline\FiscalCore\Adapters\NF\Core\NotaFiscal;
+use sabbajohn\FiscalCore\Contracts\NotaFiscalInterface;
+use sabbajohn\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
+use sabbajohn\FiscalCore\Adapters\NF\Core\NotaFiscal;
 use NFePHP\NFe\Tools;
 
 /**

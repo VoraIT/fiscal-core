@@ -1,8 +1,8 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters;
+namespace sabbajohn\FiscalCore\Adapters;
 
-use freeline\FiscalCore\Contracts\ImpressaoInterface;
+use sabbajohn\FiscalCore\Contracts\ImpressaoInterface;
 use NFePHP\DA\NFe\Danfe as DanfeNFe;
 use NFePHP\DA\NFe\Danfce as DanfeNFCe;
 use NFePHP\DA\MDFe\Damdfe as DanfeMdfe;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace freeline\FiscalCore\Contracts;
+namespace sabbajohn\FiscalCore\Contracts;
 
 interface MunicipalDanfseRendererInterface
 {

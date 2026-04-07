@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\DocumentoAdapter;
+use sabbajohn\FiscalCore\Adapters\DocumentoAdapter;
 
 class DocumentoAdapterTest extends TestCase
 {

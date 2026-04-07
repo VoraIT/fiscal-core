@@ -1,9 +1,9 @@
 <?php
 
-namespace freeline\FiscalCore\Tests\Unit;
+namespace sabbajohn\FiscalCore\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\NF\DTO\CobrancaDTO;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\CobrancaDTO;
 
 class CobrancaDTOTest extends TestCase
 {

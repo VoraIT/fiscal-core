@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Helpers;
 
-use freeline\FiscalCore\Adapters\NF\Helpers\StdClassBuilder;
+use sabbajohn\FiscalCore\Adapters\NF\Helpers\StdClassBuilder;
 use PHPUnit\Framework\TestCase;
 
 class StdClassBuilderTest extends TestCase

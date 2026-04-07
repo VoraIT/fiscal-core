@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Fakes;
 
-use freeline\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
-use freeline\FiscalCore\Contracts\NFSeProviderConfigInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
 
 final class FakeNfseProvider implements NFSeProviderConfigInterface, NFSeNacionalCapabilitiesInterface
 {

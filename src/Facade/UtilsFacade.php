@@ -1,10 +1,10 @@
 <?php
 
-namespace freeline\FiscalCore\Facade;
+namespace sabbajohn\FiscalCore\Facade;
 
-use freeline\FiscalCore\Adapters\BrasilAPIAdapter;
-use freeline\FiscalCore\Support\FiscalResponse;
-use freeline\FiscalCore\Support\ResponseHandler;
+use sabbajohn\FiscalCore\Adapters\BrasilAPIAdapter;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Support\ResponseHandler;
 
 /**
  * UtilsFacade - Interface para consultas públicas e utilitários

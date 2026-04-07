@@ -1,12 +1,12 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF\Nodes;
+namespace sabbajohn\FiscalCore\Adapters\NF\Nodes;
 
-use freeline\FiscalCore\Adapters\NF\Core\NotaNodeInterface;
-use freeline\FiscalCore\Adapters\NF\DTO\TransporteDTO;
+use sabbajohn\FiscalCore\Adapters\NF\Core\NotaNodeInterface;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\TransporteDTO;
 use NFePHP\NFe\Make;
 
-use freeline\FiscalCore\Adapters\NF\Helpers\StdClassBuilder;
+use sabbajohn\FiscalCore\Adapters\NF\Helpers\StdClassBuilder;
 
 /**
  * Node para dados de transporte

@@ -5,8 +5,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../homologacao/common.php';
 
-use freeline\FiscalCore\Facade\FiscalFacade;
-use freeline\FiscalCore\Support\BelemMunicipalDocumentUrlBuilder;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Support\BelemMunicipalDocumentUrlBuilder;
 
 function belemConsultaUsage(string $scriptName): string
 {
@@ -205,7 +205,7 @@ if ($consulta !== null) {
     echo $consulta->toJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . PHP_EOL;
 }
 
-if ($availability === null && (!$consulta instanceof \freeline\FiscalCore\Support\FiscalResponse || !$consulta->isSuccess())) {
+if ($availability === null && (!$consulta instanceof \sabbajohn\FiscalCore\Support\FiscalResponse || !$consulta->isSuccess())) {
     fwrite(STDERR, "Erro: a consulta nao retornou sucesso operacional.\n");
     exit(1);
 }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-use freeline\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
-use freeline\FiscalCore\Support\NFSeMunicipalPayloadFactory;
-use freeline\FiscalCore\Support\NFSeMunicipalPreviewSupport;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalPayloadFactory;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalPreviewSupport;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 
 function emitirMunicipioEmPreview(string $municipio): array
 {

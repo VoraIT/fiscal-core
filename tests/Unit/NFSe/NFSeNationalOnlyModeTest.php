@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\NFSe;
 
-use freeline\FiscalCore\Adapters\NF\NFSeAdapter;
-use freeline\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
-use freeline\FiscalCore\Contracts\NFSeProviderConfigInterface;
-use freeline\FiscalCore\Facade\NFSeFacade;
-use freeline\FiscalCore\Support\NFSeProviderResolver;
-use freeline\FiscalCore\Support\ProviderRegistry;
-use freeline\FiscalCore\Providers\NFSe\NacionalProvider;
+use sabbajohn\FiscalCore\Adapters\NF\NFSeAdapter;
+use sabbajohn\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Support\NFSeProviderResolver;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Providers\NFSe\NacionalProvider;
 use PHPUnit\Framework\TestCase;
 
 class NFSeNationalOnlyModeTest extends TestCase

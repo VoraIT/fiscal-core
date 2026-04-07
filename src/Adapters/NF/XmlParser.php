@@ -1,8 +1,8 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF;
+namespace sabbajohn\FiscalCore\Adapters\NF;
 
-use freeline\FiscalCore\Adapters\NF\DTO\{
+use sabbajohn\FiscalCore\Adapters\NF\DTO\{
     IdentificacaoDTO,
     EmitenteDTO,
     DestinatarioDTO,

@@ -1,6 +1,6 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF\Core;
+namespace sabbajohn\FiscalCore\Adapters\NF\Core;
 
 /**
  * Interface base para nós da Nota Fiscal (Composite Pattern)

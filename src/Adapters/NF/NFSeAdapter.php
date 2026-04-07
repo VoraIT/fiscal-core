@@ -1,13 +1,13 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF;
+namespace sabbajohn\FiscalCore\Adapters\NF;
 
-use freeline\FiscalCore\Contracts\NotaServicoInterface;
-use freeline\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
-use freeline\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
-use freeline\FiscalCore\Contracts\NFSeProviderConfigInterface;
-use freeline\FiscalCore\Support\NFSeProviderResolver;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Contracts\NotaServicoInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
+use sabbajohn\FiscalCore\Support\NFSeProviderResolver;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use NFePHP\Common\Certificate;
 
 class NFSeAdapter implements NotaServicoInterface

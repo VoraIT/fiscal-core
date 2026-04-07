@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-use freeline\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
-use freeline\FiscalCore\Facade\FiscalFacade;
-use freeline\FiscalCore\Facade\NFSeFacade;
-use freeline\FiscalCore\Support\NFSeMunicipalPayloadFactory;
-use freeline\FiscalCore\Support\NFSeMunicipalPreviewSupport;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalPayloadFactory;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalPreviewSupport;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 
 function previewMunicipalProvider(string $municipio): array
 {

@@ -1,15 +1,17 @@
 <?php
 
-namespace freeline\FiscalCore\Facade;
+namespace sabbajohn\FiscalCore\Facade;
 
-use freeline\FiscalCore\Adapters\NF\NFSeAdapter;
-use freeline\FiscalCore\Support\NFSeProviderResolver;
-use freeline\FiscalCore\Support\ResponseHandler;
-use freeline\FiscalCore\Support\FiscalResponse;
-use freeline\FiscalCore\Support\BelemMunicipalDocumentUrlBuilder;
-use freeline\FiscalCore\Support\MunicipalDanfseRendererResolver;
-use freeline\FiscalCore\Support\NFSeRuntimeBootstrap;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Adapters\NF\NFSeAdapter;
+use sabbajohn\FiscalCore\Support\BelemMunicipalDocumentUrlBuilder;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Support\MunicipalDanfseRendererResolver;
+use sabbajohn\FiscalCore\Support\NFSeProviderResolver;
+use sabbajohn\FiscalCore\Support\NFSeRuntimeBootstrap;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Support\ResponseHandler;
+use sabbajohn\FiscalCore\Support\XmlUtils;
 
 /**
  * Facade para NFSe - Interface simplificada e com tratamento de erros
@@ -106,6 +108,7 @@ class NFSeFacade
 
             return FiscalResponse::success([
                 'resultado' => $resultado,
+                'resultado_array' => XmlUtils::xmlToKeyValueArray($resultado),
                 'type' => 'nfse_xml',
                 'municipio' => $this->municipio,
                 'emissao' => $lastEmission,

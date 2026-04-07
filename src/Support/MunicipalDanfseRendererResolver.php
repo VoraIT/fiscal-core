@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace freeline\FiscalCore\Support;
+namespace sabbajohn\FiscalCore\Support;
 
-use freeline\FiscalCore\Contracts\MunicipalDanfseRendererInterface;
-use freeline\FiscalCore\Renderers\NFSe\BelemMunicipalDanfseRenderer;
+use sabbajohn\FiscalCore\Contracts\MunicipalDanfseRendererInterface;
+use sabbajohn\FiscalCore\Renderers\NFSe\BelemMunicipalDanfseRenderer;
 use RuntimeException;
 
 final class MunicipalDanfseRendererResolver

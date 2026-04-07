@@ -1,10 +1,10 @@
 <?php
 
-namespace freeline\FiscalCore\Support;
+namespace sabbajohn\FiscalCore\Support;
 
-use freeline\FiscalCore\Support\FiscalResponse;
-use freeline\FiscalCore\Support\ResponseHandler;
-use freeline\FiscalCore\Exceptions\ValidationException;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Support\ResponseHandler;
+use sabbajohn\FiscalCore\Exceptions\ValidationException;
 
 /**
  * Wrapper safe para ConfigManager

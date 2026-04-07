@@ -1,6 +1,6 @@
 <?php
 
-namespace freeline\FiscalCore\Support;
+namespace sabbajohn\FiscalCore\Support;
 
 /**
  * Singleton para gerenciamento de configurações fiscais

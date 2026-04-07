@@ -1,8 +1,8 @@
 <?php
 
-namespace freeline\FiscalCore\Providers\NFSe;
+namespace sabbajohn\FiscalCore\Providers\NFSe;
 
-use freeline\FiscalCore\Contracts\NFSeProviderConfigInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
 
 /**
  * Provider base abstrato para NFSe

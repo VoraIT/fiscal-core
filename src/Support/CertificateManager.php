@@ -1,6 +1,6 @@
 <?php
 
-namespace freeline\FiscalCore\Support;
+namespace sabbajohn\FiscalCore\Support;
 
 use NFePHP\Common\Certificate;
 use NFePHP\Common\Certificate\CertificationChain;

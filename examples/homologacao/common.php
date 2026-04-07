@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use freeline\FiscalCore\Support\NFSeMunicipalHomologationService;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalHomologationService;
 
 function nfseMunicipalEnvValue(string $key): ?string
 {

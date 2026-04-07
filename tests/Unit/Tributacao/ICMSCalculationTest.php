@@ -3,7 +3,7 @@
 namespace Tests\Unit\Tributacao;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Facade\TributacaoFacade;
+use sabbajohn\FiscalCore\Facade\TributacaoFacade;
 
 /**
  * Testes unitários para cálculos de ICMS

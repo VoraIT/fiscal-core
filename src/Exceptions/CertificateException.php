@@ -1,6 +1,6 @@
 <?php
 
-namespace freeline\FiscalCore\Exceptions;
+namespace sabbajohn\FiscalCore\Exceptions;
 
 /**
  * Exceção para problemas relacionados a certificados digitais

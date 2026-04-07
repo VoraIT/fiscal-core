@@ -1,8 +1,8 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\NFSe\ProviderRegistry;
-use freeline\FiscalCore\NFSe\DefaultProviderRegistrar;
+use sabbajohn\FiscalCore\NFSe\ProviderRegistry;
+use sabbajohn\FiscalCore\NFSe\DefaultProviderRegistrar;
 
 class DefaultProviderRegistrarTest extends TestCase
 {

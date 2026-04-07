@@ -1,6 +1,6 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF\Core;
+namespace sabbajohn\FiscalCore\Adapters\NF\Core;
 
 use NFePHP\NFe\Make;
 

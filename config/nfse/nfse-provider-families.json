@@ -1,6 +1,6 @@
 {
     "BELEM_MUNICIPAL_2025": {
-        "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\Municipal\\BelemMunicipalProvider",
+        "provider_class": "sabbajohn\\FiscalCore\\Providers\\NFSe\\Municipal\\BelemMunicipalProvider",
         "layout_family": "ABRASF_203",
         "schema_root": "resources/nfse/schemas/BELEM_MUNICIPAL_2025",
         "xsd_entrypoints": {
@@ -34,7 +34,7 @@
         "source": "custom_override"
     },
     "DSF": {
-        "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\Municipal\\DsfProvider",
+        "provider_class": "sabbajohn\\FiscalCore\\Providers\\NFSe\\Municipal\\DsfProvider",
         "layout_family": "LEGACY_ALIAS",
         "schema_root": "resources/nfse/schemas/BELEM_MUNICIPAL_2025",
         "xsd_entrypoints": {
@@ -67,7 +67,7 @@
         "source": "legacy_alias"
     },
     "MANAUS_AM": {
-        "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\Municipal\\ManausAmProvider",
+        "provider_class": "sabbajohn\\FiscalCore\\Providers\\NFSe\\Municipal\\ManausAmProvider",
         "layout_family": "MANAUS_AM",
         "schema_root": "resources/nfse/schemas/MANAUS_AM",
         "xsd_entrypoints": {
@@ -84,7 +84,7 @@
         "wsdl": ""
     },
     "ISSWEB_AM": {
-        "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\Municipal\\IsswebProvider",
+        "provider_class": "sabbajohn\\FiscalCore\\Providers\\NFSe\\Municipal\\IsswebProvider",
         "layout_family": "ISSWEB",
         "schema_root": "resources/nfse/schemas/ISSWEB",
         "xsd_entrypoints": {
@@ -115,7 +115,7 @@
         "source": "custom_override"
     },
     "PUBLICA": {
-        "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\Municipal\\PublicaProvider",
+        "provider_class": "sabbajohn\\FiscalCore\\Providers\\NFSe\\Municipal\\PublicaProvider",
         "layout_family": "PUBLICA",
         "schema_root": "resources/nfse/schemas/PUBLICA",
         "xsd_entrypoints": {
@@ -147,7 +147,7 @@
         "source": "custom_override"
     },
     "nfse_nacional": {
-        "provider_class": "freeline\\FiscalCore\\Providers\\NFSe\\NacionalProvider",
+        "provider_class": "sabbajohn\\FiscalCore\\Providers\\NFSe\\NacionalProvider",
         "layout_family": "NACIONAL",
         "transport": "rest",
         "codigo_municipio": "1001058",

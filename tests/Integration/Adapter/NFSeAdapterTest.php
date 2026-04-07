@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use freeline\FiscalCore\Adapters\NF\NFSeAdapter;
+use sabbajohn\FiscalCore\Adapters\NF\NFSeAdapter;
 use PHPUnit\Framework\TestCase;
 
 final class NFSeAdapterTest extends TestCase

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use freeline\FiscalCore\Support\NFSeMunicipalCatalog;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalCatalog;
 use PHPUnit\Framework\TestCase;
 
 final class NFSeMunicipalCatalogTest extends TestCase

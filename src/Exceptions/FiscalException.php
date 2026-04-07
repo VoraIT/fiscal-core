@@ -1,6 +1,6 @@
 <?php
 
-namespace freeline\FiscalCore\Exceptions;
+namespace sabbajohn\FiscalCore\Exceptions;
 
 /**
  * Exception base para todas as exceções do sistema fiscal

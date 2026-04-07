@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-namespace freeline\FiscalCore\Providers\NFSe;
+namespace sabbajohn\FiscalCore\Providers\NFSe;
 
-class JoinvilleProvider extends \freeline\FiscalCore\Providers\NFSe\Municipal\JoinvilleProvider
+class JoinvilleProvider extends \sabbajohn\FiscalCore\Providers\NFSe\Municipal\JoinvilleProvider
 {
 }

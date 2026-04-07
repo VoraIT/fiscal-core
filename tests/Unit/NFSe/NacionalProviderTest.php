@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\NFSe;
 
-use freeline\FiscalCore\Providers\NFSe\NacionalProvider;
+use sabbajohn\FiscalCore\Providers\NFSe\NacionalProvider;
 use PHPUnit\Framework\TestCase;
 
 class NacionalProviderTest extends TestCase

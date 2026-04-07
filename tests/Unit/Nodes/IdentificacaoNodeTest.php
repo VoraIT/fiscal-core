@@ -3,8 +3,8 @@
 namespace Tests\Unit\Nodes;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\NF\Nodes\IdentificacaoNode;
-use freeline\FiscalCore\Adapters\NF\DTO\IdentificacaoDTO;
+use sabbajohn\FiscalCore\Adapters\NF\Nodes\IdentificacaoNode;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\IdentificacaoDTO;
 
 class IdentificacaoNodeTest extends TestCase
 {

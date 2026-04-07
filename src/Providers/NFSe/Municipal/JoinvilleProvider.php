@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace freeline\FiscalCore\Providers\NFSe\Municipal;
+namespace sabbajohn\FiscalCore\Providers\NFSe\Municipal;
 
 /**
  * Alias de compatibilidade para Joinville/SC.

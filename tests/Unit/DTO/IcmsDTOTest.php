@@ -3,7 +3,7 @@
 namespace Tests\Unit\DTO;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\NF\DTO\IcmsDTO;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\IcmsDTO;
 
 class IcmsDTOTest extends TestCase
 {

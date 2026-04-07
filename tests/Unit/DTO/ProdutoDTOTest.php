@@ -3,7 +3,7 @@
 namespace Tests\Unit\DTO;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\NF\DTO\ProdutoDTO;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\ProdutoDTO;
 
 class ProdutoDTOTest extends TestCase
 {

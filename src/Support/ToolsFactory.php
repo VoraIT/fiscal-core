@@ -1,14 +1,14 @@
 <?php
 
-namespace freeline\FiscalCore\Support;
+namespace sabbajohn\FiscalCore\Support;
 
 use NFePHP\NFe\Tools as NFeTools;
 use NFePHP\DA\NFe\Danfe as DanfeNFe;
 use NFePHP\DA\NFe\Danfe as DanfeNFCe;
-use freeline\FiscalCore\Support\FiscalResponse;
-use freeline\FiscalCore\Support\ResponseHandler;
-use freeline\FiscalCore\Exceptions\CertificateException;
-use freeline\FiscalCore\Exceptions\ValidationException;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Support\ResponseHandler;
+use sabbajohn\FiscalCore\Exceptions\CertificateException;
+use sabbajohn\FiscalCore\Exceptions\ValidationException;
 
 /**
  * Factory para criação de Tools NFePHP com configuração centralizada

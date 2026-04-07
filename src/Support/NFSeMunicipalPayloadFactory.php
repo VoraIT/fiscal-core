@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace freeline\FiscalCore\Support;
+namespace sabbajohn\FiscalCore\Support;
 
 use InvalidArgumentException;
 use NFePHP\Common\Certificate;

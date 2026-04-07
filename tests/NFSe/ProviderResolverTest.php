@@ -1,9 +1,9 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\NFSe\ProviderRegistry;
-use freeline\FiscalCore\NFSe\ProviderResolver;
-use freeline\FiscalCore\Contracts\NFSeProviderInterface;
+use sabbajohn\FiscalCore\NFSe\ProviderRegistry;
+use sabbajohn\FiscalCore\NFSe\ProviderResolver;
+use sabbajohn\FiscalCore\Contracts\NFSeProviderInterface;
 
 class ProviderResolverTest extends TestCase
 {

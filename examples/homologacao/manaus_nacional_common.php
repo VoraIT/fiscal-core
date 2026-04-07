@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use freeline\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
 
 function manausNacionalApplyEnvOverrides(string $projectRoot): void
 {
@@ -165,7 +165,7 @@ function manausNacionalBuildPayload(array $options): array
     ];
 }
 
-function manausNacionalFacade(): \freeline\FiscalCore\Facade\NFSeFacade
+function manausNacionalFacade(): \sabbajohn\FiscalCore\Facade\NFSeFacade
 {
     $fiscal = new FiscalFacade();
     return $fiscal->nfse('manaus');

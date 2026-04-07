@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\NFSe;
 
-use freeline\FiscalCore\Services\NFSe\NacionalCatalogService;
-use freeline\FiscalCore\Support\Cache\FileCacheStore;
+use sabbajohn\FiscalCore\Services\NFSe\NacionalCatalogService;
+use sabbajohn\FiscalCore\Support\Cache\FileCacheStore;
 use PHPUnit\Framework\TestCase;
 
 class NacionalCatalogServiceTest extends TestCase
