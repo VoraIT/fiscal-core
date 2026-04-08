@@ -82,7 +82,39 @@
             "ibge": "1303536",
             "homologado": false,
             "active": true,
-            "provider_note": "Município preparado para integração municipal via família compartilhada ISSWEB_AM."
+            "provider_note": "Município preparado para integração municipal via família compartilhada ISSWEB_AM.",
+            "provider_config_overrides": {
+                "official_validation_url_template": "https://servicosweb.pmpf.am.gov.br/issweb/validacao?numero={numero}&chave={chave_validacao}"
+            },
+            "payload_defaults": {
+                "rps": {
+                    "numero": "123"
+                },
+                "tomador": {
+                    "razao_social": "Cliente Presidente Figueiredo Ltda",
+                    "email": "financeiro@example.com",
+                    "endereco": {
+                        "logradouro": "Avenida Amazonas",
+                        "bairro": "Centro",
+                        "codigo_municipio": "1303536",
+                        "uf": "AM",
+                        "cep": "69735-000",
+                        "municipio": "Presidente Figueiredo"
+                    }
+                },
+                "servico": {
+                    "codigo": "101",
+                    "descricao": "Servico de homologacao ISSWEB para Presidente Figueiredo.",
+                    "discriminacao": "Servico de homologacao ISSWEB para Presidente Figueiredo.",
+                    "tipo_documento": "001",
+                    "local_prestacao": {
+                        "tipo": "1",
+                        "uf": "AM",
+                        "codigo_municipio": "1303536",
+                        "cep": "69735-000"
+                    }
+                }
+            }
         },
         "1303569": {
             "slug": "rio-preto-da-eva",
@@ -93,7 +125,36 @@
             "ibge": "1303569",
             "homologado": false,
             "active": true,
-            "provider_note": "Hipótese atual de integração municipal via ISSWEB, pendente de validação oficial."
+            "provider_note": "Hipótese atual de integração municipal via ISSWEB, pendente de validação oficial.",
+            "payload_defaults": {
+                "rps": {
+                    "numero": "123"
+                },
+                "tomador": {
+                    "razao_social": "Cliente Rio Preto da Eva Ltda",
+                    "email": "financeiro@example.com",
+                    "endereco": {
+                        "logradouro": "Avenida Governador Gilberto Mestrinho",
+                        "bairro": "Centro",
+                        "codigo_municipio": "1303569",
+                        "uf": "AM",
+                        "cep": "69117-000",
+                        "municipio": "Rio Preto da Eva"
+                    }
+                },
+                "servico": {
+                    "codigo": "101",
+                    "descricao": "Servico de homologacao ISSWEB para Rio Preto da Eva.",
+                    "discriminacao": "Servico de homologacao ISSWEB para Rio Preto da Eva.",
+                    "tipo_documento": "001",
+                    "local_prestacao": {
+                        "tipo": "1",
+                        "uf": "AM",
+                        "codigo_municipio": "1303569",
+                        "cep": "69117-000"
+                    }
+                }
+            }
         },
         "1400100": {
             "slug": "boa-vista",
@@ -124,7 +185,10 @@
             "ibge": "1501402",
             "homologado": false,
             "active": true,
-            "provider_note": "Belém migrado para provider municipal atual; override local sobre catálogo UniNFe."
+            "provider_note": "Belém migrado para provider municipal atual; override local sobre catálogo UniNFe.",
+            "provider_config_overrides": {
+                "requires_explicit_mei_classification": true
+            }
         },
         "1502152": {
             "slug": "canaa-dos-carajas",
@@ -4034,7 +4098,13 @@
             "schema_package": "PUBLICA",
             "ibge": "4209102",
             "homologado": false,
-            "active": true
+            "active": true,
+            "payload_defaults": {
+                "servico": {
+                    "descricao": "Desenvolvimento e licenciamento de software para homologacao de Joinville.",
+                    "discriminacao": "Desenvolvimento e licenciamento de software para homologacao de Joinville."
+                }
+            }
         },
         "4209300": {
             "slug": "lages",

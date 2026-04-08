@@ -180,6 +180,13 @@ final class NFSeMunicipalCatalog
             'schema_package' => (string) ($m['schema_package'] ?? ($m['provider_family'] ?? '')),
             'homologado' => (bool) ($m['homologado'] ?? false),
             'active' => (bool) ($m['active'] ?? true),
+            'provider_note' => (string) ($m['provider_note'] ?? ''),
+            'provider_config_overrides' => is_array($m['provider_config_overrides'] ?? null)
+                ? $m['provider_config_overrides']
+                : [],
+            'payload_defaults' => is_array($m['payload_defaults'] ?? null)
+                ? $m['payload_defaults']
+                : [],
             'display_name' => sprintf(
                 '%s/%s',
                 (string) ($m['nome'] ?? ''),

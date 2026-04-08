@@ -130,6 +130,8 @@ php examples/avancado/03-emissao-municipal-funcional.php
 php examples/avancado/02-error-handling.php
 
 # Homologação municipal segura
+php scripts/nfse/scaffold-family.php --family=MINHA_FAMILIA --dry-run
+php scripts/nfse/scaffold-municipio.php --ibge=1303536 --dry-run
 php examples/homologacao/01-emitir-belem-real.php
 php examples/homologacao/02-emitir-joinville-real.php
 php examples/homologacao/03-emitir-belem-completo.php
@@ -180,8 +182,13 @@ export IBPT_UF="SP"
 - O catálogo municipal atual está em `config/nfse/`
 - `FISCAL_IM` continua obrigatório para emissões municipais reais
 - A consulta pública de CNPJ ajuda com razão social/contato/endereço, mas não fornece inscrição municipal
+- `provider_config_overrides` no catálogo aplica merge sobre a família técnica no runtime
+- `payload_defaults` no catálogo acelera exemplos e homologação sem duplicar a família
+- Emissão classificada como MEI usa sempre o provider nacional
 - Para Belém, o DANFSe é disponibilizado pela prefeitura em URL oficial; a biblioteca retorna status/disponibilidade e a `danfse_url`
 - O playbook canônico para implementação municipal está em [docs/NFSE-MUNICIPAL-PROVIDER-PLAYBOOK.md](docs/NFSE-MUNICIPAL-PROVIDER-PLAYBOOK.md)
+- A migração de município municipal para nacional está em [docs/NFSE-MIGRACAO-MUNICIPAL-PARA-NACIONAL.md](docs/NFSE-MIGRACAO-MUNICIPAL-PARA-NACIONAL.md)
+- A matriz operacional de famílias e providers está em [docs/NFSE-PROVIDER-MATRIX.md](docs/NFSE-PROVIDER-MATRIX.md)
 
 ## Uso Detalhado
 

@@ -106,6 +106,7 @@ echo PHP_EOL;
 echo "4. Observacoes\n";
 echo "--------------\n";
 echo "- Este exemplo usa payloads validos por provider e transporte mockado.\n";
-echo "- Belem exige classificacao explicita de nao-MEI no payload municipal.\n";
+echo "- Emissao classificada como MEI segue automaticamente pelo provider nacional.\n";
+echo "- Alguns municipios ainda exigem classificacao explicita de MEI no payload para evitar ambiguidade.\n";
 echo "- Joinville exige codigo_municipio e aliquota coerentes no servico.\n";
 echo "- Para envio real em homologacao, use os scripts em examples/homologacao/.\n";

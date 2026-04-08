@@ -26,11 +26,15 @@ Cada entrada informa:
 - `schema_package`
 - `ibge`
 - `active`
+- `provider_config_overrides` opcional
+- `payload_defaults` opcional
 
 Regras praticas:
 
 - `provider_family` precisa apontar para uma chave existente em `nfse-provider-families.json`
 - `schema_package` pode permanecer diferente da chave do provider quando o layout tecnico for compartilhado
+- `provider_config_overrides` aplica merge recursivo sobre a familia no `ProviderRegistry`
+- `payload_defaults` serve para exemplos/homologacao e nao substitui a configuracao operacional da familia
 - overrides locais devem aparecer tambem em `config/nfse/nfse-catalog-manifest.json`
 
 ### `config/nfse/nfse-provider-families.json`
@@ -62,6 +66,13 @@ No caso de `nfse_nacional`, este arquivo tambem concentra:
 - `nfse_nacional`: provider REST canonico do ambiente nacional
 - `BELEM_MUNICIPAL_2025`: override municipal especifico
 - `ISSWEB_AM`: familia compartilhada usada por Presidente Figueiredo e Rio Preto da Eva
+- `PUBLICA`: familia compartilhada com defaults municipais leves em Joinville
+
+## Politica global de MEI
+
+- emissao classificada como MEI usa sempre `nfse_nacional`
+- a classificacao continua vindo do payload do prestador
+- municipios que exigem classificacao explicita devem declarar isso em config via `requires_explicit_mei_classification`
 
 ## Manaus
 
@@ -74,7 +85,8 @@ No caso de `nfse_nacional`, este arquivo tambem concentra:
 1. Atualize o municipio em `config/nfse/providers-catalog.json`.
 2. Garanta que a `provider_family` exista em `config/nfse/nfse-provider-families.json`.
 3. Se houver override manual, sincronize `config/nfse/nfse-catalog-manifest.json`.
-4. Rode os testes de resolver, registry, adapter e facade NFSe.
+4. Se houver scaffold novo, use `scripts/nfse/scaffold-municipio.php` e `scripts/nfse/scaffold-family.php`.
+5. Rode os testes de resolver, registry, adapter e facade NFSe.
 
 ## Observacao sobre legado
 

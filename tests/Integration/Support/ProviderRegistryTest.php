@@ -45,6 +45,10 @@ final class ProviderRegistryTest extends TestCase
         $provider = $registry->getByMunicipio('presidente-figueiredo');
 
         $this->assertInstanceOf(IsswebProvider::class, $provider);
+        $this->assertSame(
+            'https://servicosweb.pmpf.am.gov.br/issweb/validacao?numero={numero}&chave={chave_validacao}',
+            $provider->getConfig()['official_validation_url_template'] ?? null
+        );
     }
 
     public function testGetByMunicipioRioPretoDaEvaReturnsIsswebProvider(): void
@@ -55,6 +59,23 @@ final class ProviderRegistryTest extends TestCase
 
         $this->assertInstanceOf(IsswebProvider::class, $provider);
         $this->assertSame('1303569', $provider->getCodigoMunicipio());
+    }
+
+    public function testGetConfigForMunicipioAppliesMunicipalOverridesWithoutAffectingSharedFamily(): void
+    {
+        $registry = ProviderRegistry::getInstance();
+
+        $presidente = $registry->getConfigForMunicipio('presidente-figueiredo');
+        $rioPreto = $registry->getConfigForMunicipio('rio-preto-da-eva');
+
+        $this->assertSame('1303536', $presidente['codigo_municipio']);
+        $this->assertSame('1303569', $rioPreto['codigo_municipio']);
+        $this->assertArrayHasKey('payload_defaults', $presidente);
+        $this->assertSame(
+            'https://servicosweb.pmpf.am.gov.br/issweb/validacao?numero={numero}&chave={chave_validacao}',
+            $presidente['official_validation_url_template'] ?? null
+        );
+        $this->assertArrayNotHasKey('official_validation_url_template', $rioPreto);
     }
 
     public function testGetByUnknownMunicipioReturnsNacionalProvider(): void

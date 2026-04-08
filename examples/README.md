@@ -57,6 +57,8 @@ php examples/avancado/02-error-handling.php
 php examples/avancado/03-emissao-municipal-funcional.php
 
 # Scripts de homologação municipal
+php scripts/nfse/scaffold-family.php --family=MINHA_FAMILIA --dry-run
+php scripts/nfse/scaffold-municipio.php --ibge=1303536 --dry-run
 php examples/homologacao/01-emitir-belem-real.php
 php examples/homologacao/02-emitir-joinville-real.php
 php examples/homologacao/03-emitir-belem-completo.php
@@ -147,6 +149,10 @@ export IBPT_UF="SP"
 - O enrich por CNPJ não substitui `FISCAL_IM`
 - Os scripts de homologação usam preview por padrão e só enviam com `--send`
 - O script de produção de Belém também usa preview por padrão e só envia com `--send`
+- Use `scripts/nfse/scaffold-family.php` e `scripts/nfse/scaffold-municipio.php` para acelerar novas integrações
+- `provider_config_overrides` no catálogo serve para diferenças leves de município sobre a mesma família
+- `payload_defaults` no catálogo serve para defaults de preview/homologação por município
+- Emissão classificada como MEI usa sempre o provider nacional
 - Em Belém, o acesso ao DANFSe segue a URL oficial da prefeitura; a biblioteca expõe disponibilidade e metadados para polling externo
 - Para Manaus, use os scripts `04` e `05` em homologação com fatos geradores a partir de `2026-01-01`
 - Para Presidente Figueiredo e Rio Preto da Eva, use `NFSE_ISSWEB_CHAVE` e confirme os endpoints reais antes de homologar com `--send`

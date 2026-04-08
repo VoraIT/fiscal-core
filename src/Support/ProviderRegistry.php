@@ -270,8 +270,39 @@ class ProviderRegistry
         $config['codigo_municipio'] = (string) ($municipio['ibge'] ?? $config['codigo_municipio'] ?? '');
         $config['municipio_nome'] = (string) ($municipio['nome'] ?? $config['municipio_nome'] ?? '');
         $config['municipio_uf'] = (string) ($municipio['uf'] ?? $config['municipio_uf'] ?? '');
+        $config['municipio_slug'] = (string) ($municipio['slug'] ?? $config['municipio_slug'] ?? '');
+        $config['schema_package'] = (string) ($municipio['schema_package'] ?? $config['schema_package'] ?? '');
+
+        if (trim((string) ($municipio['provider_note'] ?? '')) !== '') {
+            $config['provider_note'] = (string) $municipio['provider_note'];
+        }
+
+        if (is_array($municipio['payload_defaults'] ?? null) && $municipio['payload_defaults'] !== []) {
+            $config['payload_defaults'] = $this->mergeRecursiveDistinct(
+                is_array($config['payload_defaults'] ?? null) ? $config['payload_defaults'] : [],
+                $municipio['payload_defaults']
+            );
+        }
+
+        if (is_array($municipio['provider_config_overrides'] ?? null) && $municipio['provider_config_overrides'] !== []) {
+            $config = $this->mergeRecursiveDistinct($config, $municipio['provider_config_overrides']);
+        }
 
         return $config;
+    }
+
+    private function mergeRecursiveDistinct(array $base, array $overrides): array
+    {
+        foreach ($overrides as $key => $value) {
+            if (is_array($value) && isset($base[$key]) && is_array($base[$key])) {
+                $base[$key] = $this->mergeRecursiveDistinct($base[$key], $value);
+                continue;
+            }
+
+            $base[$key] = $value;
+        }
+
+        return $base;
     }
 
     private function __clone(): void

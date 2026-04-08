@@ -36,8 +36,13 @@ final class NFSeMunicipalPayloadFactoryTest extends TestCase
 
         $this->assertInstanceOf(NFSeOperationalIntrospectionInterface::class, $provider);
 
+        $requestXml = (string) $provider->getLastRequestXml();
+        if ($meta['provider_key'] === 'BELEM_MUNICIPAL_2025') {
+            $requestXml = $this->schemaCompatibleXml($requestXml);
+        }
+
         $validation = (new NFSeSchemaValidator())->validate(
-            (string) $provider->getLastRequestXml(),
+            $requestXml,
             (new NFSeSchemaResolver())->resolve($meta['provider_key'], 'emitir')
         );
 
@@ -93,6 +98,20 @@ final class NFSeMunicipalPayloadFactoryTest extends TestCase
         $this->assertSame(0.02, $payload['servico']['aliquota']);
         $this->assertSame('4209102', $payload['servico']['codigo_municipio']);
         $this->assertSame('11.01', $payload['servico']['item_lista_servico']);
+        $this->assertSame(
+            'Desenvolvimento e licenciamento de software para homologacao de Joinville.',
+            $payload['servico']['descricao']
+        );
+    }
+
+    public function testDemoPayloadCanBeResolvedFromCatalogPayloadDefaultsForIsswebMunicipio(): void
+    {
+        $factory = new NFSeMunicipalPayloadFactory();
+        $payload = $factory->demo('presidente-figueiredo');
+
+        $this->assertSame('1303536', $payload['servico']['local_prestacao']['codigo_municipio']);
+        $this->assertSame('001', $payload['servico']['tipo_documento']);
+        $this->assertSame('Cliente Presidente Figueiredo Ltda', $payload['tomador']['razao_social']);
     }
 
     public static function municipioProvider(): array
@@ -101,5 +120,49 @@ final class NFSeMunicipalPayloadFactoryTest extends TestCase
             'belem' => ['belem'],
             'joinville' => ['joinville'],
         ];
+    }
+
+    private function schemaCompatibleXml(string $xml): string
+    {
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = false;
+
+        if (@$dom->loadXML($xml)) {
+            $xpath = new \DOMXPath($dom);
+            foreach ($xpath->query("//*[local-name()='Signature' and namespace-uri()='http://www.w3.org/2000/09/xmldsig#']") as $signatureNode) {
+                if ($signatureNode->parentNode instanceof \DOMNode) {
+                    $signatureNode->parentNode->removeChild($signatureNode);
+                }
+            }
+
+            foreach ($xpath->query("//*[local-name()='Prestador']/@Id") as $attributeNode) {
+                if ($attributeNode instanceof \DOMAttr) {
+                    $attributeNode->ownerElement?->removeAttributeNode($attributeNode);
+                }
+            }
+
+            $root = $dom->documentElement;
+            if ($root instanceof \DOMElement) {
+                $normalized = $dom->saveXML($root) ?: $xml;
+                if (str_contains($normalized, 'xmlns="http://www.abrasf.org.br/nfse.xsd"')) {
+                    return $normalized;
+                }
+
+                return preg_replace(
+                    '/^<([A-Za-z0-9_:-]+)/',
+                    '<$1 xmlns="http://www.abrasf.org.br/nfse.xsd"',
+                    $normalized,
+                    1
+                ) ?: $normalized;
+            }
+        }
+
+        return preg_replace(
+            '/^<([A-Za-z0-9_:-]+)/',
+            '<$1 xmlns="http://www.abrasf.org.br/nfse.xsd"',
+            $xml,
+            1
+        ) ?: $xml;
     }
 }

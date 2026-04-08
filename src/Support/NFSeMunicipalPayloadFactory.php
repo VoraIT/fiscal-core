@@ -9,9 +9,15 @@ use NFePHP\Common\Certificate;
 
 final class NFSeMunicipalPayloadFactory
 {
+    public function __construct(
+        private readonly ?NFSeMunicipalCatalog $catalog = null
+    ) {
+    }
+
     public function demo(string $municipio): array
     {
-        return match ($this->normalizeMunicipio($municipio)) {
+        $meta = $this->providerMeta($municipio);
+        $base = match ($meta['slug']) {
             'belem' => [
                 'id' => 'RPS-BELEM-2026-1',
                 'lote' => [
@@ -109,8 +115,10 @@ final class NFSeMunicipalPayloadFactory
                 ],
                 'valor_servicos' => 1500.00,
             ],
-            default => throw new InvalidArgumentException("Município '{$municipio}' não suportado para payload demo."),
+            default => $this->buildGenericDemoPayload($meta),
         };
+
+        return $this->mergeRecursiveDistinct($base, $meta['payload_defaults']);
     }
 
     public function buildPrestador(string $municipio, Certificate $certificate, array $empresaConfig, array $options = []): array
@@ -151,7 +159,11 @@ final class NFSeMunicipalPayloadFactory
                 'simples_nacional' => $simples,
                 'incentivador_cultural' => false,
             ],
-            default => throw new InvalidArgumentException("Município '{$municipio}' não suportado para prestador."),
+            default => $base + [
+                'simples_nacional' => $simples,
+                'regime_tributario' => $simples ? 'simples nacional' : 'normal',
+                'mei' => $this->toBool($options['mei'] ?? false),
+            ],
         };
     }
 
@@ -184,7 +196,7 @@ final class NFSeMunicipalPayloadFactory
         $meta = $this->providerMeta($municipio);
         $today = new \DateTimeImmutable('now');
 
-        $base = match ($this->normalizeMunicipio($municipio)) {
+        $base = match ($meta['slug']) {
             'belem' => [
                 'id' => sprintf('RPS-BELEM-%s-1', $today->format('YmdHis')),
                 'lote' => [
@@ -239,31 +251,135 @@ final class NFSeMunicipalPayloadFactory
                 ],
                 'valor_servicos' => 1500.00,
             ],
-            default => throw new InvalidArgumentException("Município '{$municipio}' não suportado para payload real."),
+            default => $this->buildGenericRealPayload($meta, $prestador, $tomador, $today),
         };
+
+        $base = $this->mergeRecursiveDistinct($base, $meta['payload_defaults']);
+        $base['prestador'] = $this->mergeRecursiveDistinct(
+            is_array($base['prestador'] ?? null) ? $base['prestador'] : [],
+            $prestador
+        );
+        $base['tomador'] = $this->mergeRecursiveDistinct(
+            is_array($base['tomador'] ?? null) ? $base['tomador'] : [],
+            $tomador
+        );
 
         return $this->mergeRecursiveDistinct($base, $overrides);
     }
 
     public function providerMeta(string $municipio): array
     {
-        return match ($this->normalizeMunicipio($municipio)) {
-            'belem' => [
-                'slug' => 'belem',
-                'nome' => 'Belem',
-                'codigo_municipio' => '1501402',
-                'uf' => 'PA',
-                'provider_key' => 'BELEM_MUNICIPAL_2025',
+        $resolved = $this->catalog()->resolveMunicipio($municipio);
+        if ($resolved === null) {
+            throw new InvalidArgumentException("Município '{$municipio}' não suportado.");
+        }
+
+        return [
+            'slug' => (string) $resolved['slug'],
+            'nome' => (string) $resolved['nome'],
+            'codigo_municipio' => (string) $resolved['ibge'],
+            'uf' => (string) $resolved['uf'],
+            'provider_key' => (string) $resolved['provider_family_key'],
+            'schema_package' => (string) $resolved['schema_package'],
+            'provider_note' => (string) ($resolved['provider_note'] ?? ''),
+            'payload_defaults' => is_array($resolved['payload_defaults'] ?? null)
+                ? $resolved['payload_defaults']
+                : [],
+        ];
+    }
+
+    private function buildGenericDemoPayload(array $meta): array
+    {
+        $slugToken = strtoupper(str_replace('-', '', $meta['slug']));
+
+        $base = [
+            'id' => sprintf('%s-RPS-2026-1', $slugToken),
+            'rps' => [
+                'numero' => '1001',
+                'serie' => 'RPS',
+                'tipo' => '1',
+                'data_emissao' => '2026-03-20',
+                'status' => '1',
             ],
-            'joinville' => [
-                'slug' => 'joinville',
-                'nome' => 'Joinville',
-                'codigo_municipio' => '4209102',
-                'uf' => 'SC',
-                'provider_key' => 'PUBLICA',
+            'competencia' => '2026-03-20',
+            'prestador' => [
+                'cnpj' => '12345678000195',
+                'inscricaoMunicipal' => '123456',
+                'razao_social' => 'Freeline Servicos Digitais Ltda',
+                'simples_nacional' => true,
+                'regime_tributario' => 'simples nacional',
+                'mei' => false,
+                'codigo_municipio' => $meta['codigo_municipio'],
             ],
-            default => throw new InvalidArgumentException("Município '{$municipio}' não suportado."),
-        };
+            'tomador' => [
+                'documento' => '98765432000199',
+                'razao_social' => 'Tomador de Homologacao Ltda',
+                'email' => 'financeiro@example.com',
+                'telefone' => '(11) 99999-0000',
+                'endereco' => [
+                    'logradouro' => 'Rua de Homologacao',
+                    'numero' => '100',
+                    'bairro' => 'Centro',
+                    'codigo_municipio' => $meta['codigo_municipio'],
+                    'uf' => $meta['uf'],
+                    'cep' => '69000000',
+                    'municipio' => $meta['nome'],
+                ],
+            ],
+            'servico' => [
+                'codigo' => '101',
+                'descricao' => 'Servico de homologacao NFSe.',
+                'discriminacao' => 'Servico de homologacao NFSe.',
+                'codigo_municipio' => $meta['codigo_municipio'],
+                'aliquota' => 0.02,
+                'iss_retido' => false,
+            ],
+            'valor_servicos' => 150.00,
+        ];
+
+        if (($meta['payload_defaults'] ?? []) === []) {
+            throw new InvalidArgumentException(
+                "Município '{$meta['slug']}' não possui payload demo canonizado; defina payload_defaults no catálogo."
+            );
+        }
+
+        return $base;
+    }
+
+    private function buildGenericRealPayload(
+        array $meta,
+        array $prestador,
+        array $tomador,
+        \DateTimeImmutable $today
+    ): array {
+        if (($meta['payload_defaults'] ?? []) === []) {
+            throw new InvalidArgumentException(
+                "Município '{$meta['slug']}' não possui payload real canonizado; defina payload_defaults no catálogo."
+            );
+        }
+
+        return [
+            'id' => sprintf('%s-RPS-%s', strtoupper(str_replace('-', '', $meta['slug'])), $today->format('YmdHis')),
+            'rps' => [
+                'numero' => $today->format('His'),
+                'serie' => 'RPS',
+                'tipo' => '1',
+                'data_emissao' => $today->format('Y-m-d'),
+                'status' => '1',
+            ],
+            'competencia' => $today->format('Y-m-d'),
+            'prestador' => $prestador,
+            'tomador' => $tomador,
+            'servico' => [
+                'codigo' => '101',
+                'descricao' => 'Servico de homologacao NFSe.',
+                'discriminacao' => 'Servico de homologacao NFSe.',
+                'codigo_municipio' => $meta['codigo_municipio'],
+                'aliquota' => 0.02,
+                'iss_retido' => false,
+            ],
+            'valor_servicos' => 150.00,
+        ];
     }
 
     private function mergeRecursiveDistinct(array $base, array $overrides): array
@@ -283,6 +399,11 @@ final class NFSeMunicipalPayloadFactory
     private function normalizeMunicipio(string $municipio): string
     {
         return strtolower(trim($municipio));
+    }
+
+    private function catalog(): NFSeMunicipalCatalog
+    {
+        return $this->catalog ?? new NFSeMunicipalCatalog();
     }
 
     private function normalizeDigits(string $value): string
