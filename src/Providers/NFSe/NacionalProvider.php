@@ -68,6 +68,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
     {
         $this->validarDados($dados);
         $this->validarDadosDpsNacional($dados);
+        $this->assertCatalogCompatibilityBeforeEmission($dados);
         $xml = $this->montarXmlDpsNacional($dados);
         $xml = $this->assinarXmlSeNecessario($xml);
         $xml = $this->ensureUtf8XmlForTransmission($xml);
@@ -76,6 +77,38 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         $this->storeOperationState('emitir', $xml, $response, $parsed);
 
         return $response;
+    }
+
+    private function assertCatalogCompatibilityBeforeEmission(array $dados): void
+    {
+        $validation = $this->validarLayoutDps($dados, true);
+        $errors = is_array($validation['errors'] ?? null) ? $validation['errors'] : [];
+        if ($errors !== []) {
+            throw new \RuntimeException('Pré-validação NFSe nacional falhou: ' . implode(' | ', $errors));
+        }
+
+        $warnings = is_array($validation['warnings'] ?? null) ? $validation['warnings'] : [];
+        $catalog = is_array($validation['catalog'] ?? null) ? $validation['catalog'] : [];
+        $cTribNac = $this->onlyDigits((string) ($catalog['cTribNac'] ?? $dados['servico']['cTribNac'] ?? ''));
+        $codigoMunicipio = $this->onlyDigits((string) ($catalog['codigoMunicipio'] ?? $dados['cLocEmi'] ?? ''));
+
+        foreach ($warnings as $warning) {
+            if (!is_string($warning)) {
+                continue;
+            }
+
+            if (str_contains($warning, 'Catálogo nacional não retornou registro para cTribNac')) {
+                throw new \RuntimeException(
+                    "Pré-validação NFSe nacional: o catálogo de parametrização municipal não retornou o serviço {$cTribNac} para o município {$codigoMunicipio}. Revise competência, código nacional e enquadramento do prestador antes de enviar para a SEFIN."
+                );
+            }
+
+            if (str_contains($warning, 'Catálogo nacional não retornou alíquota para cTribNac')) {
+                throw new \RuntimeException(
+                    "Pré-validação NFSe nacional: o catálogo não retornou parametrização para cTribNac {$cTribNac} no município {$codigoMunicipio}. Revise o código nacional do serviço antes de enviar para a SEFIN."
+                );
+            }
+        }
     }
 
     public function consultar(string $chave): string
@@ -321,6 +354,10 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
                 );
 
                 $catalogData = $aliqResponse['data'] ?? [];
+                $catalogHasService = $this->catalogContainsServiceCode(
+                    is_array($catalogData) ? $catalogData : [],
+                    $cTribNac
+                );
                 $catalogAliq = $this->extractAliquotaMunicipalFromCatalog(
                     is_array($catalogData) ? $catalogData : [],
                     $cTribNac
@@ -330,10 +367,15 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
                     'codigoMunicipio' => $cLocEmi,
                     'cTribNac' => $cTribNac,
                     'competencia' => $competencia,
+                    'servicoEncontradoCatalogo' => $catalogHasService,
                     'aliquotaCatalogo' => $catalogAliq,
+                    'source' => $aliqResponse['metadata']['source'] ?? null,
+                    'stale' => $aliqResponse['metadata']['stale'] ?? null,
                 ];
 
-                if ($catalogAliq === null) {
+                if ($catalogHasService === false) {
+                    $warnings[] = "Catálogo nacional não retornou registro para cTribNac {$cTribNac} no município {$cLocEmi}.";
+                } elseif ($catalogAliq === null) {
                     $warnings[] = "Catálogo nacional não retornou alíquota para cTribNac {$cTribNac} no município {$cLocEmi}.";
                 } elseif ($aliqPayload <= 0) {
                     $warnings[] = "Alíquota não informada no payload. Catálogo sugere {$catalogAliq}.";
@@ -629,8 +671,16 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         if ($cTribNac === '') {
             $cTribNac = '010101';
         }
+        $cTribMun = trim((string)($dados['servico']['cTribMun'] ?? $dados['servico']['codigoMunicipal'] ?? ''));
+        $cNbs = preg_replace('/\D+/', '', (string)($dados['servico']['cNBS'] ?? $dados['servico']['nbs'] ?? '')) ?? '';
         $this->appendNodeDps($dom, $cServ, 'cTribNac', $cTribNac);
+        if ($cTribMun !== '') {
+            $this->appendNodeDps($dom, $cServ, 'cTribMun', $cTribMun);
+        }
         $this->appendNodeDps($dom, $cServ, 'xDescServ', (string)($dados['servico']['descricao'] ?? $dados['servico']['discriminacao'] ?? 'Servico'));
+        if ($cNbs !== '') {
+            $this->appendNodeDps($dom, $cServ, 'cNBS', $cNbs);
+        }
         $this->appendObraGroup($dom, $serv, (array) ($dados['servico']['obra'] ?? []));
 
         $valores = $dom->createElementNS($ns, 'valores');
@@ -1495,6 +1545,50 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         return null;
     }
 
+    private function catalogContainsServiceCode(array $catalogData, string $cTribNac): bool
+    {
+        if ($cTribNac === '') {
+            return false;
+        }
+
+        if (isset($catalogData['aliquotas']) && is_array($catalogData['aliquotas'])) {
+            foreach ($catalogData['aliquotas'] as $serviceCode => $historico) {
+                $serviceCodeNorm = $this->onlyDigits((string) $serviceCode);
+                if ($serviceCodeNorm === $cTribNac && is_array($historico) && $historico !== []) {
+                    return true;
+                }
+            }
+        }
+
+        $stack = [$catalogData];
+        while (!empty($stack)) {
+            $current = array_pop($stack);
+            if (!is_array($current)) {
+                continue;
+            }
+
+            if ($this->isAssocArray($current)) {
+                $code = $this->onlyDigits((string) ($this->findFirstValueByPaths($current, [
+                    'cTribNac',
+                    'codigoServicoNacional',
+                    'codigo_servico_nacional',
+                    'codigo',
+                ]) ?? ''));
+                if ($code !== '' && $code === $cTribNac) {
+                    return true;
+                }
+            }
+
+            foreach ($current as $child) {
+                if (is_array($child)) {
+                    $stack[] = $child;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private function normalizeCompetenciaForParamApi(?string $date): string
     {
         $raw = trim((string)$date);
@@ -1892,14 +1986,27 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
     {
         $value = trim($raw);
         $pattern = '/^(((20(([02468][048])|([13579][26]))-02-29))|(20[0-9][0-9])-((((0[1-9])|(1[0-2]))-((0[1-9])|(1\d)|(2[0-8])))|((((0[13578])|(1[02]))-31)|(((0[1,3-9])|(1[0-2]))-(29|30)))))T(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d([\-,\+](0[0-9]|10|11):00|([\+](12):00))$/';
+        $maxAllowed = new \DateTimeImmutable('now -5 seconds', new \DateTimeZone('UTC'));
 
         if ($value !== '' && preg_match($pattern, $value) === 1) {
+            try {
+                $parsed = new \DateTimeImmutable($value);
+                if ($parsed > $maxAllowed) {
+                    return $maxAllowed->format('Y-m-d\TH:i:sP');
+                }
+            } catch (\Throwable $e) {
+            }
+
             return $value;
         }
 
         if ($value !== '') {
             try {
                 $parsed = new \DateTimeImmutable($value);
+                if ($parsed > $maxAllowed) {
+                    return $maxAllowed->format('Y-m-d\TH:i:sP');
+                }
+
                 $formatted = $parsed->format('Y-m-d\TH:i:sP');
                 if (preg_match($pattern, $formatted) === 1) {
                     return $formatted;
@@ -1908,7 +2015,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
             }
         }
 
-        return (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d\TH:i:sP');
+        return $maxAllowed->format('Y-m-d\TH:i:sP');
     }
 
     private function getDpsNamespace(): string

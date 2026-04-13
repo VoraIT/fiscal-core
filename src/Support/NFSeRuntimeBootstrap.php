@@ -23,8 +23,13 @@ final class NFSeRuntimeBootstrap
         $configManager = $this->configManager ?? ConfigManager::getInstance();
         $configManager->reload();
 
-        CertificateManager::reload();
         $certificateManager = $this->certificateManager ?? CertificateManager::getInstance();
+        $certificate = $certificateManager->getCertificate();
+        if (!$certificate instanceof Certificate) {
+            CertificateManager::reload();
+            $certificateManager = $this->certificateManager ?? CertificateManager::getInstance();
+            $certificate = $certificateManager->getCertificate();
+        }
 
         $registry = $this->registry ?? ProviderRegistry::getInstance();
         $resolver = $this->resolver ?? new NFSeProviderResolver();
@@ -35,7 +40,6 @@ final class NFSeRuntimeBootstrap
         $config['ambiente'] = $configManager->isProduction() ? 'producao' : 'homologacao';
         $config['timeout'] = (int) ($configManager->get('nfse.timeout') ?? $configManager->get('timeout') ?? $config['timeout'] ?? 30);
 
-        $certificate = $certificateManager->getCertificate();
         if ($certificate instanceof Certificate) {
             $config['certificate'] = $certificate;
         }
