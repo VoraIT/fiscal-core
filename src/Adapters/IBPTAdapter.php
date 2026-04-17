@@ -1,8 +1,8 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters;
+namespace sabbajohn\FiscalCore\Adapters;
 
-use freeline\FiscalCore\Contracts\TributacaoInterface;
+use sabbajohn\FiscalCore\Contracts\TributacaoInterface;
 use NFePHP\Ibpt\Ibpt;
 
 class IBPTAdapter implements TributacaoInterface

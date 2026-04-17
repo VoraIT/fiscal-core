@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace freeline\FiscalCore\Providers\NFSe\Municipal;
+namespace sabbajohn\FiscalCore\Providers\NFSe\Municipal;
 
-use freeline\FiscalCore\Providers\NFSe\AbstractNFSeProvider;
+use sabbajohn\FiscalCore\Providers\NFSe\AbstractNFSeProvider;
 
 final class ManausAmProvider extends AbstractNFSeProvider
 {
@@ -103,7 +103,7 @@ final class ManausAmProvider extends AbstractNFSeProvider
             'prestador.inscricaoMunicipal' => (string) ($dados['prestador']['inscricaoMunicipal'] ?? ''),
             'servico.codigo' => $this->normalizeDigits((string) ($dados['servico']['codigo'] ?? '')),
             'tomador.documento' => $this->normalizeDigits((string) ($dados['tomador']['documento'] ?? '')),
-            'tomador.razao_social' => (string) ($dados['tomador']['razao_social'] ?? ''),
+            'tomador.razao_social' => (string) ($dados['tomador']['razaoSocial'] ?? ''),
         ];
 
         foreach ($required as $field => $value) {

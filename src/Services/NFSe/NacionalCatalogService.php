@@ -1,9 +1,9 @@
 <?php
 
-namespace freeline\FiscalCore\Services\NFSe;
+namespace sabbajohn\FiscalCore\Services\NFSe;
 
-use freeline\FiscalCore\Support\Cache\FileCacheStore;
-use freeline\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\Cache\FileCacheStore;
+use sabbajohn\FiscalCore\Support\CertificateManager;
 
 class NacionalCatalogService
 {

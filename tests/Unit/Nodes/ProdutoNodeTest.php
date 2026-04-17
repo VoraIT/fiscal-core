@@ -3,8 +3,8 @@
 namespace Tests\Unit\Nodes;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\NF\Nodes\ProdutoNode;
-use freeline\FiscalCore\Adapters\NF\DTO\ProdutoDTO;
+use sabbajohn\FiscalCore\Adapters\NF\Nodes\ProdutoNode;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\ProdutoDTO;
 
 class ProdutoNodeTest extends TestCase
 {

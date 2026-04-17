@@ -5,8 +5,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../homologacao/common.php';
 
-use freeline\FiscalCore\Facade\FiscalFacade;
-use freeline\FiscalCore\Support\BelemMunicipalDocumentUrlBuilder;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Support\BelemMunicipalDocumentUrlBuilder;
 
 function usage(string $scriptName): string
 {

@@ -1,11 +1,11 @@
 <?php
 
-namespace freeline\FiscalCore\Tests;
+namespace sabbajohn\FiscalCore\Tests;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\GTINAdapter;
-use freeline\FiscalCore\Support\CertificateManager;
-use freeline\FiscalCore\Support\ConfigManager;
+use sabbajohn\FiscalCore\Adapters\GTINAdapter;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\ConfigManager;
 
 class GTINAdapterTest extends TestCase
 {

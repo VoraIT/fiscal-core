@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/Fixtures/NFSeBelemMunicipalFixtures.php';
 
-use freeline\FiscalCore\Providers\NFSe\Municipal\BelemMunicipalProvider;
-use freeline\FiscalCore\Support\NFSeSchemaResolver;
-use freeline\FiscalCore\Support\NFSeSchemaValidator;
-use freeline\FiscalCore\Support\NFSeSoapTransportInterface;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Providers\NFSe\Municipal\BelemMunicipalProvider;
+use sabbajohn\FiscalCore\Support\NFSeSchemaResolver;
+use sabbajohn\FiscalCore\Support\NFSeSchemaValidator;
+use sabbajohn\FiscalCore\Support\NFSeSoapTransportInterface;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use PHPUnit\Framework\TestCase;
 
 final class BelemMunicipalProviderTest extends TestCase

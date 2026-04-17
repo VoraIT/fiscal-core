@@ -1,9 +1,9 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Support\CertificateManager;
-use freeline\FiscalCore\Support\ConfigManager;
-use freeline\FiscalCore\Support\ToolsFactory;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\ConfigManager;
+use sabbajohn\FiscalCore\Support\ToolsFactory;
 
 class SingletonManagersTest extends TestCase
 {

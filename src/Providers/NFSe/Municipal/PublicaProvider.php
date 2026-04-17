@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace freeline\FiscalCore\Providers\NFSe\Municipal;
+namespace sabbajohn\FiscalCore\Providers\NFSe\Municipal;
 
-use freeline\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
-use freeline\FiscalCore\Providers\NFSe\AbstractNFSeProvider;
-use freeline\FiscalCore\Support\CertificateManager;
-use freeline\FiscalCore\Support\NFSeSchemaResolver;
-use freeline\FiscalCore\Support\NFSeSchemaValidator;
-use freeline\FiscalCore\Support\NFSeSoapCurlTransport;
-use freeline\FiscalCore\Support\NFSeSoapTransportInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
+use sabbajohn\FiscalCore\Providers\NFSe\AbstractNFSeProvider;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\NFSeSchemaResolver;
+use sabbajohn\FiscalCore\Support\NFSeSchemaValidator;
+use sabbajohn\FiscalCore\Support\NFSeSoapCurlTransport;
+use sabbajohn\FiscalCore\Support\NFSeSoapTransportInterface;
 use NFePHP\Common\Certificate;
 use NFePHP\Common\Signer;
 

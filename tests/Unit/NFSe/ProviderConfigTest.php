@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/Support/TestCertificateFile.php';
 
-use freeline\FiscalCore\Facade\NFSeFacade;
-use freeline\FiscalCore\Support\CertificateManager;
-use freeline\FiscalCore\Support\ConfigManager;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\ConfigManager;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use PHPUnit\Framework\TestCase;
 
 final class ProviderConfigTest extends TestCase
@@ -64,16 +64,22 @@ final class ProviderConfigTest extends TestCase
         $this->assertContains('consultar_nfse_rps', $data['supported_operations']);
     }
 
-    public function testFacadeListsOnlyPilotMunicipios(): void
+    public function testFacadeListsActiveMunicipiosFromCurrentCatalog(): void
     {
         $facade = new NFSeFacade('belem');
         $response = $facade->listarMunicipios();
 
         $this->assertTrue($response->isSuccess());
-        $this->assertSame(
-            ['belem', 'joinville', 'manaus', 'nacional'],
-            $response->getData('municipios')
-        );
+        $municipios = $response->getData('municipios');
+
+        $this->assertIsArray($municipios);
+        $this->assertContains('belem', $municipios);
+        $this->assertContains('joinville', $municipios);
+        $this->assertContains('manaus', $municipios);
+        $this->assertContains('nacional', $municipios);
+        $this->assertContains('presidente-figueiredo', $municipios);
+        $this->assertContains('rio-preto-da-eva', $municipios);
+        $this->assertGreaterThan(100, count($municipios));
     }
 
     public function testFacadeMapsJoinvilleToPublica(): void
@@ -101,6 +107,61 @@ final class ProviderConfigTest extends TestCase
         $this->assertSame('nfse_nacional', $data['provider_key']);
         $this->assertTrue($data['municipio_ignored']);
         $this->assertStringContainsString('NacionalProvider', $data['provider_class']);
+    }
+
+    public function testFacadeMapsPresidenteFigueiredoToIssweb(): void
+    {
+        $facade = new NFSeFacade('presidente-figueiredo');
+        $response = $facade->getProviderInfo();
+
+        $this->assertTrue($response->isSuccess());
+
+        $data = $response->getData();
+        $this->assertSame('ISSWEB_AM', $data['provider_key']);
+        $this->assertSame('1303536', $data['codigo_municipio']);
+        $this->assertStringContainsString('IsswebProvider', $data['provider_class']);
+        $this->assertContains('consultar', $data['supported_operations']);
+    }
+
+    public function testFacadeMapsRioPretoDaEvaToIssweb(): void
+    {
+        $facade = new NFSeFacade('rio-preto-da-eva');
+        $response = $facade->getProviderInfo();
+
+        $this->assertTrue($response->isSuccess());
+
+        $data = $response->getData();
+        $this->assertSame('ISSWEB_AM', $data['provider_key']);
+        $this->assertSame('1303569', $data['codigo_municipio']);
+        $this->assertStringContainsString('IsswebProvider', $data['provider_class']);
+        $this->assertContains('consultar', $data['supported_operations']);
+    }
+
+    public function testFacadeMapsManausToNationalProvider(): void
+    {
+        $facade = new NFSeFacade('manaus');
+        $response = $facade->getProviderInfo();
+
+        $this->assertTrue($response->isSuccess());
+
+        $data = $response->getData();
+        $this->assertSame('nfse_nacional', $data['provider_key']);
+        $this->assertSame('1302603', $data['codigo_municipio']);
+        $this->assertStringContainsString('NacionalProvider', $data['provider_class']);
+        $this->assertContains('consultar_por_rps', $data['supported_operations']);
+    }
+
+    public function testFacadeHomologationReadinessUsesNationalProviderConfigForManaus(): void
+    {
+        $facade = new NFSeFacade('manaus');
+        $response = $facade->verificarProntidaoHomologacao();
+
+        $this->assertTrue($response->isSuccess());
+        $this->assertTrue($response->getData('ready'));
+        $this->assertSame('nfse_nacional', $response->getData('provider_key'));
+        $this->assertSame([], $response->getData('missing_requirements'));
+        $this->assertTrue($response->getData('certificado_carregado'));
+        $this->assertTrue($response->getData('certificado_valido'));
     }
 
     private function bootstrapEnvironment(): void

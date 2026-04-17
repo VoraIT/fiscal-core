@@ -1,26 +1,133 @@
 {
-    "generated_at": "2026-03-19T11:14:17+00:00",
+    "generated_at": "2026-04-08T17:10:41+00:00",
     "source_xml": "Uninfe/source/NFe.Components.Wsdl/NFse/WSDL/Webservice.xml",
-    "mode": "selected",
-    "processed_municipios": 3,
+    "mode": "all",
+    "processed_municipios": 624,
     "skipped_entries": 0,
-    "families_count": 5,
-    "selected_ibges": [
-        "1501402",
-        "1302603",
-        "4209102"
-    ],
+    "families_count": 86,
+    "selected_ibges": "[todos]",
     "municipio_overrides": {
+        "1001058": {
+            "provider_family": "nfse_nacional",
+            "schema_package": "NACIONAL",
+            "slug": "nacional",
+            "nome": "NACIONAL",
+            "uf": "AN",
+            "provider_note": "Entrada canônica do fluxo NFSe nacional no runtime."
+        },
+        "1302603": {
+            "provider_family": "nfse_nacional",
+            "schema_package": "NACIONAL",
+            "slug": "manaus",
+            "nome": "Manaus",
+            "uf": "AM",
+            "provider_note": "Manaus usa o fluxo NFSe nacional para fatos geradores a partir de 2026-01-01; provider municipal historico mantido apenas como referencia."
+        },
+        "1303536": {
+            "provider_family": "ISSWEB_AM",
+            "schema_package": "ISSWEB",
+            "slug": "presidente-figueiredo",
+            "nome": "Presidente Figueiredo",
+            "uf": "AM",
+            "provider_note": "Município preparado para integração municipal via família compartilhada ISSWEB_AM.",
+            "provider_config_overrides": {
+                "official_validation_url_template": "https://servicosweb.pmpf.am.gov.br/issweb/validacao?numero={numero}&chave={chave_validacao}"
+            },
+            "payload_defaults": {
+                "rps": {
+                    "numero": "123"
+                },
+                "tomador": {
+                    "razao_social": "Cliente Presidente Figueiredo Ltda",
+                    "email": "financeiro@example.com",
+                    "endereco": {
+                        "logradouro": "Avenida Amazonas",
+                        "bairro": "Centro",
+                        "codigo_municipio": "1303536",
+                        "uf": "AM",
+                        "cep": "69735-000",
+                        "municipio": "Presidente Figueiredo"
+                    }
+                },
+                "servico": {
+                    "codigo": "101",
+                    "descricao": "Servico de homologacao ISSWEB para Presidente Figueiredo.",
+                    "discriminacao": "Servico de homologacao ISSWEB para Presidente Figueiredo.",
+                    "tipo_documento": "001",
+                    "local_prestacao": {
+                        "tipo": "1",
+                        "uf": "AM",
+                        "codigo_municipio": "1303536",
+                        "cep": "69735-000"
+                    }
+                }
+            }
+        },
+        "1303569": {
+            "provider_family": "ISSWEB_AM",
+            "schema_package": "ISSWEB",
+            "slug": "rio-preto-da-eva",
+            "nome": "Rio Preto da Eva",
+            "uf": "AM",
+            "provider_note": "Hipótese atual de integração municipal via ISSWEB, pendente de validação oficial.",
+            "payload_defaults": {
+                "rps": {
+                    "numero": "123"
+                },
+                "tomador": {
+                    "razao_social": "Cliente Rio Preto da Eva Ltda",
+                    "email": "financeiro@example.com",
+                    "endereco": {
+                        "logradouro": "Avenida Governador Gilberto Mestrinho",
+                        "bairro": "Centro",
+                        "codigo_municipio": "1303569",
+                        "uf": "AM",
+                        "cep": "69117-000",
+                        "municipio": "Rio Preto da Eva"
+                    }
+                },
+                "servico": {
+                    "codigo": "101",
+                    "descricao": "Servico de homologacao ISSWEB para Rio Preto da Eva.",
+                    "discriminacao": "Servico de homologacao ISSWEB para Rio Preto da Eva.",
+                    "tipo_documento": "001",
+                    "local_prestacao": {
+                        "tipo": "1",
+                        "uf": "AM",
+                        "codigo_municipio": "1303569",
+                        "cep": "69117-000"
+                    }
+                }
+            }
+        },
         "1501402": {
             "provider_family": "BELEM_MUNICIPAL_2025",
             "schema_package": "BELEM_MUNICIPAL_2025",
             "slug": "belem",
             "nome": "Belem",
             "uf": "PA",
-            "provider_note": "Belém migrado para provider municipal atual; override local sobre catálogo UniNFe."
+            "provider_note": "Belém migrado para provider municipal atual; override local sobre catálogo UniNFe.",
+            "provider_config_overrides": {
+                "requires_explicit_mei_classification": true
+            }
+        },
+        "4209102": {
+            "provider_family": "PUBLICA",
+            "schema_package": "PUBLICA",
+            "slug": "joinville",
+            "nome": "Joinville",
+            "uf": "SC",
+            "payload_defaults": {
+                "servico": {
+                    "descricao": "Desenvolvimento e licenciamento de software para homologacao de Joinville.",
+                    "discriminacao": "Desenvolvimento e licenciamento de software para homologacao de Joinville."
+                }
+            }
         }
     },
     "extra_provider_families": [
-        "DSF"
+        "DSF",
+        "ISSWEB_AM",
+        "nfse_nacional"
     ]
 }

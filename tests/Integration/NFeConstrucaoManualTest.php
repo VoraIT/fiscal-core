@@ -3,8 +3,8 @@
 namespace Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\NF\Core\NotaFiscal;
-use freeline\FiscalCore\Adapters\NF\DTO\{
+use sabbajohn\FiscalCore\Adapters\NF\Core\NotaFiscal;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\{
     IdentificacaoDTO,
     EmitenteDTO,
     DestinatarioDTO,
@@ -13,7 +13,7 @@ use freeline\FiscalCore\Adapters\NF\DTO\{
     PisDTO,
     CofinsDTO
 };
-use freeline\FiscalCore\Adapters\NF\Nodes\{
+use sabbajohn\FiscalCore\Adapters\NF\Nodes\{
     IdentificacaoNode,
     EmitenteNode,
     DestinatarioNode,

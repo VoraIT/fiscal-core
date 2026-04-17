@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use freeline\FiscalCore\Adapters\NF\NFSeAdapter;
+use sabbajohn\FiscalCore\Adapters\NF\NFSeAdapter;
 use PHPUnit\Framework\TestCase;
 
 final class NFSeAdapterTest extends TestCase
@@ -31,14 +31,41 @@ final class NFSeAdapterTest extends TestCase
         $this->assertContains('cancelar_nfse', $info['supported_operations']);
     }
 
-    public function testManausUsesManausAmProvider(): void
+    public function testManausUsesNacionalProvider(): void
     {
         $adapter = new NFSeAdapter('manaus');
 
         $info = $adapter->getProviderInfo();
 
-        $this->assertSame('MANAUS_AM', $info['provider_key']);
-        $this->assertStringContainsString('ManausAmProvider', $info['provider_class']);
+        $this->assertSame('nfse_nacional', $info['provider_key']);
+        $this->assertStringContainsString('NacionalProvider', $info['provider_class']);
+        $this->assertContains('consultar_lote', $info['supported_operations']);
+        $this->assertContains('baixar_danfse', $info['supported_operations']);
+    }
+
+    public function testPresidenteFigueiredoUsesIsswebProvider(): void
+    {
+        $adapter = new NFSeAdapter('presidente-figueiredo');
+
+        $info = $adapter->getProviderInfo();
+
+        $this->assertSame('ISSWEB_AM', $info['provider_key']);
+        $this->assertStringContainsString('IsswebProvider', $info['provider_class']);
+        $this->assertContains('consultar', $info['supported_operations']);
+        $this->assertContains('cancelar', $info['supported_operations']);
+    }
+
+    public function testRioPretoDaEvaUsesSharedIsswebProvider(): void
+    {
+        $adapter = new NFSeAdapter('rio-preto-da-eva');
+
+        $info = $adapter->getProviderInfo();
+
+        $this->assertSame('ISSWEB_AM', $info['provider_key']);
+        $this->assertSame('1303569', $info['codigo_municipio']);
+        $this->assertStringContainsString('IsswebProvider', $info['provider_class']);
+        $this->assertContains('consultar', $info['supported_operations']);
+        $this->assertContains('cancelar', $info['supported_operations']);
     }
 
     public function testUnknownUsesNacionalProvider(): void

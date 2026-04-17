@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace freeline\FiscalCore\Support;
+namespace sabbajohn\FiscalCore\Support;
 
-use freeline\FiscalCore\Contracts\NFSeProviderConfigInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
 use JsonException;
 use RuntimeException;
 
@@ -75,13 +75,39 @@ class ProviderRegistry
 
     public function getByMunicipio(?string $municipio): NFSeProviderConfigInterface
     {
-        $providerKey = $this->resolver->resolveKey($municipio);
+        $metadata = $this->resolver->buildMetadata($municipio);
+        $providerKey = $metadata['provider_key'] ?? self::NFSE_NATIONAL_KEY;
 
         if (!$this->has($providerKey)) {
             return $this->getNfseNacional();
         }
 
-        return $this->get($providerKey);
+        if ($providerKey === self::NFSE_NATIONAL_KEY || !is_array($metadata['municipio_resolved'] ?? null)) {
+            return $this->get($providerKey);
+        }
+
+        $config = $this->applyMunicipioConfig($this->getConfig($providerKey), $metadata['municipio_resolved']);
+        $providerClass = $config['provider_class'] ?? null;
+
+        if (!is_string($providerClass) || trim($providerClass) === '') {
+            throw new RuntimeException("Provider class não especificado para chave '{$providerKey}'.");
+        }
+
+        $providerClass = $this->resolveProviderClass($providerClass);
+
+        if (!class_exists($providerClass)) {
+            throw new RuntimeException("Provider class não encontrado: {$providerClass}");
+        }
+
+        $provider = new $providerClass($config);
+
+        if (!$provider instanceof NFSeProviderConfigInterface) {
+            throw new RuntimeException(
+                "Provider '{$providerClass}' deve implementar NFSeProviderConfigInterface."
+            );
+        }
+
+        return $provider;
     }
 
     public function has(string $providerKey): bool
@@ -96,6 +122,21 @@ class ProviderRegistry
         }
 
         return $this->config[$providerKey];
+    }
+
+    public function getConfigForMunicipio(?string $municipio): array
+    {
+        $metadata = $this->resolver->buildMetadata($municipio);
+        $providerKey = $metadata['provider_key'] ?? self::NFSE_NATIONAL_KEY;
+
+        if (!$this->has($providerKey)) {
+            return $this->getConfig(self::NFSE_NATIONAL_KEY);
+        }
+
+        return $this->applyMunicipioConfig(
+            $this->getConfig($providerKey),
+            is_array($metadata['municipio_resolved'] ?? null) ? $metadata['municipio_resolved'] : null
+        );
     }
 
     public function listProviders(): array
@@ -217,7 +258,51 @@ class ProviderRegistry
             return $providerName;
         }
 
-        return "freeline\\FiscalCore\\Providers\\NFSe\\{$providerName}";
+        return "sabbajohn\\FiscalCore\\Providers\\NFSe\\{$providerName}";
+    }
+
+    private function applyMunicipioConfig(array $config, ?array $municipio): array
+    {
+        if ($municipio === null) {
+            return $config;
+        }
+
+        $config['codigo_municipio'] = (string) ($municipio['ibge'] ?? $config['codigo_municipio'] ?? '');
+        $config['municipio_nome'] = (string) ($municipio['nome'] ?? $config['municipio_nome'] ?? '');
+        $config['municipio_uf'] = (string) ($municipio['uf'] ?? $config['municipio_uf'] ?? '');
+        $config['municipio_slug'] = (string) ($municipio['slug'] ?? $config['municipio_slug'] ?? '');
+        $config['schema_package'] = (string) ($municipio['schema_package'] ?? $config['schema_package'] ?? '');
+
+        if (trim((string) ($municipio['provider_note'] ?? '')) !== '') {
+            $config['provider_note'] = (string) $municipio['provider_note'];
+        }
+
+        if (is_array($municipio['payload_defaults'] ?? null) && $municipio['payload_defaults'] !== []) {
+            $config['payload_defaults'] = $this->mergeRecursiveDistinct(
+                is_array($config['payload_defaults'] ?? null) ? $config['payload_defaults'] : [],
+                $municipio['payload_defaults']
+            );
+        }
+
+        if (is_array($municipio['provider_config_overrides'] ?? null) && $municipio['provider_config_overrides'] !== []) {
+            $config = $this->mergeRecursiveDistinct($config, $municipio['provider_config_overrides']);
+        }
+
+        return $config;
+    }
+
+    private function mergeRecursiveDistinct(array $base, array $overrides): array
+    {
+        foreach ($overrides as $key => $value) {
+            if (is_array($value) && isset($base[$key]) && is_array($base[$key])) {
+                $base[$key] = $this->mergeRecursiveDistinct($base[$key], $value);
+                continue;
+            }
+
+            $base[$key] = $value;
+        }
+
+        return $base;
     }
 
     private function __clone(): void

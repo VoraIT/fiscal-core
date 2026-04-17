@@ -39,7 +39,7 @@ composer require fiscal/fiscal-core
   2) Instale a dependência:
   
   ```bash
-  composer require freeline/fiscal-core:@dev
+  composer require sabbajohn/fiscal-core:@dev
   ```
 
 Desenvolvimento local
@@ -130,6 +130,8 @@ php examples/avancado/03-emissao-municipal-funcional.php
 php examples/avancado/02-error-handling.php
 
 # Homologação municipal segura
+php scripts/nfse/scaffold-family.php --family=MINHA_FAMILIA --dry-run
+php scripts/nfse/scaffold-municipio.php --ibge=1303536 --dry-run
 php examples/homologacao/01-emitir-belem-real.php
 php examples/homologacao/02-emitir-joinville-real.php
 php examples/homologacao/03-emitir-belem-completo.php
@@ -180,8 +182,13 @@ export IBPT_UF="SP"
 - O catálogo municipal atual está em `config/nfse/`
 - `FISCAL_IM` continua obrigatório para emissões municipais reais
 - A consulta pública de CNPJ ajuda com razão social/contato/endereço, mas não fornece inscrição municipal
+- `provider_config_overrides` no catálogo aplica merge sobre a família técnica no runtime
+- `payload_defaults` no catálogo acelera exemplos e homologação sem duplicar a família
+- Emissão classificada como MEI usa sempre o provider nacional
 - Para Belém, o DANFSe é disponibilizado pela prefeitura em URL oficial; a biblioteca retorna status/disponibilidade e a `danfse_url`
 - O playbook canônico para implementação municipal está em [docs/NFSE-MUNICIPAL-PROVIDER-PLAYBOOK.md](docs/NFSE-MUNICIPAL-PROVIDER-PLAYBOOK.md)
+- A migração de município municipal para nacional está em [docs/NFSE-MIGRACAO-MUNICIPAL-PARA-NACIONAL.md](docs/NFSE-MIGRACAO-MUNICIPAL-PARA-NACIONAL.md)
+- A matriz operacional de famílias e providers está em [docs/NFSE-PROVIDER-MATRIX.md](docs/NFSE-PROVIDER-MATRIX.md)
 
 ## Uso Detalhado
 
@@ -220,7 +227,7 @@ file_put_contents('danfe.pdf', $danfePdf->dados);
 ### 3) **NFSe: múltiplos municípios**
 
 ```php
-use freeline\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
 
 $nfse = new NFSeFacade('joinville');
 
@@ -240,7 +247,7 @@ $consulta = $nfse->consultarPorRps([
 ### 4) **NFSe municipal pronta para uso**
 
 ```php
-use freeline\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
 
 $fiscal = new FiscalFacade();
 $nfse = $fiscal->nfse('belem');
@@ -256,7 +263,7 @@ if ($resultado->isSuccess()) {
 ### 5) **DANFSe municipal**
 
 ```php
-use freeline\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
 
 $nfse = new NFSeFacade('belem');
 $danfse = $nfse->gerarDanfse($xmlNfse);
@@ -372,7 +379,7 @@ vendor/bin/phpunit
 
 // App\Providers\AppServiceProvider.php
 use NfePHP\NFe\Tools;
-use freeline\FiscalCore\Adapters\NFeAdapter;
+use sabbajohn\FiscalCore\Adapters\NFeAdapter;
 
 public function register()
 {
@@ -423,7 +430,7 @@ src/
 | ------ | --------- |
 | Certificado inválido | Verificar formato .pfx e senha |
 | API indisponível | Usar fallbacks automáticos |
-| Município não configurado | Adicionar em nfse-municipios.json |
+| Município não configurado | Revisar `config/nfse/providers-catalog.json` e `config/nfse/nfse-provider-families.json` |
 | Quota excedida | Implementar cache local |
 
 ### 🔍 **Debug Mode**
@@ -473,6 +480,10 @@ Para informações detalhadas sobre configuração de certificados e providers, 
 - 📄 [config/nfse/providers-catalog.json](config/nfse/providers-catalog.json)
 - 📄 [config/nfse/nfse-provider-families.json](config/nfse/nfse-provider-families.json)
 
+Fluxo canônico de resolução NFSe:
+
+`config/nfse/providers-catalog.json` -> `config/nfse/nfse-provider-families.json` -> `NFSeProviderResolver` -> `ProviderRegistry` -> `NFSeRuntimeBootstrap` -> provider concreto
+
 ## 🧪 Estrutura de Testes
 
 ```bash
@@ -482,8 +493,8 @@ vendor/bin/phpunit
 ### Gerenciamento Centralizado (Singletons)
 
 ```php
-use freeline\FiscalCore\Support\CertificateManager;
-use freeline\FiscalCore\Support\ConfigManager;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\ConfigManager;
 
 // Certificados centralizados
 $certManager = CertificateManager::getInstance();
@@ -531,7 +542,7 @@ $nfeConfig = $configManager->getNFeConfig();
 
 ### ToolsFactory
 ```php
-use freeline\FiscalCore\Support\ToolsFactory;
+use sabbajohn\FiscalCore\Support\ToolsFactory;
 
 // Setup rápido para desenvolvimento
 ToolsFactory::setupForDevelopment(['uf' => 'SP']);

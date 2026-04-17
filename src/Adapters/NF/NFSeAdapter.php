@@ -1,13 +1,14 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF;
+namespace sabbajohn\FiscalCore\Adapters\NF;
 
-use freeline\FiscalCore\Contracts\NotaServicoInterface;
-use freeline\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
-use freeline\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
-use freeline\FiscalCore\Contracts\NFSeProviderConfigInterface;
-use freeline\FiscalCore\Support\NFSeProviderResolver;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Contracts\NotaServicoInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
+use sabbajohn\FiscalCore\Support\NFSeEmissionRoutingPolicy;
+use sabbajohn\FiscalCore\Support\NFSeProviderResolver;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use NFePHP\Common\Certificate;
 
 class NFSeAdapter implements NotaServicoInterface
@@ -19,10 +20,12 @@ class NFSeAdapter implements NotaServicoInterface
     private bool $injectedProvider;
     private array $lastEmissionInfo = [];
     private array $lastOperationInfo = [];
+    private NFSeEmissionRoutingPolicy $routingPolicy;
 
     public function __construct(string $municipio, ?NFSeProviderConfigInterface $provider = null)
     {
         $this->municipio = $municipio;
+        $this->routingPolicy = new NFSeEmissionRoutingPolicy();
 
         $resolver = new NFSeProviderResolver();
         $this->providerKey = $resolver->resolveKey($municipio);
@@ -191,9 +194,11 @@ class NFSeAdapter implements NotaServicoInterface
     {
         $routingRules = [];
         $supportedOperations = [];
-        if ($this->providerKey === 'BELEM_MUNICIPAL_2025') {
-            $routingRules[] = 'Belém exige classificação explícita de MEI';
+        if ($this->providerKey !== ProviderRegistry::NFSE_NATIONAL_KEY) {
             $routingRules[] = 'Emitente MEI é roteado automaticamente para NFSe nacional';
+        }
+        if ($this->routingPolicy->requiresExplicitMeiClassification($this->provider)) {
+            $routingRules[] = 'Este provider exige classificação explícita de MEI no payload de emissão';
         }
         if ($this->provider instanceof NFSeOperationalIntrospectionInterface) {
             $supportedOperations = $this->provider->getSupportedOperations();
@@ -279,57 +284,6 @@ class NFSeAdapter implements NotaServicoInterface
      */
     private function resolveProviderForEmission(array $dados): array
     {
-        if ($this->injectedProvider || $this->providerKey !== 'BELEM_MUNICIPAL_2025') {
-            return [$this->providerKey, $this->provider, 'configured_provider'];
-        }
-
-        $mei = $this->resolveMeiClassification($dados);
-        if ($mei === null) {
-            throw new \InvalidArgumentException(
-                'Belém exige identificação explícita do emitente como MEI ou não MEI antes da emissão.'
-            );
-        }
-
-        if ($mei) {
-            $registry = ProviderRegistry::getInstance();
-            return [ProviderRegistry::NFSE_NATIONAL_KEY, $registry->getNfseNacional(), 'belem_mei_nacional'];
-        }
-
-        return [$this->providerKey, $this->provider, 'belem_municipal'];
-    }
-
-    private function resolveMeiClassification(array $dados): ?bool
-    {
-        $prestador = $dados['prestador'] ?? null;
-        if (!is_array($prestador)) {
-            return null;
-        }
-
-        foreach (['mei', 'microempreendedor_individual'] as $boolKey) {
-            if (array_key_exists($boolKey, $prestador)) {
-                return filter_var($prestador[$boolKey], FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) ?? null;
-            }
-        }
-
-        foreach (['regime_tributario', 'regime', 'tipo_empresa', 'enquadramento'] as $stringKey) {
-            if (!isset($prestador[$stringKey])) {
-                continue;
-            }
-
-            $normalized = strtolower(trim((string) $prestador[$stringKey]));
-            if ($normalized === '') {
-                continue;
-            }
-
-            if (in_array($normalized, ['mei', 'microempreendedor individual'], true)) {
-                return true;
-            }
-
-            if (in_array($normalized, ['simples nacional', 'lucro presumido', 'lucro real', 'normal', 'nao mei', 'não mei'], true)) {
-                return false;
-            }
-        }
-
-        return null;
+        return $this->routingPolicy->resolve($this->providerKey, $this->provider, $dados, $this->injectedProvider);
     }
 }

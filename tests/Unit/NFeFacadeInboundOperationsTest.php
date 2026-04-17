@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use freeline\FiscalCore\Adapters\ImpressaoAdapter;
-use freeline\FiscalCore\Adapters\NF\NFeAdapter;
-use freeline\FiscalCore\Facade\NFeFacade;
-use freeline\FiscalCore\Support\ManifestationType;
+use sabbajohn\FiscalCore\Adapters\ImpressaoAdapter;
+use sabbajohn\FiscalCore\Adapters\NF\NFeAdapter;
+use sabbajohn\FiscalCore\Facade\NFeFacade;
+use sabbajohn\FiscalCore\Support\ManifestationType;
 use PHPUnit\Framework\TestCase;
 
 class NFeFacadeInboundOperationsTest extends TestCase

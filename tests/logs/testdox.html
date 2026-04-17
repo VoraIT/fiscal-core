@@ -51,10 +51,53 @@
         </style>
     </head>
     <body>
-        <h2>Cnpj Response Mapping (Tests\Unit\Utils\CnpjResponseMapping)</h2>
+        <h2>NFSe Belem Routing</h2>
         <ul>
-            <li class="defect">Brasil api adapter unwraps nested data payload</li>
-            <li class="defect">Utils facade maps new cnpj payload format</li>
+            <li class="success">Belem mei routes automatically to national provider</li>
+            <li class="success">Belem rejects emission when mei classification is missing</li>
+            <li class="success">Any municipal provider routes mei emission to national provider</li>
+            <li class="success">Belem municipal consult and cancel use municipal provider capabilities</li>
+            <li class="success">Belem facade includes municipal operation metadata</li>
+            <li class="success">Belem facade emitir completo falls back to consultar lote and returns official url</li>
+            <li class="success">Belem facade emitir completo falls back to consultar por rps when lote has no nfse and returns official url</li>
+            <li class="success">Belem facade emitir completo returns partial when consultation does not resolve nfse</li>
+            <li class="success">Belem facade consultar disponibilidade by protocolo returns official url</li>
+            <li class="success">Belem facade consultar disponibilidade falls back to rps when lote has no nfse</li>
+            <li class="success">Belem facade consultar disponibilidade returns pendente when no nfse is available</li>
+            <li class="success">Belem facade gerar danfse returns explicit unsupported error</li>
+        </ul>
+        <h2>NFSe Municipal Payload Factory</h2>
+        <ul>
+            <li class="success">Demo payloads generate schema valid xml with data set "belem"</li>
+            <li class="success">Demo payloads generate schema valid xml with data set "joinville"</li>
+            <li class="success">Build prestador requires inscricao municipal</li>
+            <li class="success">Real joinville payload uses two percent aliquota</li>
+            <li class="success">Demo payload can be resolved from catalog payload defaults for issweb municipio</li>
+        </ul>
+        <h2>NFSe Provider Resolver</h2>
+        <ul>
+            <li class="success">Resolve joinville to publica</li>
+            <li class="success">Resolve belem to current municipal family</li>
+            <li class="success">Resolve manaus to national</li>
+            <li class="success">Resolve presidente figueiredo to issweb</li>
+            <li class="success">Resolve rio preto da eva to issweb</li>
+            <li class="success">Unknown falls back to national</li>
+            <li class="success">Null falls back to national</li>
+        </ul>
+        <h2>NFSe Scaffold Scripts</h2>
+        <ul>
+            <li class="success">Scaffold family dry run generates expected artifacts</li>
+            <li class="success">Scaffold municipio dry run uses catalog and manifest hints</li>
+        </ul>
+        <h2>Provider Registry</h2>
+        <ul>
+            <li class="success">Get by municipio joinville returns publica provider</li>
+            <li class="success">Get by municipio belem returns current municipal provider</li>
+            <li class="success">Get by municipio manaus returns nacional provider</li>
+            <li class="success">Get by municipio presidente figueiredo returns issweb provider</li>
+            <li class="success">Get by municipio rio preto da eva returns issweb provider</li>
+            <li class="success">Get config for municipio applies municipal overrides without affecting shared family</li>
+            <li class="success">Get by unknown municipio returns nacional provider</li>
         </ul>
     </body>
 </html>

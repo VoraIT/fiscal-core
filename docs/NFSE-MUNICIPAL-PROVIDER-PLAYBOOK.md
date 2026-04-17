@@ -33,6 +33,10 @@ Isso implica duas distincões obrigatorias:
   Executa preview e envio real com introspeccao de request, response e warnings.
 - `src/Support/MunicipalDanfseRendererResolver.php`
   Resolve renderer de DANFSe por `provider_key`.
+- `scripts/nfse/scaffold-family.php`
+  Gera scaffold base de nova familia/provider sem editar o catalogo automaticamente.
+- `scripts/nfse/scaffold-municipio.php`
+  Gera snippets e checklist base para onboarding de municipio.
 
 ### 1.2 Contratos base
 
@@ -78,6 +82,7 @@ Resultado esperado:
 
 - adicionar municipio no catalogo
 - ajustar a entrada da familia em `nfse-provider-families.json`
+- preferir `provider_config_overrides` no catalogo antes de criar subclass por cidade
 - se necessario, extender comportamento em provider existente sem criar familia nova
 
 ### Categoria C: novo provider concreto sobre comportamento proximo
@@ -201,6 +206,24 @@ Servico:
 - natureza da operacao
 - exigibilidade
 
+### 3.7.1 Payload defaults por municipio
+
+Quando a familia for compartilhada, defaults especificos de exemplo/homologacao devem ficar em `payload_defaults` no catalogo do municipio.
+
+Use isso para:
+
+- codigos e descricoes padrao de servico
+- defaults de RPS
+- enderecos e campos de tomador de homologacao
+- grupos adicionais exigidos por um municipio especifico
+
+Nao use `payload_defaults` para:
+
+- sobrescrever endpoint
+- trocar namespace SOAP
+- alterar assinatura
+- duplicar configuracao da familia tecnica
+
 ### 3.8 Consulta, cancelamento e DANFSe
 
 - identificadores exigidos para consulta
@@ -257,6 +280,8 @@ Atualize `config/nfse/nfse-provider-families.json` com:
 
 Se o municipio reutiliza familia existente, esta etapa pode ser apenas um ajuste leve de config.
 
+Se a variacao for apenas municipal, prefira registrar a diferenca em `provider_config_overrides` no catalogo em vez de duplicar a familia.
+
 ### Etapa 3: definir o provider concreto
 
 Criar ou ajustar o provider em `src/Providers/NFSe/Municipal/` quando o reuso por config nao for suficiente.
@@ -291,6 +316,8 @@ So mexer no factory quando o provider realmente precisar de:
 - defaults municipais
 - regras de `prestador`, `tomador` ou `servico`
 - diferenca entre payload demo e payload real
+
+Quando o payload adicional for apenas municipal e nao estrutural, prefira primeiro `payload_defaults` no catalogo.
 
 ### Etapa 6: garantir bootstrap e runtime
 
@@ -445,9 +472,10 @@ Arquivos de referencia:
 
 Use Manaus como caso de cobertura parcial:
 
-- catalogado e com familia registrada
-- util para validar o checklist de classificacao
-- nao deve ser tratado como exemplo de provider concluido enquanto operacoes, parser, homologacao e DANFSe nao estiverem fechados
+- o provider `MANAUS_AM` permanece apenas como referencia historica
+- nao e mais rota ativa no catalogo municipal
+- fatos geradores a partir de `2026-01-01` devem seguir pelo provider `nfse_nacional`
+- fatos geradores ate `2025-12-31` permanecem fora do fluxo suportado pelo roteamento padrao e ficam no sistema legado `Nota Manaus`
 
 Arquivo de referencia:
 
@@ -457,16 +485,26 @@ Arquivo de referencia:
 
 1. Levantar todos os requisitos do municipio.
 2. Classificar em A, B, C ou D.
-3. Registrar municipio no catalogo.
-4. Registrar ou ajustar a familia tecnica.
-5. Implementar provider somente se necessario.
-6. Ajustar payload factory somente se houver novos obrigatorios reais.
-7. Validar bootstrap, certificado e IM.
-8. Implementar parser e artefatos operacionais.
-9. Resolver DANFSe/pos-emissao.
-10. Criar fixtures, testes e evidencias.
-11. Homologar.
-12. Atualizar docs e release.
+3. Rodar `scripts/nfse/scaffold-municipio.php` para gerar snippet e checklist.
+4. Se necessario, rodar `scripts/nfse/scaffold-family.php`.
+5. Registrar municipio no catalogo.
+6. Registrar ou ajustar a familia tecnica.
+7. Definir `provider_config_overrides` e `payload_defaults` quando houver variacao leve.
+8. Implementar provider somente se necessario.
+9. Ajustar payload factory somente se houver novos obrigatorios reais.
+10. Validar bootstrap, certificado e IM.
+11. Implementar parser e artefatos operacionais.
+12. Resolver DANFSe/pos-emissao.
+13. Criar fixtures, testes e evidencias.
+14. Homologar.
+15. Atualizar docs e release.
+
+## 8.1 Politica de MEI
+
+- MEI em emissao usa sempre o provider nacional.
+- A classificacao deve vir do payload do prestador.
+- Se uma familia exigir classificacao explicita para evitar ambiguidade, usar `requires_explicit_mei_classification` via config.
+- Nao embutir regra de MEI apenas em um provider municipal especifico.
 
 ## 9. Backlog observavel, sem bloquear o processo
 

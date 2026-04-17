@@ -8,7 +8,7 @@
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-use freeline\FiscalCore\Facade\UtilsFacade;
+use sabbajohn\FiscalCore\Facade\UtilsFacade;
 
 $utils = new UtilsFacade();
 

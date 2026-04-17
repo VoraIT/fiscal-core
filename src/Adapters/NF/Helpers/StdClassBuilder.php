@@ -1,6 +1,6 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF\Helpers;
+namespace sabbajohn\FiscalCore\Adapters\NF\Helpers;
 
 /**
  * Helper para construção de objetos stdClass

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/Support/TestCertificateFile.php';
 
-use freeline\FiscalCore\Facade\NFSeFacade;
-use freeline\FiscalCore\Support\CertificateManager;
-use freeline\FiscalCore\Support\ConfigManager;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\ConfigManager;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use PHPUnit\Framework\TestCase;
 
 final class NFSeFacadeBootstrapTest extends TestCase
@@ -16,6 +16,8 @@ final class NFSeFacadeBootstrapTest extends TestCase
     private string $originalCwd;
     /** @var array{path:string,password:string} */
     private array $certificateFile;
+    /** @var array{path:string,password:string} */
+    private array $runtimeCertificateFile;
     /** @var string[] */
     private array $managedEnvKeys = [
         'FISCAL_ENVIRONMENT',
@@ -39,6 +41,11 @@ final class NFSeFacadeBootstrapTest extends TestCase
             'bootstrap-secret',
             '83188342000104'
         );
+        $this->runtimeCertificateFile = TestCertificateFile::create(
+            'NFSe Runtime Bootstrap Test',
+            'runtime-secret',
+            '01824852000166'
+        );
     }
 
     protected function tearDown(): void
@@ -46,6 +53,7 @@ final class NFSeFacadeBootstrapTest extends TestCase
         chdir($this->originalCwd);
         $this->clearEnvironment();
         TestCertificateFile::cleanup($this->certificateFile['path'] ?? null);
+        TestCertificateFile::cleanup($this->runtimeCertificateFile['path'] ?? null);
         ConfigManager::getInstance()->reload();
         CertificateManager::reload();
         ProviderRegistry::getInstance()->reload();
@@ -108,6 +116,33 @@ final class NFSeFacadeBootstrapTest extends TestCase
 
         $this->assertTrue($response->isError());
         $this->assertStringContainsString('diverge do certificado', (string) $response->getError());
+    }
+
+    public function testFacadePreservesRuntimeCertificateAlreadyLoadedBeforeBootstrap(): void
+    {
+        $this->bootstrapEnvironment([
+            'FISCAL_ENVIRONMENT=homologacao',
+            'FISCAL_CNPJ=01824852000166',
+            'FISCAL_RAZAO_SOCIAL="AGROAM - AGRICOLA AMAZONAS COMERCIAL LTDA"',
+            'FISCAL_UF=AM',
+            'FISCAL_CERT_PATH="' . $this->certificateFile['path'] . '"',
+            'FISCAL_CERT_PASSWORD="' . $this->certificateFile['password'] . '"',
+        ]);
+
+        $runtimeRaw = file_get_contents($this->runtimeCertificateFile['path']);
+        $this->assertNotFalse($runtimeRaw);
+
+        CertificateManager::getInstance()->clear()->loadFromContent(
+            (string) $runtimeRaw,
+            $this->runtimeCertificateFile['password']
+        );
+
+        $facade = new NFSeFacade('manaus');
+        $response = $facade->getProviderInfo();
+
+        $this->assertTrue($response->isSuccess(), (string) $response->getError());
+        $this->assertTrue((bool) $response->getData('certificate_loaded'));
+        $this->assertSame('01824852000166', CertificateManager::getInstance()->getCnpj());
     }
 
     private function bootstrapEnvironment(array $lines): void

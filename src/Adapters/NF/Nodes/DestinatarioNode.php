@@ -1,9 +1,9 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF\Nodes;
+namespace sabbajohn\FiscalCore\Adapters\NF\Nodes;
 
-use freeline\FiscalCore\Adapters\NF\Core\NotaNodeInterface;
-use freeline\FiscalCore\Adapters\NF\DTO\DestinatarioDTO;
+use sabbajohn\FiscalCore\Adapters\NF\Core\NotaNodeInterface;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\DestinatarioDTO;
 use NFePHP\NFe\Make;
 
 /**
@@ -27,7 +27,11 @@ class DestinatarioNode implements NotaNodeInterface
             $dest['CNPJ'] = $this->dto->cpfCnpj;
         }
         
-        if ($this->dto->inscricaoEstadual !== null && $this->dto->inscricaoEstadual !== '') {
+        if (
+            $this->dto->indIEDest === 1
+            && $this->dto->inscricaoEstadual !== null
+            && $this->dto->inscricaoEstadual !== ''
+        ) {
             $dest['IE'] = $this->dto->inscricaoEstadual;
         }
 
@@ -74,6 +78,14 @@ class DestinatarioNode implements NotaNodeInterface
         // indIEDest: 1=Contribuinte, 2=Isento, 9=Não contribuinte
         if (!in_array($this->dto->indIEDest, [1, 2, 9])) {
             throw new \InvalidArgumentException('indIEDest inválido');
+        }
+
+        if ($this->dto->indIEDest === 1 && empty($this->dto->inscricaoEstadual)) {
+            throw new \InvalidArgumentException('IE do destinatário é obrigatória quando indIEDest=1');
+        }
+
+        if ($this->dto->indIEDest !== 1 && !empty($this->dto->inscricaoEstadual)) {
+            throw new \InvalidArgumentException('IE do destinatário só pode ser informada quando indIEDest=1');
         }
         
         return true;

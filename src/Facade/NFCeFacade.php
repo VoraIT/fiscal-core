@@ -1,13 +1,13 @@
 <?php
 
-namespace freeline\FiscalCore\Facade;
+namespace sabbajohn\FiscalCore\Facade;
 
-use freeline\FiscalCore\Adapters\NF\NFCe\NFCeAdapter;
-use freeline\FiscalCore\Adapters\ImpressaoAdapter;
-use freeline\FiscalCore\Support\ResponseHandler;
-use freeline\FiscalCore\Support\FiscalResponse;
-use freeline\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
-use freeline\FiscalCore\Support\ToolsFactory;
+use sabbajohn\FiscalCore\Adapters\NF\NFCe\NFCeAdapter;
+use sabbajohn\FiscalCore\Adapters\ImpressaoAdapter;
+use sabbajohn\FiscalCore\Support\ResponseHandler;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
+use sabbajohn\FiscalCore\Support\ToolsFactory;
 /**
  * Facade para NFCe - Interface simplificada com tratamento de erros
  * Evita que aplicações recebam erros 500 fornecendo responses padronizados

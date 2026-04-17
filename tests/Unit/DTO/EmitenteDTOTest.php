@@ -3,7 +3,7 @@
 namespace Tests\Unit\DTO;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\NF\DTO\EmitenteDTO;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\EmitenteDTO;
 
 class EmitenteDTOTest extends TestCase
 {

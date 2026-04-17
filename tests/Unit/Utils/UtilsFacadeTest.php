@@ -3,7 +3,7 @@
 namespace Tests\Unit\Utils;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Facade\UtilsFacade;
+use sabbajohn\FiscalCore\Facade\UtilsFacade;
 
 /**
  * Testes unitários para UtilsFacade

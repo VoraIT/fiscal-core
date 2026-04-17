@@ -1,9 +1,9 @@
 <?php
 
-namespace freeline\FiscalCore\Tests\Unit;
+namespace sabbajohn\FiscalCore\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Adapters\NF\DTO\TotaisDTO;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\TotaisDTO;
 
 class TotaisDTOTest extends TestCase
 {

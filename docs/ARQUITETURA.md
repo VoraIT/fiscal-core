@@ -258,7 +258,7 @@ XML da NFe/NFCe
 ### Criando NFCe do Zero
 
 ```php
-use freeline\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
+use sabbajohn\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
 
 $builder = NotaFiscalBuilder::fromArray([
     'identificacao' => [
@@ -305,7 +305,7 @@ $xml = $nota->toXml();
 ### Importando de XML
 
 ```php
-use freeline\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
+use sabbajohn\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
 
 // De string
 $builder = NotaFiscalBuilder::fromXml($xmlString);

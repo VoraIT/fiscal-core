@@ -15,12 +15,12 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use freeline\FiscalCore\Facade\FiscalFacade;
-use freeline\FiscalCore\Facade\NFeFacade;
-use freeline\FiscalCore\Facade\NFCeFacade;
-use freeline\FiscalCore\Facade\NFSeFacade;
-use freeline\FiscalCore\Facade\TributacaoFacade;
-use freeline\FiscalCore\Facade\ImpressaoFacade;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Facade\NFeFacade;
+use sabbajohn\FiscalCore\Facade\NFCeFacade;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Facade\TributacaoFacade;
+use sabbajohn\FiscalCore\Facade\ImpressaoFacade;
 
 // =====================================================
 // 🎯 EXEMPLO 1: USO BÁSICO - INTERFACE UNIFICADA
@@ -243,7 +243,7 @@ echo "\n🔧 CONFIGURAÇÃO ADICIONAL\n";
 echo "=========================\n";
 echo "• Certificados A1/A3: Configure para NFe/NFCe\n";
 echo "• IBPT: Configure IBPT_CNPJ e IBPT_TOKEN para tributação\n";
-echo "• NFSe: Revise config/nfse-municipios.json para seus municípios\n";
+echo "• NFSe: Revise config/nfse/providers-catalog.json e config/nfse/nfse-provider-families.json\n";
 
 echo "\n📚 DOCUMENTAÇÃO\n";
 echo "===============\n";

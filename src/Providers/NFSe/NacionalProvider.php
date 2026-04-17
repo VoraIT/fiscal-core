@@ -1,18 +1,25 @@
 <?php
 
-namespace freeline\FiscalCore\Providers\NFSe;
+namespace sabbajohn\FiscalCore\Providers\NFSe;
 
-use freeline\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
-use freeline\FiscalCore\Services\NFSe\NacionalCatalogService;
-use freeline\FiscalCore\Support\Cache\FileCacheStore;
-use freeline\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
+use sabbajohn\FiscalCore\Services\NFSe\NacionalCatalogService;
+use sabbajohn\FiscalCore\Support\Cache\FileCacheStore;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use NFePHP\Common\Certificate;
 use NFePHP\Common\Signer;
 
-class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapabilitiesInterface
+class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapabilitiesInterface, NFSeOperationalIntrospectionInterface
 {
     private NacionalCatalogService $catalogService;
     private $httpClient;
     protected array $config;
+    private array $lastResponseData = [];
+    private array $lastOperationArtifacts = [];
+    private ?string $lastOperation = null;
+    private bool $lastSignatureApplied = false;
+    private array $lastCertificateContext = [];
 
     public function __construct(array $config)
     {
@@ -61,11 +68,47 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
     {
         $this->validarDados($dados);
         $this->validarDadosDpsNacional($dados);
+        // $this->assertCatalogCompatibilityBeforeEmission($dados);
         $xml = $this->montarXmlDpsNacional($dados);
         $xml = $this->assinarXmlSeNecessario($xml);
         $xml = $this->ensureUtf8XmlForTransmission($xml);
+        $response = $this->enviarOperacao('emitir', $xml);
+        $parsed = $this->processarResposta($response);
+        $this->storeOperationState('emitir', $xml, $response, $parsed);
 
-        return $this->enviarOperacao('emitir', $xml);
+        return $response;
+    }
+
+    private function assertCatalogCompatibilityBeforeEmission(array $dados): void
+    {
+        $validation = $this->validarLayoutDps($dados, true);
+        $errors = is_array($validation['errors'] ?? null) ? $validation['errors'] : [];
+        if ($errors !== []) {
+            throw new \RuntimeException('Pré-validação NFSe nacional falhou: ' . implode(' | ', $errors));
+        }
+
+        $warnings = is_array($validation['warnings'] ?? null) ? $validation['warnings'] : [];
+        $catalog = is_array($validation['catalog'] ?? null) ? $validation['catalog'] : [];
+        $cTribNac = $this->onlyDigits((string) ($catalog['cTribNac'] ?? $dados['servico']['cTribNac'] ?? ''));
+        $codigoMunicipio = $this->onlyDigits((string) ($catalog['codigoMunicipio'] ?? $dados['cLocEmi'] ?? ''));
+
+        foreach ($warnings as $warning) {
+            if (!is_string($warning)) {
+                continue;
+            }
+
+            if (str_contains($warning, 'Catálogo nacional não retornou registro para cTribNac')) {
+                throw new \RuntimeException(
+                    "Pré-validação NFSe nacional: o catálogo de parametrização municipal não retornou o serviço {$cTribNac} para o município {$codigoMunicipio}. Revise competência, código nacional e enquadramento do prestador antes de enviar para a SEFIN."
+                );
+            }
+
+            if (str_contains($warning, 'Catálogo nacional não retornou alíquota para cTribNac')) {
+                throw new \RuntimeException(
+                    "Pré-validação NFSe nacional: o catálogo não retornou parametrização para cTribNac {$cTribNac} no município {$codigoMunicipio}. Revise o código nacional do serviço antes de enviar para a SEFIN."
+                );
+            }
+        }
     }
 
     public function consultar(string $chave): string
@@ -74,8 +117,12 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
             throw new \InvalidArgumentException('Chave da NFSe é obrigatória');
         }
 
-        $xml = $this->buildConsultaXml($chave);
-        return $this->enviarOperacao('consultar', $xml, ['id' => $chave]);
+        // $xml = $this->buildConsultaXml($chave);
+        $response = $this->enviarOperacao('consultar', null, ['id' => $chave]);
+        $parsed = $this->processarResposta($response);
+        $this->storeOperationState('consultar', null, $response, $parsed, ['chave_acesso' => $chave]);
+
+        return json_encode($parsed);
     }
 
     public function cancelar(string $chave, string $motivo, ?string $protocolo = null): bool
@@ -87,6 +134,11 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         $xml = $this->buildCancelamentoXml($chave, $motivo, $protocolo);
         $response = $this->enviarOperacao('cancelar', $xml, ['id' => $chave]);
         $parsed = $this->processarResposta($response);
+        $this->storeOperationState('cancelar', $xml, $response, $parsed, [
+            'chave_acesso' => $chave,
+            'motivo' => $motivo,
+            'protocolo' => $protocolo,
+        ]);
 
         return (bool) ($parsed['sucesso'] ?? false);
     }
@@ -105,14 +157,35 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
 
     public function consultarPorRps(array $identificacaoRps): string
     {
-        foreach (['numero', 'serie', 'tipo'] as $campo) {
+        foreach (['numero', 'serie', 'tipo', 'id'] as $campo) {
             if (!isset($identificacaoRps[$campo])) {
                 throw new \InvalidArgumentException("Identificação RPS inválida: campo {$campo} é obrigatório");
             }
         }
 
+        $id = trim((string) ($identificacaoRps['id'] ?? ''));
+        if (preg_match('/^DPS\d{42}$/', $id) === 1) {
+            $response = $this->requestHttp(
+                'GET',
+                $this->resolveConfiguredEndpoint(
+                    (string) ($this->config['endpoints']['consultar_dps'] ?? 'sefin:/dps/{id}'),
+                    ['id' => $id]
+                ),
+                null,
+                ['Accept: application/json']
+            );
+            $parsed = $this->processarResposta($response);
+            $this->storeOperationState('consultar_dps', null, $response, $parsed, ['id_dps' => $id]);
+
+            return $response;
+        }
+
         $xml = $this->buildConsultaRpsXml($identificacaoRps);
-        return $this->enviarOperacao('consultar_rps', $xml);
+        $response = $this->enviarOperacao('consultar_rps', $xml);
+        $parsed = $this->processarResposta($response);
+        $this->storeOperationState('consultar_rps', $xml, $response, $parsed, ['rps' => $identificacaoRps]);
+
+        return $response;
     }
 
     public function consultarLote(string $protocolo): string
@@ -122,7 +195,11 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         }
 
         $xml = $this->buildConsultaLoteXml($protocolo);
-        return $this->enviarOperacao('consultar_lote', $xml);
+        $response = $this->enviarOperacao('consultar_lote', $xml);
+        $parsed = $this->processarResposta($response);
+        $this->storeOperationState('consultar_lote', $xml, $response, $parsed, ['protocolo' => $protocolo]);
+
+        return $response;
     }
 
     public function baixarXml(string $chave): string
@@ -132,7 +209,11 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         }
 
         $xml = $this->buildDownloadXmlPayload('xml', $chave);
-        return $this->enviarOperacao('baixar_xml', $xml);
+        $response = $this->enviarOperacao('baixar_xml', $xml, ['id' => $chave]);
+        $parsed = $this->processarResposta($response);
+        $this->storeOperationState('baixar_xml', $xml, $response, $parsed, ['chave_acesso' => $chave]);
+
+        return json_encode($parsed);
     }
 
     public function baixarDanfse(string $chave): string
@@ -142,7 +223,11 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         }
 
         $xml = $this->buildDownloadXmlPayload('danfse', $chave);
-        return $this->enviarOperacao('baixar_danfse', $xml);
+        $response = $this->enviarOperacao('baixar_danfse', $xml, ['chave' => $chave]);
+        $parsed = $this->processarResposta($response);
+        $this->storeOperationState('baixar_danfse', $xml, $response, $parsed, ['chave_acesso' => $chave]);
+
+        return json_encode($parsed);
     }
 
     public function listarMunicipiosNacionais(bool $forceRefresh = false): array
@@ -220,6 +305,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
             'tpEmit' => (string)($payload['tpEmit'] ?? ''),
             'cLocEmi' => (string)($payload['cLocEmi'] ?? ''),
             'prestador.cnpj' => (string)($payload['prestador']['cnpj'] ?? ''),
+            'prestador.inscricaoMunicipal' => (string)($payload['prestador']['inscricaoMunicipal'] ?? ''),
             'prestador.regTrib.opSimpNac' => (string)($payload['prestador']['opSimpNac'] ?? ''),
             'prestador.regTrib.regEspTrib' => (string)($payload['prestador']['regEspTrib'] ?? ''),
             'serv.cLocPrestacao' => (string)($payload['servico']['cLocPrestacao'] ?? ''),
@@ -268,6 +354,10 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
                 );
 
                 $catalogData = $aliqResponse['data'] ?? [];
+                $catalogHasService = $this->catalogContainsServiceCode(
+                    is_array($catalogData) ? $catalogData : [],
+                    $cTribNac
+                );
                 $catalogAliq = $this->extractAliquotaMunicipalFromCatalog(
                     is_array($catalogData) ? $catalogData : [],
                     $cTribNac
@@ -277,10 +367,15 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
                     'codigoMunicipio' => $cLocEmi,
                     'cTribNac' => $cTribNac,
                     'competencia' => $competencia,
+                    'servicoEncontradoCatalogo' => $catalogHasService,
                     'aliquotaCatalogo' => $catalogAliq,
+                    'source' => $aliqResponse['metadata']['source'] ?? null,
+                    'stale' => $aliqResponse['metadata']['stale'] ?? null,
                 ];
 
-                if ($catalogAliq === null) {
+                if ($catalogHasService === false) {
+                    $warnings[] = "Catálogo nacional não retornou registro para cTribNac {$cTribNac} no município {$cLocEmi}.";
+                } elseif ($catalogAliq === null) {
                     $warnings[] = "Catálogo nacional não retornou alíquota para cTribNac {$cTribNac} no município {$cLocEmi}.";
                 } elseif ($aliqPayload <= 0) {
                     $warnings[] = "Alíquota não informada no payload. Catálogo sugere {$catalogAliq}.";
@@ -474,7 +569,11 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         $ns = $this->getDpsNamespace();
 
         $serie = $this->normalizeNumeric((string)($dados['serie'] ?? $dados['serie_rps'] ?? '1'), 5, '1');
-        $nDps = $this->normalizeNumeric((string)($dados['nDPS'] ?? $dados['numero_rps'] ?? '1'), 15, '1');
+        $nDpsId = $this->normalizeNumeric((string)($dados['nDPS'] ?? $dados['numero_rps'] ?? '1'), 15, '1');
+        $nDps = ltrim($nDpsId, '0');
+        if ($nDps === '') {
+            $nDps = '1';
+        }
         $dCompet = $this->normalizeDpsDate((string)($dados['dCompet'] ?? ''));
         $tpAmb = (string)($dados['tpAmb'] ?? ($this->getAmbiente() === 'producao' ? '1' : '2'));
         $dhEmi = $this->normalizeDpsDateTime((string)($dados['dhEmi'] ?? ''));
@@ -482,7 +581,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         $tpEmit = (string)($dados['tpEmit'] ?? '1');
 
         $versao = (string)($this->config['dps_versao'] ?? '1.00');
-        $dpsId = $this->buildDpsId($dados, $serie, $nDps);
+        $dpsId = $this->buildDpsId($dados, $serie, $nDpsId);
         $wrapInNfse = $this->shouldWrapDpsInNfse();
 
         if ($wrapInNfse) {
@@ -509,7 +608,6 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         $inf = $dom->createElementNS($ns, 'infDPS');
         $inf->setAttribute('Id', $dpsId);
         $dps->appendChild($inf);
-        $this->appendNodeDps($dom, $inf, 'id', $dpsId);
 
         $this->appendNodeDps($dom, $inf, 'tpAmb', $tpAmb);
         $this->appendNodeDps($dom, $inf, 'dhEmi', $dhEmi);
@@ -531,7 +629,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         } else {
             $this->appendNodeDps($dom, $prest, 'CPF', str_pad(substr($prestDoc, 0, 11), 11, '0', STR_PAD_LEFT));
         }
-        $prestIm = trim((string)($dados['prestador']['inscricaoMunicipal'] ?? ''));
+        $prestIm = $this->normalizeMunicipalRegistration((string)($dados['prestador']['inscricaoMunicipal'] ?? ''));
         if ($prestIm !== '') {
             $this->appendNodeDps($dom, $prest, 'IM', $prestIm);
         }
@@ -573,8 +671,17 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         if ($cTribNac === '') {
             $cTribNac = '010101';
         }
+        $cTribMun = trim((string)($dados['servico']['cTribMun'] ?? $dados['servico']['codigoMunicipal'] ?? ''));
+        $cNbs = preg_replace('/\D+/', '', (string)($dados['servico']['cNBS'] ?? $dados['servico']['nbs'] ?? '')) ?? '';
         $this->appendNodeDps($dom, $cServ, 'cTribNac', $cTribNac);
+        if ($cTribMun !== '') {
+            $this->appendNodeDps($dom, $cServ, 'cTribMun', $cTribMun);
+        }
         $this->appendNodeDps($dom, $cServ, 'xDescServ', (string)($dados['servico']['descricao'] ?? $dados['servico']['discriminacao'] ?? 'Servico'));
+        if ($cNbs !== '') {
+            $this->appendNodeDps($dom, $cServ, 'cNBS', $cNbs);
+        }
+        $this->appendObraGroup($dom, $serv, (array) ($dados['servico']['obra'] ?? []));
 
         $valores = $dom->createElementNS($ns, 'valores');
         $inf->appendChild($valores);
@@ -590,7 +697,6 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         $trib->appendChild($tribMun);
         $tribIssqn = (string)($dados['servico']['tribISSQN'] ?? '1');
         $this->appendNodeDps($dom, $tribMun, 'tribISSQN', $tribIssqn);
-        $this->appendNodeDps($dom, $tribMun, 'tpRetISSQN', (string)($dados['servico']['tpRetISSQN'] ?? '1'));
         $aliquota = $this->normalizeDpsAliquotaPercent((float)($dados['servico']['aliquota'] ?? 0));
         $sendPAliq = (bool)($this->config['dps_send_paliq'] ?? ($tribIssqn === '1'));
         if (array_key_exists('enviarPAliq', (array)($dados['servico'] ?? []))) {
@@ -599,6 +705,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         if ($sendPAliq && $aliquota > 0) {
             $this->appendNodeDps($dom, $tribMun, 'pAliq', $this->formatDecimal($aliquota, 2));
         }
+        $this->appendNodeDps($dom, $tribMun, 'tpRetISSQN', (string)($dados['servico']['tpRetISSQN'] ?? '1'));
 
         $totTrib = $dom->createElementNS($ns, 'totTrib');
         $trib->appendChild($totTrib);
@@ -607,13 +714,49 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         $this->appendNodeDps($dom, $vTotTrib, 'vTotTribFed', '0.00');
         $this->appendNodeDps($dom, $vTotTrib, 'vTotTribEst', '0.00');
         $this->appendNodeDps($dom, $vTotTrib, 'vTotTribMun', '0.00');
-        $pTotTrib = $dom->createElementNS($ns, 'pTotTrib');
-        $totTrib->appendChild($pTotTrib);
-        $this->appendNodeDps($dom, $pTotTrib, 'pTotTribFed', '0.00');
-        $this->appendNodeDps($dom, $pTotTrib, 'pTotTribEst', '0.00');
-        $this->appendNodeDps($dom, $pTotTrib, 'pTotTribMun', '0.00');
 
         return $dom->saveXML() ?: '';
+    }
+
+    private function appendObraGroup(\DOMDocument $dom, \DOMElement $serv, array $obra): void
+    {
+        if ($obra === []) {
+            return;
+        }
+
+        $ns = $this->getDpsNamespace();
+        $obraNode = $dom->createElementNS($ns, 'obra');
+
+        $cObra = trim((string) ($obra['cObra'] ?? $obra['codigo'] ?? ''));
+        $inscImobFisc = trim((string) ($obra['inscImobFisc'] ?? ''));
+        $end = is_array($obra['end'] ?? null) ? $obra['end'] : [];
+
+        if ($cObra !== '') {
+            $this->appendNodeDps($dom, $obraNode, 'cObra', $cObra);
+        } elseif ($inscImobFisc !== '') {
+            $this->appendNodeDps($dom, $obraNode, 'inscImobFisc', $inscImobFisc);
+        } elseif ($end !== []) {
+            $endNode = $dom->createElementNS($ns, 'end');
+            foreach ([
+                'CEP' => 'CEP',
+                'xLgr' => 'xLgr',
+                'nro' => 'nro',
+                'xCpl' => 'xCpl',
+                'xBairro' => 'xBairro',
+            ] as $target => $source) {
+                $value = trim((string) ($end[$source] ?? ''));
+                if ($value !== '') {
+                    $this->appendNodeDps($dom, $endNode, $target, $value);
+                }
+            }
+            if ($endNode->childNodes->length > 0) {
+                $obraNode->appendChild($endNode);
+            }
+        }
+
+        if ($obraNode->childNodes->length > 0) {
+            $serv->appendChild($obraNode);
+        }
     }
 
     protected function processarResposta(string $xmlResposta): array
@@ -625,22 +768,36 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
                 'dados' => [],
             ];
         }
+        if (str_contains($xmlResposta, '%PDF-1.7')) {
+            // Handle PDF response
+            return [
+                'sucesso' => true,
+                'status' => 'success',
+                'mensagem' => 'Processado com sucesso',
+                'dados' => [
+                    'pdf_base64' => base64_encode($xmlResposta),
+                    'content_type' => 'application/pdf',
+                ],
+            ];
+        }
 
         $json = json_decode($xmlResposta, true);
         if (is_array($json)) {
-            $mensagemErro = $json['erro']['mensagem']
-                ?? $json['erro']['descricao']
-                ?? (($json['erros'][0]['mensagem'] ?? null))
-                ?? (($json['erros'][0]['descricao'] ?? null))
-                ?? null;
+            $mensagens = $this->extractProcessingMessages($json);
+            $mensagemErro = $mensagens[0] ?? null;
             $nfseXml = $this->decodeGZipBase64((string)($json['nfseXmlGZipB64'] ?? ''));
             $idDps = (string)($json['idDps'] ?? $json['idDPS'] ?? '');
             $chave = (string)($json['chaveAcesso'] ?? '');
+            $nfseResumo = $this->extractNfseSummary($nfseXml, $chave);
 
             if ($nfseXml !== null) {
                 return [
                     'sucesso' => true,
+                    'status' => 'success',
                     'mensagem' => 'Processado com sucesso',
+                    'mensagens' => $mensagens,
+                    'raw_xml' => $nfseXml,
+                    'nfse' => $nfseResumo,
                     'dados' => [
                         'xml_retorno' => $nfseXml,
                         'id_dps' => $idDps !== '' ? $idDps : null,
@@ -656,8 +813,12 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
             }
 
             return [
-                'sucesso' => false,
-                'mensagem' => (string)($mensagemErro ?: 'Falha no processamento da NFS-e'),
+                'sucesso' => $chave !== '' && $idDps !== '',
+                'status' => ($chave !== '' && $idDps !== '') ? 'success' : 'error',
+                'mensagem' => (string)($mensagemErro ?: ($chave !== '' ? 'Processado com sucesso' : 'Falha no processamento da NFS-e')),
+                'mensagens' => $mensagens,
+                'raw_xml' => null,
+                'nfse' => $chave !== '' ? ['chave_acesso' => $chave] : null,
                 'dados' => [
                     'id_dps' => $idDps !== '' ? $idDps : null,
                     'chave_acesso' => $chave !== '' ? $chave : null,
@@ -704,7 +865,15 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
 
         return [
             'sucesso' => $sucesso,
+            'status' => $sucesso ? 'success' : 'error',
             'mensagem' => $mensagem ?? ($sucesso ? 'Processado com sucesso' : 'Retorno sem status explícito'),
+            'mensagens' => $mensagem !== null ? [$mensagem] : [],
+            'raw_xml' => $xmlResposta,
+            'nfse' => $numeroNfse !== null || $codigoVerificacao !== null ? [
+                'numero' => $numeroNfse,
+                'codigo_verificacao' => $codigoVerificacao,
+                'chave_acesso' => null,
+            ] : null,
             'dados' => [
                 'numero_nfse' => $numeroNfse,
                 'codigo_verificacao' => $codigoVerificacao,
@@ -722,6 +891,10 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
 
         if (empty($dados['prestador']['cnpj']) || strlen($this->onlyDigits((string) $dados['prestador']['cnpj'])) !== 14) {
             throw new \InvalidArgumentException('CNPJ do prestador inválido');
+        }
+
+        if (trim((string) ($dados['prestador']['inscricaoMunicipal'] ?? '')) === '') {
+            throw new \InvalidArgumentException('Campo obrigatório ausente: prestador.inscricaoMunicipal');
         }
 
         $codigoServico = (string)($dados['servico']['codigo'] ?? $dados['servico']['cTribNac'] ?? $dados['servico']['codigoServicoNacional'] ?? '');
@@ -751,7 +924,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
 
     private function shouldWrapDpsInNfse(): bool
     {
-        $root = strtolower((string)($this->config['dps_root'] ?? 'nfse'));
+        $root = strtolower((string)($this->config['dps_root'] ?? 'dps'));
         if ($root === 'dps') {
             return false;
         }
@@ -869,28 +1042,38 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         }
     }
 
-    private function enviarOperacao(string $operacao, string $xml, array $params = []): string
+    private function enviarOperacao(string $operacao, ?string $xml, array $params = []): string
     {
         $rawEndpoint = (string)($this->config['endpoints'][$operacao] ?? '');
         $path = $this->resolveOperationPath($operacao, $params);
         $method = $this->resolveOperationMethod($operacao);
         $response = '';
+        $useJsonTransport = $this->shouldUseJsonTransport($operacao, $rawEndpoint);
+        $transport = $this->getTransport($operacao, $rawEndpoint);
 
-        if ($operacao === 'emitir' && $this->shouldSendJsonGzipPayload($operacao, $rawEndpoint, $path)) {
-            $gzipBase64 = base64_encode(gzencode($xml));
-            $payload = json_encode(['dpsXmlGZipB64' => $gzipBase64], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            if ($payload === false) {
-                throw new \RuntimeException('Falha ao serializar payload JSON da NFS-e.');
-            }
-            $response = $this->requestHttp($method, $path, $payload, [
-                'Content-Type: application/json',
-                'Accept: application/json',
-            ]);
-        } else {
-            $response = $this->requestHttp($method, $path, $method === 'GET' ? null : $xml, [
-                'Content-Type: application/xml',
-                'Accept: application/xml',
-            ]);
+
+        switch ($transport) {
+            case 'json':
+                $payload = $method === 'GET' ? null : $this->buildJsonPayloadForOperation($operacao, $xml);
+                $headers = ['Accept: application/json'];
+                if ($payload !== null) {
+                    array_unshift($headers, 'Content-Type: application/json');
+                }
+                $response = $this->requestHttp($method, $path, $payload, $headers);
+                break;
+
+            case 'pdf':
+                $response = $this->requestHttp($method, $path, $method === 'GET' ? null : $xml, [
+                    'Content-Type: application/pdf',
+                    'Accept: application/pdf',
+                ]);
+                break;
+            default:
+                $response = $this->requestHttp($method, $path, $method === 'GET' ? null : $xml, [
+                            'Content-Type: application/xml',
+                            'Accept: application/xml',
+                        ]);
+                break;
         }
 
         if ($response === '') {
@@ -903,14 +1086,14 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
     private function resolveOperationPath(string $operacao, array $params = []): string
     {
         $defaultMap = [
-            'emitir' => '/nfse/emitir',
-            'consultar' => '/nfse/consultar',
-            'cancelar' => '/nfse/cancelar',
-            'substituir' => '/nfse/substituir',
+            'emitir' => '/nfse',
+            'consultar' => '/nfse/{id}',
+            'cancelar' => '/nfse/{id}/eventos',
+            'substituir' => '/nfse',
             'consultar_rps' => '/nfse/consultar-rps',
             'consultar_lote' => '/nfse/consultar-lote',
             'baixar_xml' => '/nfse/download/xml',
-            'baixar_danfse' => '/nfse/download/danfse',
+            'baixar_danfse' => '/danfse/{chave}',
         ];
 
         $configured = $this->config['endpoints'][$operacao] ?? null;
@@ -971,18 +1154,45 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         return $endpoint;
     }
 
-    private function shouldSendJsonGzipPayload(string $operacao, string $rawEndpoint, string $resolvedPath): bool
+    private function shouldUseJsonTransport(string $operacao, string $rawEndpoint): bool
     {
-        if ($operacao !== 'emitir') {
-            return false;
+        $transport = strtolower((string)($this->config['operation_transports'][$operacao] ?? ''));
+        if ($transport !== '') {
+            return $transport === 'json';
         }
 
-        if (isset($this->config['emit_payload_format'])) {
-            return strtolower((string)$this->config['emit_payload_format']) === 'json_gzip';
+        return preg_match('/^sefin:\//i', $rawEndpoint) === 1 || $operacao === 'emitir';
+    }
+
+    private function getTransport(string $operacao, string $rawEndpoint): string
+    {
+        $transport = strtolower((string)($this->config['operation_transports'][$operacao] ?? ''));
+        if ($transport !== '') {
+            return $transport;
         }
 
-        return preg_match('/^[a-z0-9_]+:\//i', $rawEndpoint) === 1
-            || str_contains($resolvedPath, '/api/v1/');
+        return preg_match('/^sefin:\//i', $rawEndpoint) === 1 || $operacao === 'emitir' ? 'json' : 'pdf';
+    }
+
+    private function buildJsonPayloadForOperation(string $operacao, ?string $xml): ?string
+    {
+        if ($xml === null) {
+            return null;
+        }
+
+        $gzipBase64 = base64_encode(gzencode($xml));
+        $payload = match ($operacao) {
+            'emitir' => ['dpsXmlGZipB64' => $gzipBase64],
+            'cancelar' => ['pedidoRegistroEventoXmlGZipB64' => $gzipBase64],
+            default => throw new \RuntimeException("Operação {$operacao} não suporta transporte JSON compactado configurado."),
+        };
+
+        $encoded = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($encoded === false) {
+            throw new \RuntimeException("Falha ao serializar payload JSON da operação {$operacao}.");
+        }
+
+        return $encoded;
     }
 
     private function requestHttp(string $method, string $path, ?string $body = null, array $headers = []): string
@@ -1009,6 +1219,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
             $ch = curl_init($url);
             $tempCertFile = null;
             $tempKeyFile = null;
+            $certificate = $this->resolveRuntimeCertificate();
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => $this->getTimeout(),
@@ -1024,7 +1235,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
             if (($urlParts['scheme'] ?? 'https') === 'https') {
                 curl_setopt($ch, CURLOPT_PORT, 443);
             }
-            $this->applyMutualTlsCurlOptions($ch, $tempCertFile, $tempKeyFile);
+            $mutualTlsApplied = $this->applyMutualTlsCurlOptions($ch, $tempCertFile, $tempKeyFile, $certificate);
             if ($body !== null) {
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
             }
@@ -1047,13 +1258,16 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
                     'url' => $url,
                     'path' => $path,
                     'status' => $status,
-                    'curl_error' => $curlErr,
-                    'headers' => $allHeaders,
-                    'request_body' => $this->truncate((string)$body, 1200),
-                    'response_headers' => null,
-                    'response_body' => null,
-                ]);
-                throw new \RuntimeException("Erro cURL: {$curlErr}");
+                'curl_error' => $curlErr,
+                'headers' => $this->maskHttpHeaders($allHeaders),
+                'request_body' => $this->summarizeHttpBody($body),
+                'mutual_tls' => $mutualTlsApplied,
+                'xml_signature_applied' => $this->lastSignatureApplied,
+                'certificate' => $this->buildCertificateDebugContext($certificate),
+                'response_headers' => null,
+                'response_body' => null,
+            ]);
+                throw new \RuntimeException($this->buildHttpErrorMessage("Erro cURL: {$curlErr}"));
             }
 
             $responseHeaders = substr((string)$rawResponse, 0, $headerSize);
@@ -1065,8 +1279,11 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
                 'path' => $path,
                 'status' => $status,
                 'curl_error' => $curlErr !== '' ? $curlErr : null,
-                'headers' => $allHeaders,
-                'request_body' => $this->truncate((string)$body, 1200),
+                'headers' => $this->maskHttpHeaders($allHeaders),
+                'request_body' => $this->summarizeHttpBody($body),
+                'mutual_tls' => $mutualTlsApplied,
+                'xml_signature_applied' => $this->lastSignatureApplied,
+                'certificate' => $this->buildCertificateDebugContext($certificate),
                 'response_headers' => $this->truncate($responseHeaders, 1200),
                 'response_body' => $this->truncate((string)$response, 1200),
             ]);
@@ -1074,7 +1291,9 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
             if ($status >= 400) {
                 $snippet = substr(trim((string)$response), 0, 300);
                 $suffix = $snippet !== '' ? " | resposta: {$snippet}" : '';
-                throw new \RuntimeException("HTTP {$status} na operação {$path} [req:{$requestId}]{$suffix}");
+                throw new \RuntimeException(
+                    $this->buildHttpErrorMessage("HTTP {$status} na operação {$path} [req:{$requestId}]{$suffix}")
+                );
             }
 
             return (string) $response;
@@ -1096,13 +1315,13 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
             'path' => $path,
             'status' => null,
             'curl_error' => null,
-            'headers' => $allHeaders,
-            'request_body' => $this->truncate((string)$body, 1200),
+            'headers' => $this->maskHttpHeaders($allHeaders),
+            'request_body' => $this->summarizeHttpBody($body),
             'response_headers' => null,
             'response_body' => $response !== false ? $this->truncate((string)$response, 1200) : null,
         ]);
         if ($response === false) {
-            throw new \RuntimeException("Falha HTTP na operação {$path} [req:{$requestId}]");
+            throw new \RuntimeException($this->buildHttpErrorMessage("Falha HTTP na operação {$path} [req:{$requestId}]"));
         }
 
         return (string) $response;
@@ -1118,6 +1337,11 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
 
     private function getHttpDebugLogPath(): string
     {
+        $envConfigured = trim((string)($_ENV['FISCAL_NFSE_DEBUG_LOG'] ?? getenv('FISCAL_NFSE_DEBUG_LOG') ?: ''));
+        if ($envConfigured !== '') {
+            return $envConfigured;
+        }
+
         $configured = (string)($this->config['debug_log_file'] ?? '');
         if ($configured !== '') {
             return $configured;
@@ -1144,6 +1368,95 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         }
 
         @file_put_contents($this->getHttpDebugLogPath(), $line . PHP_EOL, FILE_APPEND);
+    }
+
+    private function buildHttpErrorMessage(string $message): string
+    {
+        if (!$this->isHttpDebugEnabled()) {
+            return $message;
+        }
+
+        return $message . ' | debug_log: ' . $this->getHttpDebugLogPath();
+    }
+
+    private function maskHttpHeaders(array $headers): array
+    {
+        return array_map(function ($header) {
+            $header = (string) $header;
+            if (preg_match('/^(Authorization|X-API-Key|Api-Key|Token):/i', $header) === 1) {
+                [$name] = explode(':', $header, 2);
+                return $name . ': ***';
+            }
+
+            return $header;
+        }, $headers);
+    }
+
+    private function summarizeHttpBody(?string $body): mixed
+    {
+        if ($body === null) {
+            return null;
+        }
+
+        $decoded = json_decode($body, true);
+        if (is_array($decoded)) {
+            if (isset($decoded['dpsXmlGZipB64'])) {
+                $xml = $this->decodeGZipBase64((string) $decoded['dpsXmlGZipB64']);
+                $summary = [
+                    'format' => 'json_gzip',
+                    'keys' => array_keys($decoded),
+                    'dpsXmlGZipB64_length' => strlen((string) $decoded['dpsXmlGZipB64']),
+                ];
+                if (is_string($xml) && $xml !== '') {
+                    $summary['xml_root'] = $this->extractXmlRootName($xml);
+                    $summary['xml_signed'] = str_contains($xml, '<Signature');
+                    $summary['dps_id'] = $this->extractXmlReferenceId($xml);
+                }
+
+                return $summary;
+            }
+
+            if (isset($decoded['pedidoRegistroEventoXmlGZipB64'])) {
+                $xml = $this->decodeGZipBase64((string) $decoded['pedidoRegistroEventoXmlGZipB64']);
+                return [
+                    'format' => 'json_gzip',
+                    'keys' => array_keys($decoded),
+                    'pedidoRegistroEventoXmlGZipB64_length' => strlen((string) $decoded['pedidoRegistroEventoXmlGZipB64']),
+                    'xml_root' => is_string($xml) ? $this->extractXmlRootName($xml) : null,
+                    'xml_signed' => is_string($xml) ? str_contains($xml, '<Signature') : null,
+                ];
+            }
+
+            return $decoded;
+        }
+
+        return $this->truncate($body, 1200);
+    }
+
+    private function extractXmlRootName(string $xml): ?string
+    {
+        $dom = new \DOMDocument();
+        if (!@$dom->loadXML($xml)) {
+            return null;
+        }
+
+        return $dom->documentElement?->localName;
+    }
+
+    private function extractXmlReferenceId(string $xml): ?string
+    {
+        $dom = new \DOMDocument();
+        if (!@$dom->loadXML($xml)) {
+            return null;
+        }
+
+        $xpath = new \DOMXPath($dom);
+        $referenceNode = $xpath->query("//*[local-name()='infDPS']/@Id")->item(0);
+        if ($referenceNode instanceof \DOMAttr) {
+            return trim($referenceNode->value) !== '' ? $referenceNode->value : null;
+        }
+
+        return null;
     }
 
     private function truncate(?string $value, int $limit): ?string
@@ -1266,6 +1579,50 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         return null;
     }
 
+    private function catalogContainsServiceCode(array $catalogData, string $cTribNac): bool
+    {
+        if ($cTribNac === '') {
+            return false;
+        }
+
+        if (isset($catalogData['aliquotas']) && is_array($catalogData['aliquotas'])) {
+            foreach ($catalogData['aliquotas'] as $serviceCode => $historico) {
+                $serviceCodeNorm = $this->onlyDigits((string) $serviceCode);
+                if ($serviceCodeNorm === $cTribNac && is_array($historico) && $historico !== []) {
+                    return true;
+                }
+            }
+        }
+
+        $stack = [$catalogData];
+        while (!empty($stack)) {
+            $current = array_pop($stack);
+            if (!is_array($current)) {
+                continue;
+            }
+
+            if ($this->isAssocArray($current)) {
+                $code = $this->onlyDigits((string) ($this->findFirstValueByPaths($current, [
+                    'cTribNac',
+                    'codigoServicoNacional',
+                    'codigo_servico_nacional',
+                    'codigo',
+                ]) ?? ''));
+                if ($code !== '' && $code === $cTribNac) {
+                    return true;
+                }
+            }
+
+            foreach ($current as $child) {
+                if (is_array($child)) {
+                    $stack[] = $child;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private function normalizeCompetenciaForParamApi(?string $date): string
     {
         $raw = trim((string)$date);
@@ -1294,24 +1651,23 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         return $headers;
     }
 
-    private function applyMutualTlsCurlOptions($ch, ?string &$tempCertFile = null, ?string &$tempKeyFile = null): void
+    private function applyMutualTlsCurlOptions($ch, ?string &$tempCertFile = null, ?string &$tempKeyFile = null, ?Certificate $certificate = null): bool
     {
-        $certManager = CertificateManager::getInstance();
-        $certificate = $certManager->getCertificate();
+        $certificate = $certificate ?? $this->resolveRuntimeCertificate();
         if ($certificate === null) {
-            return;
+            return false;
         }
 
         $certPem = (string)$certificate;
         $keyPem = (string)$certificate->privateKey;
         if ($certPem === '' || $keyPem === '') {
-            return;
+            return false;
         }
 
         $tempCertFile = tempnam(sys_get_temp_dir(), 'nfse_cert_');
         $tempKeyFile = tempnam(sys_get_temp_dir(), 'nfse_key_');
         if (!is_string($tempCertFile) || !is_string($tempKeyFile)) {
-            return;
+            return false;
         }
 
         file_put_contents($tempCertFile, $certPem);
@@ -1323,6 +1679,8 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         curl_setopt($ch, CURLOPT_SSLKEY, $tempKeyFile);
         curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'PEM');
         curl_setopt($ch, CURLOPT_SSLKEYTYPE, 'PEM');
+
+        return true;
     }
 
     private function decodeGZipBase64(string $content): ?string
@@ -1662,14 +2020,27 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
     {
         $value = trim($raw);
         $pattern = '/^(((20(([02468][048])|([13579][26]))-02-29))|(20[0-9][0-9])-((((0[1-9])|(1[0-2]))-((0[1-9])|(1\d)|(2[0-8])))|((((0[13578])|(1[02]))-31)|(((0[1,3-9])|(1[0-2]))-(29|30)))))T(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d([\-,\+](0[0-9]|10|11):00|([\+](12):00))$/';
+        $maxAllowed = new \DateTimeImmutable('now -5 seconds', new \DateTimeZone('UTC'));
 
         if ($value !== '' && preg_match($pattern, $value) === 1) {
+            try {
+                $parsed = new \DateTimeImmutable($value);
+                if ($parsed > $maxAllowed) {
+                    return $maxAllowed->format('Y-m-d\TH:i:sP');
+                }
+            } catch (\Throwable $e) {
+            }
+
             return $value;
         }
 
         if ($value !== '') {
             try {
                 $parsed = new \DateTimeImmutable($value);
+                if ($parsed > $maxAllowed) {
+                    return $maxAllowed->format('Y-m-d\TH:i:sP');
+                }
+
                 $formatted = $parsed->format('Y-m-d\TH:i:sP');
                 if (preg_match($pattern, $formatted) === 1) {
                     return $formatted;
@@ -1678,7 +2049,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
             }
         }
 
-        return (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d\TH:i:sP');
+        return $maxAllowed->format('Y-m-d\TH:i:sP');
     }
 
     private function getDpsNamespace(): string
@@ -1689,12 +2060,12 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
     private function assinarXmlSeNecessario(string $xml): string
     {
         $signatureMode = (string) ($this->config['signature_mode'] ?? 'optional');
+        $this->lastSignatureApplied = false;
         if ($signatureMode === 'none') {
             return $xml;
         }
 
-        $certManager = CertificateManager::getInstance();
-        $certificate = $certManager->getCertificate();
+        $certificate = $this->resolveRuntimeCertificate();
         if ($certificate === null) {
             if ($signatureMode === 'required') {
                 throw new \RuntimeException('Certificado digital obrigatório para assinatura XML em homologação.');
@@ -1704,19 +2075,51 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
 
         try {
             [$signTag, $signAttr] = $this->resolveSignatureTarget($xml);
-            return Signer::sign(
+            $signedXml = Signer::sign(
                 $certificate,
                 $xml,
                 $signTag,
                 $signAttr,
                 OPENSSL_ALGO_SHA256
             );
+            $this->lastSignatureApplied = $signedXml !== $xml;
+            return $signedXml;
         } catch (\Throwable $e) {
             if ($signatureMode === 'required') {
                 throw new \RuntimeException('Falha ao assinar XML NFSe: ' . $e->getMessage(), 0, $e);
             }
             return $xml;
         }
+    }
+
+    private function resolveRuntimeCertificate(): ?Certificate
+    {
+        $configured = $this->config['certificate'] ?? null;
+        if ($configured instanceof Certificate) {
+            return $configured;
+        }
+
+        return CertificateManager::getInstance()->getCertificate();
+    }
+
+    private function buildCertificateDebugContext(?Certificate $certificate): array
+    {
+        if ($certificate === null) {
+            $this->lastCertificateContext = ['loaded' => false];
+            return $this->lastCertificateContext;
+        }
+
+        $documento = $certificate->getCnpj() ?: $certificate->getCpf() ?: '';
+        $context = [
+            'loaded' => true,
+            'documento' => $documento,
+            'razao_social' => trim((string) $certificate->getCompanyName()),
+            'valid_to' => $certificate->getValidTo()?->format('Y-m-d H:i:s'),
+        ];
+
+        $this->lastCertificateContext = $context;
+
+        return $context;
     }
 
     /**
@@ -1737,7 +2140,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
 
         $dps = $xpath->query("//*[local-name()='infDPS']");
         if ($dps && $dps->length > 0) {
-            return ['infDPS', 'id'];
+            return ['infDPS', 'Id'];
         }
 
         return ['InfDeclaracaoPrestacaoServico', 'Id'];
@@ -1901,5 +2304,135 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
     public function getConfig(): array
     {
         return $this->config;
+    }
+
+    public function getLastResponseData(): array
+    {
+        return $this->lastResponseData;
+    }
+
+    public function getLastOperationArtifacts(): array
+    {
+        return $this->lastOperationArtifacts;
+    }
+
+    public function getSupportedOperations(): array
+    {
+        return [
+            'emitir',
+            'consultar',
+            'cancelar',
+            'consultar_dps',
+            'baixar_xml',
+            'baixar_danfse',
+        ];
+    }
+
+    private function storeOperationState(
+        string $operation,
+        ?string $requestXml,
+        string $responseRaw,
+        array $parsedResponse,
+        array $extra = []
+    ): void {
+        $this->lastOperation = $operation;
+        $this->lastResponseData = $parsedResponse;
+        $this->lastOperationArtifacts = [
+            'operation' => $operation,
+            'request_xml' => $requestXml,
+            'response_xml' => $parsedResponse['raw_xml'] ?? null,
+            'response_raw' => $responseRaw,
+            'parsed_response' => $parsedResponse,
+            'transport' => array_merge([
+                'mode' => 'rest',
+                'service' => $this->resolveOperationServiceName($operation),
+            ], $extra),
+        ];
+    }
+
+    private function resolveOperationServiceName(string $operation): ?string
+    {
+        $endpoint = (string) ($this->config['endpoints'][$operation] ?? '');
+        if (preg_match('/^([a-z0-9_]+):/i', $endpoint, $matches) === 1) {
+            return strtolower((string) $matches[1]);
+        }
+
+        return null;
+    }
+
+    private function extractProcessingMessages(array $json): array
+    {
+        $messages = [];
+        foreach (['erros', 'alertas'] as $listKey) {
+            $items = $json[$listKey] ?? null;
+            if (!is_array($items)) {
+                continue;
+            }
+
+            foreach ($items as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+
+                $message = trim((string) ($item['descricao'] ?? $item['mensagem'] ?? $item['Mensagem'] ?? ''));
+                $code = trim((string) ($item['codigo'] ?? $item['Codigo'] ?? ''));
+                if ($message === '' && $code === '') {
+                    continue;
+                }
+
+                $messages[] = $code !== '' && $message !== '' ? "{$code}: {$message}" : ($message !== '' ? $message : $code);
+            }
+        }
+
+        return array_values(array_filter(array_unique($messages)));
+    }
+
+    private function extractNfseSummary(?string $nfseXml, ?string $chaveAcesso = null): ?array
+    {
+        if ($nfseXml === null || trim($nfseXml) === '') {
+            return $chaveAcesso !== null && trim($chaveAcesso) !== ''
+                ? ['chave_acesso' => trim($chaveAcesso)]
+                : null;
+        }
+
+        return [
+            'numero' => $this->extractNodeValueFromXml($nfseXml, 'Numero'),
+            'codigo_verificacao' => $this->extractNodeValueFromXml($nfseXml, 'CodigoVerificacao'),
+            'data_emissao' => $this->extractNodeValueFromXml($nfseXml, 'DataEmissao'),
+            'chave_acesso' => $chaveAcesso !== null && trim($chaveAcesso) !== '' ? trim($chaveAcesso) : null,
+        ];
+    }
+
+    private function extractNodeValueFromXml(string $xml, string $localName): ?string
+    {
+        $dom = new \DOMDocument();
+        if (!@$dom->loadXML($xml)) {
+            return null;
+        }
+
+        $xpath = new \DOMXPath($dom);
+        $node = $xpath->query("//*[local-name()='{$localName}']")->item(0);
+        if (!$node instanceof \DOMNode) {
+            return null;
+        }
+
+        $value = trim((string) $node->textContent);
+
+        return $value !== '' ? $value : null;
+    }
+
+    private function normalizeMunicipalRegistration(string $value): string
+    {
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        $digits = $this->onlyDigits($trimmed);
+        if ($digits !== '' && $digits === $trimmed) {
+            return str_pad(substr($digits, 0, 15), 15, '0', STR_PAD_LEFT);
+        }
+
+        return $trimmed;
     }
 }

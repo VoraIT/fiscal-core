@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use freeline\FiscalCore\Support\NFSeMunicipalCatalog;
-use freeline\FiscalCore\Support\NFSeProviderResolver;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalCatalog;
+use sabbajohn\FiscalCore\Support\NFSeProviderResolver;
 use PHPUnit\Framework\TestCase;
 
 final class NFSeProviderResolverTest extends TestCase
@@ -29,11 +29,25 @@ final class NFSeProviderResolverTest extends TestCase
         $this->assertSame('BELEM_MUNICIPAL_2025', $resolver->resolveKey('belem'));
     }
 
-    public function testResolveManausToManausAm(): void
+    public function testResolveManausToNational(): void
     {
         $resolver = $this->makeResolver();
 
-        $this->assertSame('MANAUS_AM', $resolver->resolveKey('manaus'));
+        $this->assertSame(NFSeProviderResolver::NATIONAL_KEY, $resolver->resolveKey('manaus'));
+    }
+
+    public function testResolvePresidenteFigueiredoToIssweb(): void
+    {
+        $resolver = $this->makeResolver();
+
+        $this->assertSame('ISSWEB_AM', $resolver->resolveKey('presidente-figueiredo'));
+    }
+
+    public function testResolveRioPretoDaEvaToIssweb(): void
+    {
+        $resolver = $this->makeResolver();
+
+        $this->assertSame('ISSWEB_AM', $resolver->resolveKey('rio-preto-da-eva'));
     }
 
     public function testUnknownFallsBackToNational(): void

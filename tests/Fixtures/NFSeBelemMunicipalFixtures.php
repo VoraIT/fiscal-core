@@ -142,7 +142,7 @@ final class NFSeBelemMunicipalFixtures
 
     public static function belemConfig(array $overrides = []): array
     {
-        $config = \freeline\FiscalCore\Support\ProviderRegistry::getInstance()->getConfig('BELEM_MUNICIPAL_2025');
+        $config = \sabbajohn\FiscalCore\Support\ProviderRegistry::getInstance()->getConfig('BELEM_MUNICIPAL_2025');
         $config['prestador'] = [
             'cnpj' => self::payload()['prestador']['cnpj'],
             'inscricaoMunicipal' => self::payload()['prestador']['inscricaoMunicipal'],

@@ -3,8 +3,8 @@
 namespace Tests\Unit\Support;
 
 use PHPUnit\Framework\TestCase;
-use freeline\FiscalCore\Support\FiscalResponse;
-use freeline\FiscalCore\Support\ResponseHandler;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Support\ResponseHandler;
 
 /**
  * Testes unitários para sistema de respostas

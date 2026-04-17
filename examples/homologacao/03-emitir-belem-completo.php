@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-use freeline\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
 
 $fiscal = new FiscalFacade();
 $nfse = $fiscal->nfse('belem');

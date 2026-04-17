@@ -2,9 +2,9 @@
 
 namespace Tests\Integration;
 
-use freeline\FiscalCore\Adapters\NF\NFSeAdapter;
-use freeline\FiscalCore\Facade\NFSeFacade;
-use freeline\FiscalCore\Providers\NFSe\NacionalProvider;
+use sabbajohn\FiscalCore\Adapters\NF\NFSeAdapter;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Providers\NFSe\NacionalProvider;
 use PHPUnit\Framework\TestCase;
 
 class NFSeNacionalMockFlowTest extends TestCase

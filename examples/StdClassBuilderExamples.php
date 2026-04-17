@@ -9,7 +9,7 @@
 
 namespace Examples;
 
-use freeline\FiscalCore\Adapters\NF\Helpers\StdClassBuilder;
+use sabbajohn\FiscalCore\Adapters\NF\Helpers\StdClassBuilder;
 
 class StdClassBuilderExamples
 {

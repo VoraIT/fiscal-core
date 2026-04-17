@@ -1,11 +1,11 @@
 <?php
 
-namespace freeline\FiscalCore\Facade;
+namespace sabbajohn\FiscalCore\Facade;
 
-use freeline\FiscalCore\Adapters\IBPTAdapter;
-use freeline\FiscalCore\Adapters\BrasilAPIAdapter;
-use freeline\FiscalCore\Support\ResponseHandler;
-use freeline\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Adapters\IBPTAdapter;
+use sabbajohn\FiscalCore\Adapters\BrasilAPIAdapter;
+use sabbajohn\FiscalCore\Support\ResponseHandler;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
 
 /**
  * Facade para operações de tributação

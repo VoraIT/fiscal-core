@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\NFSe;
 
-use freeline\FiscalCore\Adapters\NF\NFSeAdapter;
-use freeline\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
-use freeline\FiscalCore\Contracts\NFSeProviderConfigInterface;
-use freeline\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Adapters\NF\NFSeAdapter;
+use sabbajohn\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
 use PHPUnit\Framework\TestCase;
 
 class NFSeAdapterFacadeNacionalTest extends TestCase
@@ -281,5 +281,162 @@ class NFSeAdapterFacadeNacionalTest extends TestCase
 
         $habilitacao = $adapter->verificarHabilitacaoCnc('11222333000181');
         $this->assertFalse($habilitacao);
+    }
+
+    public function test_facade_bloqueia_emissao_legada_de_manaus_no_fluxo_nacional(): void
+    {
+        $provider = new class () implements NFSeProviderConfigInterface, NFSeNacionalCapabilitiesInterface {
+            public function emitir(array $dados): string
+            {
+                return '<ok />';
+            }
+
+            public function consultar(string $chave): string
+            {
+                return '<consulta />';
+            }
+
+            public function cancelar(string $chave, string $motivo, ?string $protocolo = null): bool
+            {
+                return true;
+            }
+
+            public function substituir(string $chave, array $dados): string
+            {
+                return '<substituicao />';
+            }
+
+            public function getWsdlUrl(): string
+            {
+                return 'https://example.test';
+            }
+
+            public function getVersao(): string
+            {
+                return '1.00';
+            }
+
+            public function getAliquotaFormat(): string
+            {
+                return 'decimal';
+            }
+
+            public function getCodigoMunicipio(): string
+            {
+                return '1302603';
+            }
+
+            public function getAmbiente(): string
+            {
+                return 'homologacao';
+            }
+
+            public function getTimeout(): int
+            {
+                return 30;
+            }
+
+            public function getAuthConfig(): array
+            {
+                return [];
+            }
+
+            public function getNationalApiBaseUrl(): string
+            {
+                return 'https://api.local';
+            }
+
+            public function validarDados(array $dados): bool
+            {
+                return true;
+            }
+
+            public function consultarPorRps(array $identificacaoRps): string
+            {
+                return '<consulta-rps />';
+            }
+
+            public function consultarLote(string $protocolo): string
+            {
+                return '<consulta-lote />';
+            }
+
+            public function baixarXml(string $chave): string
+            {
+                return '<xml-download />';
+            }
+
+            public function baixarDanfse(string $chave): string
+            {
+                return '<danfse-download />';
+            }
+
+            public function listarMunicipiosNacionais(bool $forceRefresh = false): array
+            {
+                return ['data' => [], 'metadata' => []];
+            }
+
+            public function consultarAliquotasMunicipio(string $codigoMunicipio, ?string $codigoServico = null, ?string $competencia = null, bool $forceRefresh = false): array
+            {
+                return ['data' => [], 'metadata' => []];
+            }
+
+            public function consultarContribuinteCnc(string $cnc): array
+            {
+                return [];
+            }
+
+            public function verificarHabilitacaoCnc(string $cnc): bool
+            {
+                return true;
+            }
+
+            public function getConfig(): array
+            {
+                return [];
+            }
+
+            public function consultarConvenioMunicipio(string $codigoMunicipio, bool $forceRefresh = false): array
+            {
+                return ['data' => [], 'metadata' => []];
+            }
+
+            public function validarLayoutDps(array $payload, bool $checkCatalog = true): array
+            {
+                return ['valid' => true, 'errors' => [], 'warnings' => []];
+            }
+
+            public function gerarXmlDpsPreview(array $payload): string
+            {
+                return '<preview/>';
+            }
+
+            public function validarXmlDps(array $payload): array
+            {
+                return ['valid' => true, 'errors' => []];
+            }
+
+            public function validarPrestador(array $prestador): array
+            {
+                return ['valid' => true];
+            }
+
+            public function validarMunicipio(?string $municipio = null): array
+            {
+                return ['valid' => true];
+            }
+        };
+
+        $facade = new NFSeFacade('manaus', new NFSeAdapter('manaus', $provider));
+
+        $response = $facade->emitir([
+            'dCompet' => '2025-12-31',
+            'dhEmi' => '2025-12-31T10:00:00-04:00',
+        ]);
+
+        $this->assertTrue($response->isError());
+        $this->assertSame('NFSE_MANAUS_LEGACY_PERIOD', $response->getErrorCode());
+        $this->assertSame('2025-12-31', $response->getMetadata('reference_date'));
+        $this->assertStringContainsString('2026-01-01', (string) $response->getError());
     }
 }

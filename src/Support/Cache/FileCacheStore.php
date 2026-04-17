@@ -1,6 +1,6 @@
 <?php
 
-namespace freeline\FiscalCore\Support\Cache;
+namespace sabbajohn\FiscalCore\Support\Cache;
 
 class FileCacheStore
 {

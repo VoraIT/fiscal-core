@@ -1,15 +1,15 @@
 <?php
 
-namespace freeline\FiscalCore\Facade;
+namespace sabbajohn\FiscalCore\Facade;
 
-use freeline\FiscalCore\Adapters\NF\NFeAdapter;
-use freeline\FiscalCore\Adapters\ImpressaoAdapter;
-use freeline\FiscalCore\Support\ResponseHandler;
-use freeline\FiscalCore\Support\FiscalResponse;
-use freeline\FiscalCore\Support\ManifestationType;
-use freeline\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
-use freeline\FiscalCore\Adapters\NF\Core\NotaFiscal;
-use freeline\FiscalCore\Support\ToolsFactory;
+use sabbajohn\FiscalCore\Adapters\NF\NFeAdapter;
+use sabbajohn\FiscalCore\Adapters\ImpressaoAdapter;
+use sabbajohn\FiscalCore\Support\ResponseHandler;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Support\ManifestationType;
+use sabbajohn\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
+use sabbajohn\FiscalCore\Adapters\NF\Core\NotaFiscal;
+use sabbajohn\FiscalCore\Support\ToolsFactory;
 use NFePHP\NFe\Tools;
 
 /**

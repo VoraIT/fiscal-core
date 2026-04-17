@@ -1,14 +1,14 @@
 <?php
 
-namespace freeline\FiscalCore\Support;
+namespace sabbajohn\FiscalCore\Support;
 
-use freeline\FiscalCore\Support\FiscalResponse;
-use freeline\FiscalCore\Exceptions\FiscalException;
-use freeline\FiscalCore\Exceptions\CertificateException;
-use freeline\FiscalCore\Exceptions\SefazException;
-use freeline\FiscalCore\Exceptions\ValidationException;
-use freeline\FiscalCore\Exceptions\XmlException;
-use freeline\FiscalCore\Support\XmlUtils;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Exceptions\FiscalException;
+use sabbajohn\FiscalCore\Exceptions\CertificateException;
+use sabbajohn\FiscalCore\Exceptions\SefazException;
+use sabbajohn\FiscalCore\Exceptions\ValidationException;
+use sabbajohn\FiscalCore\Exceptions\XmlException;
+use sabbajohn\FiscalCore\Support\XmlUtils;
 
 /**
  * Handler centralizado para tratamento de exceções e responses

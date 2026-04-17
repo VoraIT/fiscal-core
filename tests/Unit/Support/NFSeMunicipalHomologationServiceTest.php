@@ -6,11 +6,11 @@ require_once dirname(__DIR__, 2) . '/Fixtures/NFSeBelemMunicipalFixtures.php';
 require_once dirname(__DIR__, 2) . '/Fixtures/NFSeJoinvilleMunicipalFixtures.php';
 require_once dirname(__DIR__, 2) . '/Support/TestCertificateFile.php';
 
-use freeline\FiscalCore\Support\CertificateManager;
-use freeline\FiscalCore\Support\ConfigManager;
-use freeline\FiscalCore\Support\NFSeMunicipalHomologationService;
-use freeline\FiscalCore\Support\NFSeSoapTransportInterface;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\ConfigManager;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalHomologationService;
+use sabbajohn\FiscalCore\Support\NFSeSoapTransportInterface;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use PHPUnit\Framework\TestCase;
 
 final class NFSeMunicipalHomologationServiceTest extends TestCase

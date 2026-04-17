@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace freeline\FiscalCore\Support;
+namespace sabbajohn\FiscalCore\Support;
 
-use freeline\FiscalCore\Contracts\NFSeProviderConfigInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
 use NFePHP\Common\Certificate;
 use RuntimeException;
 
@@ -23,19 +23,23 @@ final class NFSeRuntimeBootstrap
         $configManager = $this->configManager ?? ConfigManager::getInstance();
         $configManager->reload();
 
-        CertificateManager::reload();
         $certificateManager = $this->certificateManager ?? CertificateManager::getInstance();
+        $certificate = $certificateManager->getCertificate();
+        if (!$certificate instanceof Certificate) {
+            CertificateManager::reload();
+            $certificateManager = $this->certificateManager ?? CertificateManager::getInstance();
+            $certificate = $certificateManager->getCertificate();
+        }
 
         $registry = $this->registry ?? ProviderRegistry::getInstance();
         $resolver = $this->resolver ?? new NFSeProviderResolver();
         $providerKey = $resolver->resolveKey($municipio);
         $metadata = $resolver->buildMetadata($municipio);
-        $config = $registry->getConfig($providerKey);
+        $config = $registry->getConfigForMunicipio($municipio);
 
         $config['ambiente'] = $configManager->isProduction() ? 'producao' : 'homologacao';
         $config['timeout'] = (int) ($configManager->get('nfse.timeout') ?? $configManager->get('timeout') ?? $config['timeout'] ?? 30);
 
-        $certificate = $certificateManager->getCertificate();
         if ($certificate instanceof Certificate) {
             $config['certificate'] = $certificate;
         }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use freeline\FiscalCore\Support\BelemMunicipalDocumentUrlBuilder;
+use sabbajohn\FiscalCore\Support\BelemMunicipalDocumentUrlBuilder;
 use PHPUnit\Framework\TestCase;
 
 final class BelemMunicipalDocumentUrlBuilderTest extends TestCase

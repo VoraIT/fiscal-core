@@ -1,12 +1,12 @@
 <?php
 
-namespace freeline\Examples;
+namespace sabbajohn\Examples;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use freeline\FiscalCore\Facade\NFeFacade;
-use freeline\FiscalCore\Facade\NFCeFacade;
-use freeline\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Facade\NFeFacade;
+use sabbajohn\FiscalCore\Facade\NFCeFacade;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
 
 /**
  * Exemplos de uso dos Facades com tratamento de erros

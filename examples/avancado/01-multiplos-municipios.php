@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-use freeline\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
-use freeline\FiscalCore\Facade\FiscalFacade;
-use freeline\FiscalCore\Facade\NFSeFacade;
-use freeline\FiscalCore\Support\NFSeMunicipalPayloadFactory;
-use freeline\FiscalCore\Support\NFSeMunicipalPreviewSupport;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalPayloadFactory;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalPreviewSupport;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 
 function previewMunicipalProvider(string $municipio): array
 {
@@ -106,6 +106,7 @@ echo PHP_EOL;
 echo "4. Observacoes\n";
 echo "--------------\n";
 echo "- Este exemplo usa payloads validos por provider e transporte mockado.\n";
-echo "- Belem exige classificacao explicita de nao-MEI no payload municipal.\n";
+echo "- Emissao classificada como MEI segue automaticamente pelo provider nacional.\n";
+echo "- Alguns municipios ainda exigem classificacao explicita de MEI no payload para evitar ambiguidade.\n";
 echo "- Joinville exige codigo_municipio e aliquota coerentes no servico.\n";
 echo "- Para envio real em homologacao, use os scripts em examples/homologacao/.\n";

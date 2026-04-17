@@ -5,11 +5,11 @@ declare(strict_types=1);
 require_once dirname(__DIR__, 2) . '/Fixtures/NFSeBelemMunicipalFixtures.php';
 require_once dirname(__DIR__, 2) . '/Fakes/RecordingNfseProvider.php';
 
-use freeline\FiscalCore\Adapters\NF\NFSeAdapter;
-use freeline\FiscalCore\Facade\NFSeFacade;
-use freeline\FiscalCore\Providers\NFSe\Municipal\BelemMunicipalProvider;
-use freeline\FiscalCore\Support\NFSeSoapTransportInterface;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Adapters\NF\NFSeAdapter;
+use sabbajohn\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Providers\NFSe\Municipal\BelemMunicipalProvider;
+use sabbajohn\FiscalCore\Support\NFSeSoapTransportInterface;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use PHPUnit\Framework\TestCase;
 use Tests\Fakes\RecordingNfseProvider;
 
@@ -43,7 +43,7 @@ final class NFSeBelemRoutingTest extends TestCase
             $adapter->getLastEmissionInfo()['effective_provider_key'] ?? null
         );
         $this->assertSame(
-            'belem_mei_nacional',
+            'mei_nacional',
             $adapter->getLastEmissionInfo()['routing_mode'] ?? null
         );
     }
@@ -53,9 +53,39 @@ final class NFSeBelemRoutingTest extends TestCase
         $adapter = new NFSeAdapter('belem');
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('identificação explícita do emitente');
+        $this->expectExceptionMessage('identificação explícita do emitente como MEI ou não MEI');
 
         $adapter->emitir(NFSeBelemMunicipalFixtures::payloadWithoutClassification());
+    }
+
+    public function testAnyMunicipalProviderRoutesMeiEmissionToNationalProvider(): void
+    {
+        $registry = ProviderRegistry::getInstance();
+        $registry->register('PUBLICA', [
+            'provider_class' => RecordingNfseProvider::class,
+            'codigo_municipio' => '4209102',
+            'aliquota_format' => 'percentual',
+            'wsdl' => 'https://example.test/publica',
+            'ambiente' => 'homologacao',
+        ]);
+        $registry->register('nfse_nacional', [
+            'provider_class' => RecordingNfseProvider::class,
+            'codigo_municipio' => '1001058',
+            'aliquota_format' => 'decimal',
+            'wsdl' => '',
+            'api_base_url' => 'https://example.test/api',
+            'ambiente' => 'homologacao',
+        ]);
+
+        $adapter = new NFSeAdapter('joinville');
+        $payload = NFSeBelemMunicipalFixtures::payload();
+        $payload['prestador']['mei'] = true;
+        $payload['prestador']['regime_tributario'] = 'mei';
+
+        $adapter->emitir($payload);
+
+        $this->assertSame('nfse_nacional', $adapter->getLastEmissionInfo()['effective_provider_key'] ?? null);
+        $this->assertSame('mei_nacional', $adapter->getLastEmissionInfo()['routing_mode'] ?? null);
     }
 
     public function testBelemMunicipalConsultAndCancelUseMunicipalProviderCapabilities(): void

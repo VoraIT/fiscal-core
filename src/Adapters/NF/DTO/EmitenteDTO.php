@@ -1,6 +1,6 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF\DTO;
+namespace sabbajohn\FiscalCore\Adapters\NF\DTO;
 
 /**
  * DTO para dados do Emitente

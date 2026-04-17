@@ -1,10 +1,10 @@
 <?php
 
-namespace freeline\FiscalCore\Facade;
+namespace sabbajohn\FiscalCore\Facade;
 
-use freeline\FiscalCore\Adapters\ImpressaoAdapter;
-use freeline\FiscalCore\Support\ResponseHandler;
-use freeline\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Adapters\ImpressaoAdapter;
+use sabbajohn\FiscalCore\Support\ResponseHandler;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
 
 /**
  * Facade para impressão de documentos fiscais

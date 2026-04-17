@@ -1,8 +1,8 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters;
+namespace sabbajohn\FiscalCore\Adapters;
 
-use freeline\FiscalCore\Contracts\DocumentoInterface;
+use sabbajohn\FiscalCore\Contracts\DocumentoInterface;
 use Brazanation\Documents\Cpf;
 use Brazanation\Documents\Cnpj;
 

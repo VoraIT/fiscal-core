@@ -1,6 +1,6 @@
 <?php
 
-namespace freeline\FiscalCore\Contracts;
+namespace sabbajohn\FiscalCore\Contracts;
 
 interface ConsultaPublicaInterface
 {

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/Support/TestCertificateFile.php';
 
-use freeline\FiscalCore\Facade\FiscalFacade;
-use freeline\FiscalCore\Support\CertificateManager;
-use freeline\FiscalCore\Support\ConfigManager;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\ConfigManager;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use PHPUnit\Framework\TestCase;
 
 final class FiscalFacadeCachingTest extends TestCase

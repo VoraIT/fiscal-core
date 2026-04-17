@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use freeline\FiscalCore\Facade\FiscalFacade;
-use freeline\FiscalCore\Support\NFSeMunicipalHomologationService;
+use sabbajohn\FiscalCore\Facade\FiscalFacade;
+use sabbajohn\FiscalCore\Support\NFSeMunicipalHomologationService;
 use PHPUnit\Framework\TestCase;
 
 /**

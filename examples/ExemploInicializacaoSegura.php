@@ -1,14 +1,14 @@
 <?php
 
-namespace freeline\Examples;
+namespace sabbajohn\Examples;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use freeline\FiscalCore\Support\SafeCertificateManager;
-use freeline\FiscalCore\Support\SafeConfigManager;
-use freeline\FiscalCore\Support\ToolsFactory;
-use freeline\FiscalCore\Support\FiscalResponse;
-use freeline\FiscalCore\Facade\NFeFacade;
+use sabbajohn\FiscalCore\Support\SafeCertificateManager;
+use sabbajohn\FiscalCore\Support\SafeConfigManager;
+use sabbajohn\FiscalCore\Support\ToolsFactory;
+use sabbajohn\FiscalCore\Support\FiscalResponse;
+use sabbajohn\FiscalCore\Facade\NFeFacade;
 
 /**
  * Exemplo de inicialização segura com tratamento de erros padronizado

@@ -6,13 +6,13 @@ require_once dirname(__DIR__, 2) . '/Fixtures/NFSePilotPayloads.php';
 require_once dirname(__DIR__, 2) . '/Fixtures/NFSeBelemMunicipalFixtures.php';
 require_once dirname(__DIR__, 2) . '/Fixtures/NFSeJoinvilleMunicipalFixtures.php';
 
-use freeline\FiscalCore\Providers\NFSe\Municipal\BelemMunicipalProvider;
-use freeline\FiscalCore\Providers\NFSe\Municipal\ManausAmProvider;
-use freeline\FiscalCore\Providers\NFSe\Municipal\PublicaProvider;
-use freeline\FiscalCore\Support\NFSeSchemaResolver;
-use freeline\FiscalCore\Support\NFSeSchemaValidator;
-use freeline\FiscalCore\Support\NFSeSoapTransportInterface;
-use freeline\FiscalCore\Support\ProviderRegistry;
+use sabbajohn\FiscalCore\Providers\NFSe\Municipal\BelemMunicipalProvider;
+use sabbajohn\FiscalCore\Providers\NFSe\Municipal\PublicaProvider;
+use sabbajohn\FiscalCore\Providers\NFSe\NacionalProvider;
+use sabbajohn\FiscalCore\Support\NFSeSchemaResolver;
+use sabbajohn\FiscalCore\Support\NFSeSchemaValidator;
+use sabbajohn\FiscalCore\Support\NFSeSoapTransportInterface;
+use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -55,6 +55,12 @@ final class PilotProviderXmlValidationTest extends TestCase
             };
             $config['certificate'] = NFSeJoinvilleMunicipalFixtures::makeCertificate();
             $provider = new PublicaProvider($config);
+        } elseif ($municipio === 'manaus') {
+            $config = ProviderRegistry::getInstance()->getConfig('nfse_nacional');
+            $config['http_client'] = static function (): array {
+                return ['status' => 200, 'body' => '<ok />', 'headers' => []];
+            };
+            $provider = new NacionalProvider($config);
         } else {
             $registry = ProviderRegistry::getInstance();
             $provider = $registry->getByMunicipio($municipio);
@@ -62,7 +68,11 @@ final class PilotProviderXmlValidationTest extends TestCase
 
         $this->assertInstanceOf($expectedClass, $provider);
 
-        $xml = $provider->emitir($payload);
+        if ($municipio === 'manaus') {
+            $xml = $provider->gerarXmlDpsPreview($payload);
+        } else {
+            $xml = $provider->emitir($payload);
+        }
         if (in_array($municipio, ['belem', 'joinville'], true)) {
             $xml = $provider->getLastRequestXml();
         }
@@ -71,13 +81,21 @@ final class PilotProviderXmlValidationTest extends TestCase
             $xml = self::normalizeBelemXmlForSchemaValidation($xml);
         }
 
-        $schemaPath = (new NFSeSchemaResolver())->resolve($expectedFamily, 'emitir');
-        $validation = (new NFSeSchemaValidator())->validate($xml, $schemaPath);
+        if ($municipio === 'manaus') {
+            $validation = $provider->validarXmlDps($payload);
+            $this->assertTrue(
+                $validation['valid'],
+                implode(PHP_EOL, $validation['errors'])
+            );
+        } else {
+            $schemaPath = (new NFSeSchemaResolver())->resolve($expectedFamily, 'emitir');
+            $validation = (new NFSeSchemaValidator())->validate($xml, $schemaPath);
 
-        $this->assertTrue(
-            $validation['valid'],
-            implode(PHP_EOL, $validation['errors'])
-        );
+            $this->assertTrue(
+                $validation['valid'],
+                implode(PHP_EOL, $validation['errors'])
+            );
+        }
     }
 
     #[DataProvider('invalidPilotCases')]
@@ -86,8 +104,15 @@ final class PilotProviderXmlValidationTest extends TestCase
         array $payload,
         string $expectedMessage
     ): void {
-        $registry = ProviderRegistry::getInstance();
-        $provider = $registry->getByMunicipio($municipio);
+        if ($municipio === 'manaus') {
+            $config = ProviderRegistry::getInstance()->getConfig('nfse_nacional');
+            $config['api_base_url'] = 'https://api.example.test';
+            $config['http_client'] = static fn (): string => '<ok />';
+            $provider = new NacionalProvider($config);
+        } else {
+            $registry = ProviderRegistry::getInstance();
+            $provider = $registry->getByMunicipio($municipio);
+        }
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedMessage);
@@ -99,7 +124,7 @@ final class PilotProviderXmlValidationTest extends TestCase
     {
         return [
             'belem' => ['belem', BelemMunicipalProvider::class, 'BELEM_MUNICIPAL_2025', NFSePilotPayloads::belem()],
-            'manaus' => ['manaus', ManausAmProvider::class, 'MANAUS_AM', NFSePilotPayloads::manaus()],
+            'manaus' => ['manaus', NacionalProvider::class, 'NACIONAL', NFSePilotPayloads::manaus()],
             'joinville' => ['joinville', PublicaProvider::class, 'PUBLICA', NFSePilotPayloads::joinville()],
         ];
     }

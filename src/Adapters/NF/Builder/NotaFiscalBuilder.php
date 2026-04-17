@@ -1,10 +1,10 @@
 <?php
 
-namespace freeline\FiscalCore\Adapters\NF\Builder;
+namespace sabbajohn\FiscalCore\Adapters\NF\Builder;
 
-use freeline\FiscalCore\Adapters\NF\Core\NotaFiscal;
-use freeline\FiscalCore\Adapters\NF\XmlParser;
-use freeline\FiscalCore\Adapters\NF\DTO\{
+use sabbajohn\FiscalCore\Adapters\NF\Core\NotaFiscal;
+use sabbajohn\FiscalCore\Adapters\NF\XmlParser;
+use sabbajohn\FiscalCore\Adapters\NF\DTO\{
     IdentificacaoDTO,
     EmitenteDTO,
     DestinatarioDTO,
@@ -20,7 +20,7 @@ use freeline\FiscalCore\Adapters\NF\DTO\{
     ResponsavelTecnicoDTO,
     InfoSuplementarDTO
 };
-use freeline\FiscalCore\Adapters\NF\Nodes\{
+use sabbajohn\FiscalCore\Adapters\NF\Nodes\{
     IdentificacaoNode,
     EmitenteNode,
     DestinatarioNode,

@@ -50,8 +50,8 @@ $builder = NFeAdapter::builder();
 ### Exemplo de Uso
 
 ```php
-use freeline\FiscalCore\Support\ConfigManager;
-use freeline\FiscalCore\Adapters\NFCeAdapter;
+use sabbajohn\FiscalCore\Support\ConfigManager;
+use sabbajohn\FiscalCore\Adapters\NFCeAdapter;
 use NFePHP\NFe\Tools;
 
 // 1. Configurar
