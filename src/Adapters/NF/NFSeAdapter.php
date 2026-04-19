@@ -67,7 +67,12 @@ class NFSeAdapter implements NotaServicoInterface
 
     public function consultar(string $chave): string
     {
-        return $this->provider->consultar($chave);
+        $result = $this->provider->consultar($chave);
+        $this->lastOperationInfo = $this->buildProviderOperationInfo('consultar', $this->provider, [
+            'chave' => $chave,
+        ]);
+
+        return $result;
     }
 
     public function cancelar(string $chave, string $motivo, ?string $protocolo = null): bool

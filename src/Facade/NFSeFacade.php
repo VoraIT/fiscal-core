@@ -251,7 +251,40 @@ class NFSeFacade
         }
 
         try {
-            $resultado = json_decode($this->nfse->consultar($chave), true);
+            $resultado = $this->nfse->consultar($chave);
+            $operation = method_exists($this->nfse, 'getLastOperationInfo')
+                ? $this->nfse->getLastOperationInfo()
+                : [];
+
+            if ($this->isBelemMunicipalFlow()) {
+                $parsedResponse = is_array($operation['parsed_response'] ?? null)
+                    ? $operation['parsed_response']
+                    : [];
+                $availability = $this->buildAvailabilityPayloadFromParsedResponse(
+                    $parsedResponse,
+                    'numero_nfse',
+                    $operation
+                );
+
+                return FiscalResponse::success(array_merge([
+                    'resultado' => [
+                        'raw_xml' => $resultado,
+                        'parsed_response' => $parsedResponse,
+                    ],
+                    'type' => 'nfse_consulta',
+                    'chave' => $chave,
+                    'municipio' => $this->municipio,
+                    'consulta' => $operation,
+                ], $availability), 'nfse_query', [
+                    'chave' => $chave,
+                    'municipio' => $this->municipio,
+                    'provider_key' => $this->providerKey,
+                    'municipio_ignored' => $this->municipioIgnored,
+                    'warnings' => $this->deprecationWarnings,
+                ]);
+            }
+
+            $resultado = json_decode($resultado, true);
             return FiscalResponse::success([
                 'resultado' => $resultado,
                 'type' => 'nfse_consulta',

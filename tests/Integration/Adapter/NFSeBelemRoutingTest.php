@@ -97,8 +97,9 @@ final class NFSeBelemRoutingTest extends TestCase
             {
                 $this->call++;
                 $response = match ($this->call) {
-                    1 => NFSeBelemMunicipalFixtures::consultarNfseRpsSoapResponse(),
-                    2 => NFSeBelemMunicipalFixtures::consultarLoteSoapResponse(),
+                    1 => NFSeBelemMunicipalFixtures::consultarNfseServicoPrestadoSoapResponse(),
+                    2 => NFSeBelemMunicipalFixtures::consultarNfseRpsSoapResponse(),
+                    3 => NFSeBelemMunicipalFixtures::consultarLoteSoapResponse(),
                     default => NFSeBelemMunicipalFixtures::cancelarSoapSuccessResponse(),
                 };
 
@@ -115,6 +116,11 @@ final class NFSeBelemRoutingTest extends TestCase
             'soap_transport' => $transport,
         ]));
         $adapter = new NFSeAdapter('belem', $provider);
+
+        $consulta = $adapter->consultar(NFSeBelemMunicipalFixtures::chaveNfse());
+        $this->assertStringContainsString('ConsultarNfseServicoPrestadoResponse', $consulta);
+        $this->assertSame('consultar', $adapter->getLastOperationInfo()['operation']);
+        $this->assertSame('success', $adapter->getLastOperationInfo()['parsed_response']['status'] ?? null);
 
         $consultaRps = $adapter->consultarPorRps(NFSeBelemMunicipalFixtures::consultaRps());
         $this->assertStringContainsString('ConsultarNfsePorRpsResponse', $consultaRps);
@@ -170,6 +176,44 @@ final class NFSeBelemRoutingTest extends TestCase
         );
         $this->assertTrue($cancelamento->isSuccess());
         $this->assertSame('cancelar', $cancelamento->getData('cancelamento')['operation']);
+    }
+
+    public function testBelemFacadeConsultarByChaveReturnsOfficialUrl(): void
+    {
+        $transport = new class(NFSeBelemMunicipalFixtures::consultarNfseServicoPrestadoSoapResponse()) implements NFSeSoapTransportInterface {
+            public function __construct(private readonly string $response)
+            {
+            }
+
+            public function send(string $endpoint, string $envelope, array $options = []): array
+            {
+                return [
+                    'request_xml' => $envelope,
+                    'response_xml' => $this->response,
+                    'status_code' => 200,
+                    'headers' => ['Content-Type: text/xml'],
+                ];
+            }
+        };
+
+        $provider = new BelemMunicipalProvider(NFSeBelemMunicipalFixtures::belemConfig([
+            'soap_transport' => $transport,
+        ]));
+        $facade = new NFSeFacade('belem', new NFSeAdapter('belem', $provider));
+
+        $response = $facade->consultar(NFSeBelemMunicipalFixtures::chaveNfse());
+
+        $this->assertTrue($response->isSuccess(), (string) $response->getError());
+        $this->assertSame('autorizada', $response->getData('authorization_status'));
+        $this->assertTrue($response->getData('disponivel'));
+        $this->assertSame('numero_nfse', $response->getData('source'));
+        $this->assertSame('1105', $response->getData('nfse')['numero'] ?? null);
+        $this->assertSame('consultar', $response->getData('consulta')['operation'] ?? null);
+        $this->assertNotEmpty($response->getData('resultado')['raw_xml'] ?? null);
+        $this->assertSame(
+            'https://notafiscal.belem.pa.gov.br/notafiscal-ws/servico/notafiscal/autenticacao/cpfCnpj/12345678000195/inscricaoMunicipal/4007197/numeroNota/1105/codigoVerificacao/ABC123XYZ',
+            $response->getData('danfse_url')
+        );
     }
 
     public function testBelemFacadeEmitirCompletoFallsBackToConsultarLoteAndReturnsOfficialUrl(): void
