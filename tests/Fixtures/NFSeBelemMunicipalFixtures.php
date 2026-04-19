@@ -140,6 +140,11 @@ final class NFSeBelemMunicipalFixtures
         return '1105';
     }
 
+    public static function chaveNfse(): string
+    {
+        return '15014021212345678000195000000000110526034063508531';
+    }
+
     public static function belemConfig(array $overrides = []): array
     {
         $config = \sabbajohn\FiscalCore\Support\ProviderRegistry::getInstance()->getConfig('BELEM_MUNICIPAL_2025');
@@ -153,6 +158,7 @@ final class NFSeBelemMunicipalFixtures
             'emitir',
             'consultar_lote',
             'consultar_nfse_rps',
+            'consultar_nfse_numero',
             'cancelar_nfse',
         ];
 
@@ -274,6 +280,39 @@ XML;
         </nfse:CompNfse>
       </tns:ConsultarNfsePorRpsResposta>
     </tns:ConsultarNfsePorRpsResponse>
+  </soapenv:Body>
+</soapenv:Envelope>
+XML;
+    }
+
+    public static function consultarNfseServicoPrestadoSoapResponse(): string
+    {
+        return <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://nfse.abrasf.org.br" xmlns:nfse="http://www.abrasf.org.br/nfse.xsd">
+  <soapenv:Body>
+    <tns:ConsultarNfseServicoPrestadoResponse>
+      <tns:ConsultarNfseServicoPrestadoResposta>
+        <nfse:ListaNfse>
+          <nfse:CompNfse>
+            <nfse:Nfse>
+              <nfse:InfNfse Id="406526257">
+                <nfse:Numero>1105</nfse:Numero>
+                <nfse:CodigoVerificacao>ABC123XYZ</nfse:CodigoVerificacao>
+                <nfse:DataEmissao>2026-03-18T10:15:02</nfse:DataEmissao>
+                <nfse:Servico>
+                  <nfse:Valores>
+                    <nfse:ValorServicos>3000.00</nfse:ValorServicos>
+                    <nfse:ValorLiquidoNfse>3000.00</nfse:ValorLiquidoNfse>
+                  </nfse:Valores>
+                </nfse:Servico>
+              </nfse:InfNfse>
+            </nfse:Nfse>
+          </nfse:CompNfse>
+          <nfse:Pagina>1</nfse:Pagina>
+        </nfse:ListaNfse>
+      </tns:ConsultarNfseServicoPrestadoResposta>
+    </tns:ConsultarNfseServicoPrestadoResponse>
   </soapenv:Body>
 </soapenv:Envelope>
 XML;

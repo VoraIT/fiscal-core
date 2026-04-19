@@ -72,6 +72,23 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
         );
     }
 
+    public function consultar(string $chave): string
+    {
+        $numeroNfse = $this->extractNumeroNfseFromChave($chave);
+        $baseRequestXml = $this->montarXmlConsultarNfsePorNumero($numeroNfse);
+        $requestXml = $this->shouldSignOperation('consultar_nfse_numero')
+            ? $this->assinarXml($baseRequestXml, 'consultar_nfse_numero')
+            : $baseRequestXml;
+
+        return $this->dispatchSoapOperation(
+            'consultar_nfse_numero',
+            'ConsultarNfseServicoPrestado',
+            $requestXml,
+            'consultar_nfse_numero',
+            $baseRequestXml
+        );
+    }
+
     public function consultarLote(string $protocolo): string
     {
         if (trim($protocolo) === '') {
@@ -451,6 +468,7 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
             'emitir_sincrono',
             'consultar_lote',
             'consultar_nfse_rps',
+            'consultar_nfse_numero',
             'cancelar_nfse',
         ];
     }
@@ -539,6 +557,31 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
         $cpfCnpjNode = $this->appendXmlNode($dom, $prestadorNode, 'CpfCnpj');
         $this->appendDocumentoNode($dom, $cpfCnpjNode, $prestador['cnpj']);
         $this->appendXmlNode($dom, $prestadorNode, 'InscricaoMunicipal', $prestador['inscricao_municipal']);
+
+        return $dom->saveXML($dom->documentElement) ?: '';
+    }
+
+    private function montarXmlConsultarNfsePorNumero(string $numeroNfse): string
+    {
+        $numeroNfse = trim($numeroNfse);
+        if ($numeroNfse === '') {
+            throw new \InvalidArgumentException('Numero da NFSe é obrigatório para consulta em Belém.');
+        }
+
+        $prestador = $this->resolvePrestadorContext();
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = false;
+        $root = $dom->createElement('ConsultarNfseServicoPrestadoEnvio');
+        $dom->appendChild($root);
+
+        $prestadorNode = $this->appendXmlNode($dom, $root, 'Prestador');
+        $cpfCnpjNode = $this->appendXmlNode($dom, $prestadorNode, 'CpfCnpj');
+        $this->appendDocumentoNode($dom, $cpfCnpjNode, $prestador['cnpj']);
+        $this->appendXmlNode($dom, $prestadorNode, 'InscricaoMunicipal', $prestador['inscricao_municipal']);
+        $this->appendXmlNode($dom, $root, 'NumeroNfse', $numeroNfse);
+        $this->appendXmlNode($dom, $root, 'Pagina', '1');
 
         return $dom->saveXML($dom->documentElement) ?: '';
     }
@@ -670,7 +713,7 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
         array $parsedResponse,
         ?string $unsignedRequestXml
     ): bool {
-        if (!in_array($operationKey, ['consultar_lote', 'consultar_nfse_rps'], true)) {
+        if (!in_array($operationKey, ['consultar_lote', 'consultar_nfse_rps', 'consultar_nfse_numero'], true)) {
             return false;
         }
 
@@ -815,7 +858,7 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
 
         return match ($operationKey) {
             'emitir' => $this->assinarXmlEmissao($certificate, $xml),
-            'consultar_lote', 'consultar_nfse_rps' => $this->assinarXmlConsulta($certificate, $xml),
+            'consultar_lote', 'consultar_nfse_rps', 'consultar_nfse_numero' => $this->assinarXmlConsulta($certificate, $xml),
             'cancelar_nfse' => Signer::sign(
                 $certificate,
                 $xml,
@@ -1189,6 +1232,7 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
             'emitir',
             'consultar_lote',
             'consultar_nfse_rps',
+            'consultar_nfse_numero',
             'cancelar_nfse',
         ];
         if (!is_array($configured)) {
@@ -1196,6 +1240,7 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
                 'emitir',
                 'consultar_lote',
                 'consultar_nfse_rps',
+                'consultar_nfse_numero',
                 'cancelar_nfse',
             ];
         }
@@ -1370,6 +1415,34 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
         }
 
         return $configured !== '' ? $configured : '1';
+    }
+
+    private function extractNumeroNfseFromChave(string $chave): string
+    {
+        $digits = $this->normalizeDigits($chave);
+        if (strlen($digits) !== 50) {
+            throw new \InvalidArgumentException('Chave de acesso da NFS-e de Belém deve conter 50 dígitos.');
+        }
+
+        $codigoMunicipio = substr($digits, 0, 7);
+        if ($codigoMunicipio !== $this->getCodigoMunicipio()) {
+            throw new \InvalidArgumentException(
+                sprintf(
+                    'Chave de NFS-e incompatível com Belém. Código do município esperado: %s; recebido: %s.',
+                    $this->getCodigoMunicipio(),
+                    $codigoMunicipio
+                )
+            );
+        }
+
+        $numeroBruto = substr($digits, 23, 13);
+        if ($numeroBruto === false || $numeroBruto === '') {
+            throw new \InvalidArgumentException('Não foi possível extrair o número da NFS-e a partir da chave informada.');
+        }
+
+        $numeroNormalizado = ltrim($numeroBruto, '0');
+
+        return $numeroNormalizado !== '' ? $numeroNormalizado : '0';
     }
 
     private function isSoapDebugEnabled(): bool

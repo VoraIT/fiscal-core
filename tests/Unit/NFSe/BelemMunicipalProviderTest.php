@@ -213,6 +213,52 @@ final class BelemMunicipalProviderTest extends TestCase
         );
     }
 
+    public function testConsultarByChaveBuildsSchemaValidRequestAndParsesResponse(): void
+    {
+        $transport = new class(NFSeBelemMunicipalFixtures::consultarNfseServicoPrestadoSoapResponse()) implements NFSeSoapTransportInterface {
+            public function __construct(private readonly string $response)
+            {
+            }
+
+            public function send(string $endpoint, string $envelope, array $options = []): array
+            {
+                return [
+                    'request_xml' => $envelope,
+                    'response_xml' => $this->response,
+                    'status_code' => 200,
+                    'headers' => ['Content-Type: text/xml'],
+                ];
+            }
+        };
+
+        $provider = $this->makeProvider($transport);
+        $provider->consultar(NFSeBelemMunicipalFixtures::chaveNfse());
+
+        $this->assertStringContainsString('<svc:ConsultarNfseServicoPrestado>', $provider->getLastSoapEnvelope());
+
+        $validation = (new NFSeSchemaValidator())->validate(
+            $this->schemaCompatibleXml((string) $provider->getLastRequestXml()),
+            (new NFSeSchemaResolver())->resolve('BELEM_MUNICIPAL_2025', 'consultar_nfse_numero')
+        );
+        $this->assertTrue($validation['valid'], implode(PHP_EOL, $validation['errors']));
+        $this->assertSame('consultar_nfse_numero', $provider->getLastOperation());
+
+        $parsed = $provider->getLastResponseData();
+        $this->assertSame('success', $parsed['status']);
+        $this->assertSame('1105', $parsed['nfse']['numero']);
+
+        $dom = new DOMDocument();
+        $dom->loadXML((string) $provider->getLastRequestXml());
+        $xpath = new DOMXPath($dom);
+        $xpath->registerNamespace('ds', 'http://www.w3.org/2000/09/xmldsig#');
+        $this->assertSame('1105', $xpath->evaluate('string(//*[local-name()="NumeroNfse"])'));
+        $this->assertSame('1', $xpath->evaluate('string(//*[local-name()="Pagina"])'));
+        $this->assertSame(
+            '#PrestadorConsulta',
+            $xpath->evaluate('string(//ds:Signature/ds:SignedInfo/ds:Reference/@URI)')
+        );
+    }
+
     public function testConsultarLoteRetriesWithAlternativeSignatureVariantWhenFaultMentionsAssinatura(): void
     {
         $faultResponse = <<<'XML'
@@ -349,6 +395,52 @@ XML;
             '<DigestValue>2jmj7l5rSw0yVb/vlWAYkK/YBwk=</DigestValue>',
             (string) ($wholeDocumentAttempt['request_xml'] ?? '')
         );
+    }
+
+    public function testConsultarByChaveRetriesWithAlternativeSignatureVariantWhenFaultMentionsAssinatura(): void
+    {
+        $faultResponse = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <soap:Fault>
+      <faultcode>soap:Server</faultcode>
+      <faultstring>Arquivo enviado com erro na assinatura. / Acerte a assinatura do arquivo.</faultstring>
+    </soap:Fault>
+  </soap:Body>
+</soap:Envelope>
+XML;
+
+        $transport = new class($faultResponse, NFSeBelemMunicipalFixtures::consultarNfseServicoPrestadoSoapResponse()) implements NFSeSoapTransportInterface {
+            public array $calls = [];
+
+            public function __construct(
+                private readonly string $firstResponse,
+                private readonly string $secondResponse
+            ) {
+            }
+
+            public function send(string $endpoint, string $envelope, array $options = []): array
+            {
+                $this->calls[] = compact('endpoint', 'envelope', 'options');
+
+                return [
+                    'request_xml' => $envelope,
+                    'response_xml' => count($this->calls) === 1 ? $this->firstResponse : $this->secondResponse,
+                    'status_code' => 200,
+                    'headers' => ['Content-Type: text/xml'],
+                ];
+            }
+        };
+
+        $provider = $this->makeProvider($transport);
+        $provider->consultar(NFSeBelemMunicipalFixtures::chaveNfse());
+
+        $this->assertCount(2, $transport->calls);
+        $artifacts = $provider->getLastOperationArtifacts();
+        $this->assertSame('success', $artifacts['parsed_response']['status']);
+        $this->assertSame('prestador_embedded', $artifacts['transport']['signature_variant']);
+        $this->assertCount(2, $artifacts['transport']['retry_attempts']);
     }
 
     public function testCancelarNfseBuildsSchemaValidRequestAndParsesResponse(): void
