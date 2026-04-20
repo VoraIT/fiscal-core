@@ -121,6 +121,32 @@ class FiscalDocumentResultNormalizer
         );
     }
 
+    public function normalizeXmlRetrieval(
+        string $modelo,
+        string $operation,
+        ?string $xml,
+        ?string $chaveAcesso,
+        ?string $situacao = null,
+        array $raw = [],
+        array $extra = []
+    ): array {
+        return $this->normalizeDocumentoFiscal(
+            $modelo,
+            $operation,
+            [
+                'xml' => $xml,
+                'chave_acesso' => $chaveAcesso,
+                'situacao' => $situacao,
+            ],
+            $this->emptyImpressao(),
+            [],
+            array_merge([
+                'response_xml' => $raw['response_xml'] ?? $xml,
+            ], $raw),
+            $extra
+        );
+    }
+
     public function emptyImpressao(): array
     {
         return [

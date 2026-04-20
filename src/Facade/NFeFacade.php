@@ -313,15 +313,33 @@ class NFeFacade
             }
 
             $xmlResponse = $this->nfe->downloadNFe($chave);
+            $parsed = $this->parseDistDFeResponse($xmlResponse);
+            $documentXml = $parsed['documents'][0]['xml'] ?? $xmlResponse;
 
-            return array_merge(
+            return $this->resultNormalizer->normalizeXmlRetrieval(
+                'nfe',
+                'download_nfe_destinataria',
+                is_string($documentXml) ? $documentXml : null,
+                $chave,
+                $parsed['xmotivo'] ?? null,
                 [
-                    'chave_acesso' => $chave,
-                    'xml_response' => $xmlResponse,
+                    'response_xml' => $xmlResponse,
+                    'parsed_response' => $parsed,
                 ],
-                $this->parseDistDFeResponse($xmlResponse)
+                [
+                    'documents' => $parsed['documents'] ?? [],
+                    'cstat' => $parsed['cstat'] ?? null,
+                    'xmotivo' => $parsed['xmotivo'] ?? null,
+                    'ult_nsu' => $parsed['ult_nsu'] ?? '0',
+                    'max_nsu' => $parsed['max_nsu'] ?? '0',
+                ]
             );
         }, 'download_nfe_destinataria');
+    }
+
+    public function baixarXml(string $chave): FiscalResponse
+    {
+        return $this->downloadNFe($chave);
     }
 
     /**

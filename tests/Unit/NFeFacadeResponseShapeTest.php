@@ -51,4 +51,37 @@ class NFeFacadeResponseShapeTest extends TestCase
         $this->assertSame('application/pdf', $response->getData('impressao')['content_type']);
         $this->assertTrue(str_starts_with($response->getData('impressao')['filename'], 'danfe_'));
     }
+
+    public function test_baixar_xml_returns_canonical_document_shape(): void
+    {
+        $documentXml = '<resNFe><chNFe>35123456789012345678901234567890123456789012</chNFe></resNFe>';
+        $docZip = base64_encode(gzencode($documentXml));
+        $distXml = <<<XML
+<retDistDFeInt>
+    <cStat>138</cStat>
+    <xMotivo>Documento localizado</xMotivo>
+    <ultNSU>12</ultNSU>
+    <maxNSU>12</maxNSU>
+    <loteDistDFeInt>
+        <docZip NSU="12" schema="resNFe_v1.01">{$docZip}</docZip>
+    </loteDistDFeInt>
+</retDistDFeInt>
+XML;
+
+        $adapter = $this->createMock(NFeAdapter::class);
+        $adapter->expects($this->once())
+            ->method('downloadNFe')
+            ->with('35123456789012345678901234567890123456789012')
+            ->willReturn($distXml);
+
+        $facade = new NFeFacade($adapter, $this->createMock(ImpressaoAdapter::class));
+        $response = $facade->baixarXml('35123456789012345678901234567890123456789012');
+
+        $this->assertTrue($response->isSuccess());
+        $this->assertSame($documentXml, $response->getData('documento')['xml']);
+        $this->assertSame('35123456789012345678901234567890123456789012', $response->getData('documento')['chave_acesso']);
+        $this->assertSame('indisponivel', $response->getData('impressao')['modo']);
+        $this->assertSame($distXml, $response->getData('raw')['response_xml']);
+        $this->assertCount(1, $response->getData('documents'));
+    }
 }

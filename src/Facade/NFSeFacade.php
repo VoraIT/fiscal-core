@@ -386,9 +386,46 @@ class NFSeFacade
         }
 
         try {
-            $resultado = json_decode($this->nfse->baixarXml($chave), true);
+            $rawResult = $this->nfse->baixarXml($chave);
+            $parsed = json_decode($rawResult, true);
+            $documentoXml = null;
+
+            if (is_array($parsed)) {
+                $documentoXml = $parsed['raw_xml']
+                    ?? $parsed['xml']
+                    ?? $parsed['xml_retorno']
+                    ?? null;
+            } elseif (is_string($rawResult) && str_starts_with(ltrim($rawResult), '<')) {
+                $documentoXml = $rawResult;
+            }
+
             return FiscalResponse::success([
-                'resultado' => $resultado,
+                'documento' => [
+                    'modelo' => 'nfse',
+                    'xml' => $documentoXml,
+                    'chave_consulta' => $chave,
+                ],
+                'impressao' => [
+                    'disponivel' => false,
+                    'modo' => 'indisponivel',
+                    'url' => null,
+                    'pdf_base64' => null,
+                    'content_type' => null,
+                    'filename' => null,
+                    'source' => null,
+                ],
+                'provider' => [
+                    'type' => 'nfse',
+                    'operation' => 'baixar_xml',
+                    'municipio' => $this->municipio,
+                ],
+                'raw' => [
+                    'parsed_response' => is_array($parsed) ? $parsed : null,
+                    'request_payload' => null,
+                    'request_xml' => null,
+                    'response_body' => is_array($parsed) ? $rawResult : null,
+                    'response_xml' => $documentoXml,
+                ],
                 'type' => 'nfse_xml_download',
                 'chave' => $chave,
                 'municipio' => $this->municipio,

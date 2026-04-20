@@ -202,6 +202,11 @@ class NFCeFacade
         }, 'geracao_danfce');
     }
 
+    public function baixarXml(string $chave): FiscalResponse
+    {
+        return $this->consultar($chave);
+    }
+
     /**
      * Verifica status do serviço SEFAZ
      */

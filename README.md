@@ -304,7 +304,24 @@ if ($danfe->isSuccess()) {
 }
 ```
 
-### 7) **Consultas Públicas**
+### 7) **Consulta padronizada de XML**
+
+```php
+$xmlNfe = $fiscal->baixarXmlNFe($chave);
+$xmlNfce = $fiscal->baixarXmlNFCe($chave);
+$xmlNfse = $fiscal->baixarXmlNFSe($chave, 'manaus');
+
+foreach ([$xmlNfe, $xmlNfce, $xmlNfse] as $response) {
+    if ($response->isSuccess()) {
+        file_put_contents(
+            'documento.xml',
+            $response->getData('documento')['xml']
+        );
+    }
+}
+```
+
+### 8) **Consultas Públicas**
 
 ```php
 use Fiscal\Facade\FiscalFacade;

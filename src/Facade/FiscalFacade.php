@@ -56,6 +56,11 @@ class FiscalFacade
         return $this->nfe->consultar($chave);
     }
 
+    public function baixarXmlNFe(string $chave): FiscalResponse
+    {
+        return $this->nfe->baixarXml($chave);
+    }
+
     /**
      * Cancela uma NFe
      */
@@ -80,6 +85,11 @@ class FiscalFacade
     public function consultarNFCe(string $chave): FiscalResponse
     {
         return $this->nfce->consultar($chave);
+    }
+
+    public function baixarXmlNFCe(string $chave): FiscalResponse
+    {
+        return $this->nfce->baixarXml($chave);
     }
 
     /**
@@ -116,6 +126,11 @@ class FiscalFacade
     public function consultarNFSe(string $chave, string $municipio = 'nacional'): FiscalResponse
     {
         return $this->nfse($municipio)->consultar($chave);
+    }
+
+    public function baixarXmlNFSe(string $chave, string $municipio = 'nacional'): FiscalResponse
+    {
+        return $this->nfse($municipio)->baixarXml($chave);
     }
 
     // ===== OPERAÇÕES DE IMPRESSÃO =====
