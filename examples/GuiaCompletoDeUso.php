@@ -22,6 +22,35 @@ use sabbajohn\FiscalCore\Facade\NFSeFacade;
 use sabbajohn\FiscalCore\Facade\TributacaoFacade;
 use sabbajohn\FiscalCore\Facade\ImpressaoFacade;
 
+function salvarRetornoFiscal(string $baseName, array $data): void
+{
+    $outputDir = __DIR__ . '/output';
+    if (!is_dir($outputDir)) {
+        mkdir($outputDir, 0777, true);
+    }
+
+    $documento = is_array($data['documento'] ?? null) ? $data['documento'] : [];
+    $impressao = is_array($data['impressao'] ?? null) ? $data['impressao'] : [];
+
+    if (!empty($documento['xml'])) {
+        $xmlPath = $outputDir . '/' . $baseName . '.xml';
+        file_put_contents($xmlPath, (string) $documento['xml']);
+        echo "💾 XML salvo em: {$xmlPath}\n";
+    }
+
+    if (($impressao['modo'] ?? null) === 'pdf_base64' && !empty($impressao['pdf_base64'])) {
+        $pdfPath = $outputDir . '/' . ($impressao['filename'] ?? ($baseName . '.pdf'));
+        file_put_contents($pdfPath, base64_decode((string) $impressao['pdf_base64']));
+        echo "💾 PDF salvo em: {$pdfPath}\n";
+    }
+
+    if (($impressao['modo'] ?? null) === 'url' && !empty($impressao['url'])) {
+        $urlPath = $outputDir . '/' . $baseName . '.url.txt';
+        file_put_contents($urlPath, (string) $impressao['url']);
+        echo "💾 URL oficial salva em: {$urlPath}\n";
+    }
+}
+
 // =====================================================
 // 🎯 EXEMPLO 1: USO BÁSICO - INTERFACE UNIFICADA
 // =====================================================
@@ -91,6 +120,7 @@ $nfseResult = $fiscal->emitirNFSe($dadosNfse, 'curitiba');
 if ($nfseResult->isSuccess()) {
     $data = $nfseResult->getData();
     echo "✅ NFSe emitida: " . ($data['type'] ?? 'sucesso') . "\n";
+    salvarRetornoFiscal('nfse_curitiba', $data);
 } else {
     echo "ℹ️ NFSe (demo): " . $nfseResult->getError() . "\n";
 }
@@ -156,11 +186,38 @@ if ($validacaoXml->isSuccess()) {
     if ($danfe->isSuccess()) {
         $data = $danfe->getData();
         echo "🖨️ DANFE gerado: " . number_format($data['size'] / 1024, 1) . "KB\n";
+        if (!empty($data['pdf_base64'])) {
+            $danfePath = __DIR__ . '/output/danfe_exemplo.pdf';
+            if (!is_dir(dirname($danfePath))) {
+                mkdir(dirname($danfePath), 0777, true);
+            }
+            file_put_contents($danfePath, base64_decode((string) $data['pdf_base64']));
+            echo "💾 DANFE salvo em: {$danfePath}\n";
+        }
     } else {
         echo "ℹ️ DANFE: " . $danfe->getError() . "\n";
     }
 } else {
     echo "⚠️ XML simplificado para exemplo\n";
+}
+
+echo "\n4️⃣.1 CONSULTA CANÔNICA DE NFe/NFCe\n";
+echo "----------------------------------\n";
+
+$nfeFacade = new NFeFacade();
+$consultaNfe = $nfeFacade->consultar(str_repeat('1', 44));
+if ($consultaNfe->isSuccess()) {
+    salvarRetornoFiscal('nfe_consulta', $consultaNfe->getData());
+} else {
+    echo "ℹ️ Consulta NFe (demo): " . $consultaNfe->getError() . "\n";
+}
+
+$nfceFacade = new NFCeFacade();
+$consultaNfce = $nfceFacade->consultar(str_repeat('2', 44));
+if ($consultaNfce->isSuccess()) {
+    salvarRetornoFiscal('nfce_consulta', $consultaNfce->getData());
+} else {
+    echo "ℹ️ Consulta NFCe (demo): " . $consultaNfce->getError() . "\n";
 }
 
 // =====================================================

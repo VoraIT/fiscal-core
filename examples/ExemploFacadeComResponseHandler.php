@@ -13,6 +13,39 @@ use sabbajohn\FiscalCore\Support\FiscalResponse;
  * Demonstra como evitar erros 500 nas aplicações
  */
 
+function salvarArtefatosFiscais(FiscalResponse $response, string $prefixo): void
+{
+    if (!$response->isSuccess()) {
+        return;
+    }
+
+    $outputDir = __DIR__ . '/output';
+    if (!is_dir($outputDir)) {
+        mkdir($outputDir, 0777, true);
+    }
+
+    $documento = $response->getData('documento') ?? [];
+    $impressao = $response->getData('impressao') ?? [];
+
+    if (!empty($documento['xml'])) {
+        $xmlPath = $outputDir . '/' . $prefixo . '.xml';
+        file_put_contents($xmlPath, (string) $documento['xml']);
+        echo "XML salvo em: {$xmlPath}\n";
+    }
+
+    if (($impressao['modo'] ?? null) === 'pdf_base64' && !empty($impressao['pdf_base64'])) {
+        $pdfPath = $outputDir . '/' . ($impressao['filename'] ?? ($prefixo . '.pdf'));
+        file_put_contents($pdfPath, base64_decode((string) $impressao['pdf_base64']));
+        echo "PDF salvo em: {$pdfPath}\n";
+    }
+
+    if (($impressao['modo'] ?? null) === 'url' && !empty($impressao['url'])) {
+        $urlPath = $outputDir . '/' . $prefixo . '.url.txt';
+        file_put_contents($urlPath, (string) $impressao['url']);
+        echo "URL de impressao salva em: {$urlPath}\n";
+    }
+}
+
 function exemploNFeComTratamentoErros(): void
 {
     echo "=== Teste NFe com Facade e Response Handler ===\n\n";

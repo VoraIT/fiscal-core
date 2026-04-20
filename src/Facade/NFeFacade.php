@@ -11,6 +11,7 @@ use sabbajohn\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
 use sabbajohn\FiscalCore\Adapters\NF\Core\NotaFiscal;
 use sabbajohn\FiscalCore\Support\ToolsFactory;
 use NFePHP\NFe\Tools;
+use sabbajohn\FiscalCore\Support\FiscalDocumentResultNormalizer;
 
 /**
  * Facade para NFe - Interface simplificada e com tratamento de erros
@@ -21,6 +22,7 @@ class NFeFacade
     private ?NFeAdapter $nfe = null;
     private ?ImpressaoAdapter $impressao = null;
     private ResponseHandler $responseHandler;
+    private FiscalDocumentResultNormalizer $resultNormalizer;
     private ?FiscalResponse $initializationError = null;
 
     public function __construct(
@@ -28,6 +30,7 @@ class NFeFacade
         ?ImpressaoAdapter $impressao = null
     ) {
         $this->responseHandler = new ResponseHandler();
+        $this->resultNormalizer = new FiscalDocumentResultNormalizer();
         
         if ($nfe !== null) {
             $this->nfe = $nfe;
@@ -90,15 +93,22 @@ class NFeFacade
             }
             
             $result = $this->nfe->emitir($dados);
-            
-            return [
-                'xml_response' => $result,
-                'xmlAssinado' => $this->nfe->getLastSignedXml(),
-                'xmlRetorno' => $this->nfe->getLastResponseXml() ?? $result,
-                'modelo' => 55,
-                'ambiente' => $dados['identificacao']['tpAmb'] ?? 2,
-                'chave_acesso' => $this->extrairChaveAcesso($result)
-            ];
+
+            $xmlAssinado = $this->nfe->getLastSignedXml();
+            $xmlRetorno = $this->nfe->getLastResponseXml() ?? $result;
+
+            return $this->resultNormalizer->normalizeEmissao(
+                'nfe',
+                'emissao_nfe',
+                $xmlRetorno,
+                $xmlAssinado,
+                $this->extrairChaveAcesso($result),
+                $this->extrairSituacao($xmlRetorno),
+                [
+                    'modelo' => 55,
+                    'ambiente' => $dados['identificacao']['tpAmb'] ?? 2,
+                ]
+            );
         }, 'emissao_nfe');
     }
 
@@ -122,12 +132,14 @@ class NFeFacade
             }
             
             $result = $this->nfe->consultar($chave);
-            
-            return [
-                'xml_response' => $result,
-                'chave_acesso' => $chave,
-                'situacao' => $this->extrairSituacao($result)
-            ];
+
+            return $this->resultNormalizer->normalizeConsulta(
+                'nfe',
+                'consulta_nfe',
+                $result,
+                $chave,
+                $this->extrairSituacao($result)
+            );
         }, 'consulta_nfe');
     }
 
@@ -330,12 +342,14 @@ class NFeFacade
             }
             
             $pdf = $this->impressao->gerarDanfe($xmlAutorizado);
-            
-            return [
-                'pdf_base64' => base64_encode($pdf),
-                'content_type' => 'application/pdf',
-                'filename' => 'danfe_' . date('Ymd_His') . '.pdf'
-            ];
+
+            return $this->resultNormalizer->normalizePdfBase64(
+                'nfe',
+                'geracao_danfe',
+                $xmlAutorizado,
+                base64_encode($pdf),
+                'danfe_' . date('Ymd_His') . '.pdf'
+            );
         }, 'geracao_danfe');
     }
 

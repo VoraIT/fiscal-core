@@ -193,13 +193,13 @@ if (trim((string) ($options['source_file'] ?? '')) !== '') {
         }
 
         $fonte = 'chave';
-        $resultado = is_array($consulta->getData('resultado') ?? null)
-            ? $consulta->getData('resultado')
+        $documento = is_array($consulta->getData('documento') ?? null)
+            ? $consulta->getData('documento')
             : [];
-        $rawXml = trim((string) ($resultado['raw_xml'] ?? ''));
-        if ($rawXml === '') {
-            $rawXml = trim((string) ($consulta->getData('raw_xml') ?? ''));
-        }
+        $raw = is_array($consulta->getData('raw') ?? null)
+            ? $consulta->getData('raw')
+            : [];
+        $rawXml = trim((string) ($documento['xml'] ?? $raw['response_xml'] ?? ''));
     }
 }
 

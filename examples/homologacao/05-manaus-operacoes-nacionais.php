@@ -58,11 +58,28 @@ if (isset($options['consultar_chave'])) {
 }
 
 if ($response !== null) {
-/* TODO: ajustar, funciona bem com os testes */
-    
-    file_put_contents($response->getData('chave').'.xml', $response->getData('resultado')['raw_xml']);
+    $documento = is_array($response->getData('documento') ?? null) ? $response->getData('documento') : [];
+    $impressao = is_array($response->getData('impressao') ?? null) ? $response->getData('impressao') : [];
+    $outputDir = $projectRoot . '/tmp/nfse';
 
-    file_put_contents($response->getData('filename'), $response->getData('resultado'));
+    if (!is_dir($outputDir)) {
+        mkdir($outputDir, 0777, true);
+    }
+
+    if (!empty($documento['xml'])) {
+        $xmlName = ($documento['chave_consulta'] ?? $documento['numero'] ?? 'nfse') . '.xml';
+        file_put_contents($outputDir . '/' . $xmlName, (string) $documento['xml']);
+    }
+
+    if (($impressao['modo'] ?? null) === 'pdf_base64' && !empty($impressao['pdf_base64'])) {
+        $pdfName = (string) ($impressao['filename'] ?? 'danfse.pdf');
+        file_put_contents($outputDir . '/' . $pdfName, base64_decode((string) $impressao['pdf_base64']));
+    }
+
+    if (($impressao['modo'] ?? null) === 'url' && !empty($impressao['url'])) {
+        file_put_contents($outputDir . '/danfse.url.txt', (string) $impressao['url']);
+    }
+
     echo json_encode([
         'provider' => $providerInfo->toArray(),
         'response' => $response->toArray(),

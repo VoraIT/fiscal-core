@@ -283,7 +283,28 @@ if ($consulta->isSuccess()) {
 }
 ```
 
-### 6) **Consultas Públicas**
+### 6) **Salvar XML e PDF retornados**
+
+```php
+$consulta = $fiscal->consultarNFe($chave);
+
+if ($consulta->isSuccess()) {
+    $documento = $consulta->getData('documento');
+    file_put_contents('nfe.xml', $documento['xml']);
+}
+
+$danfe = $fiscal->gerarDanfe($xmlAutorizado);
+
+if ($danfe->isSuccess()) {
+    $impressao = $danfe->getData('impressao');
+    file_put_contents(
+        $impressao['filename'] ?? 'danfe.pdf',
+        base64_decode($impressao['pdf_base64'])
+    );
+}
+```
+
+### 7) **Consultas Públicas**
 
 ```php
 use Fiscal\Facade\FiscalFacade;

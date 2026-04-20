@@ -8,6 +8,7 @@ use sabbajohn\FiscalCore\Support\ResponseHandler;
 use sabbajohn\FiscalCore\Support\FiscalResponse;
 use sabbajohn\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
 use sabbajohn\FiscalCore\Support\ToolsFactory;
+use sabbajohn\FiscalCore\Support\FiscalDocumentResultNormalizer;
 /**
  * Facade para NFCe - Interface simplificada com tratamento de erros
  * Evita que aplicações recebam erros 500 fornecendo responses padronizados
@@ -17,6 +18,7 @@ class NFCeFacade
     private ?NFCeAdapter $nfce = null;
     private ?ImpressaoAdapter $impressao = null;
     private ResponseHandler $responseHandler;
+    private FiscalDocumentResultNormalizer $resultNormalizer;
     private ?FiscalResponse $initializationError = null;
 
     public function __construct(
@@ -24,6 +26,7 @@ class NFCeFacade
         ?ImpressaoAdapter $impressao = null
     ) {
         $this->responseHandler = new ResponseHandler();
+        $this->resultNormalizer = new FiscalDocumentResultNormalizer();
         
         if ($nfce !== null) {
             $this->nfce = $nfce;
@@ -86,15 +89,22 @@ class NFCeFacade
             }
             
             $result = $this->nfce->emitir($dados);
-            
-            return [
-                'xml_response' => $result,
-                'xmlAssinado' => $this->nfce->getLastSignedXml(),
-                'xmlRetorno' => $this->nfce->getLastResponseXml() ?? $result,
-                'modelo' => 65,
-                'ambiente' => $dados['identificacao']['tpAmb'] ?? 2,
-                'chave_acesso' => $this->extrairChaveAcesso($result)
-            ];
+
+            $xmlAssinado = $this->nfce->getLastSignedXml();
+            $xmlRetorno = $this->nfce->getLastResponseXml() ?? $result;
+
+            return $this->resultNormalizer->normalizeEmissao(
+                'nfce',
+                'emissao_nfce',
+                $xmlRetorno,
+                $xmlAssinado,
+                $this->extrairChaveAcesso($result),
+                $this->extrairSituacao($xmlRetorno),
+                [
+                    'modelo' => 65,
+                    'ambiente' => $dados['identificacao']['tpAmb'] ?? 2,
+                ]
+            );
         }, 'emissao_nfce');
     }
 
@@ -118,12 +128,14 @@ class NFCeFacade
             }
             
             $result = $this->nfce->consultar($chave);
-            
-            return [
-                'xml_response' => $result,
-                'chave_acesso' => $chave,
-                'situacao' => $this->extrairSituacao($result)
-            ];
+
+            return $this->resultNormalizer->normalizeConsulta(
+                'nfce',
+                'consulta_nfce',
+                $result,
+                $chave,
+                $this->extrairSituacao($result)
+            );
         }, 'consulta_nfce');
     }
 
@@ -179,12 +191,14 @@ class NFCeFacade
             }
             
             $pdf = $this->impressao->gerarDanfce($xmlAutorizado);
-            
-            return [
-                'pdf_base64' => base64_encode($pdf),
-                'content_type' => 'application/pdf',
-                'filename' => 'danfce_' . date('Ymd_His') . '.pdf'
-            ];
+
+            return $this->resultNormalizer->normalizePdfBase64(
+                'nfce',
+                'geracao_danfce',
+                $xmlAutorizado,
+                base64_encode($pdf),
+                'danfce_' . date('Ymd_His') . '.pdf'
+            );
         }, 'geracao_danfce');
     }
 
