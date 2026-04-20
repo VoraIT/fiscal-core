@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace sabbajohn\FiscalCore\Providers\NFSe\Municipal;
 
+use sabbajohn\FiscalCore\Contracts\NFSeConsultaResultInterface;
 use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
 use sabbajohn\FiscalCore\Providers\NFSe\AbstractNFSeProvider;
 use sabbajohn\FiscalCore\Support\CertificateManager;
 use sabbajohn\FiscalCore\Support\NFSeSchemaResolver;
 use sabbajohn\FiscalCore\Support\NFSeSchemaValidator;
+use sabbajohn\FiscalCore\Support\NFSeResultNormalizer;
 use sabbajohn\FiscalCore\Support\NFSeSoapCurlTransport;
 use sabbajohn\FiscalCore\Support\NFSeSoapTransportInterface;
 use NFePHP\Common\Certificate;
@@ -55,7 +57,7 @@ class PublicaProvider extends AbstractNFSeProvider implements NFSeOperationalInt
         );
     }
 
-    public function consultarPorRps(array $identificacaoRps): string
+    public function consultarPorRps(array $identificacaoRps): NFSeConsultaResultInterface
     {
         $this->validarIdentificacaoRps($identificacaoRps);
 
@@ -64,16 +66,21 @@ class PublicaProvider extends AbstractNFSeProvider implements NFSeOperationalInt
             $requestXml = $this->assinarXml($requestXml, 'consultar_nfse_rps');
         }
 
-        return $this->dispatchSoapOperation(
+        $this->dispatchSoapOperation(
             'consultar_nfse_rps',
             'ConsultarNfsePorRps',
             $requestXml,
             'consultar_nfse_rps',
             'consultas'
         );
+
+        return $this->normalizeConsultaResult('consultar_nfse_rps', [
+            'chave_consulta' => (string) $identificacaoRps['numero'],
+            'source' => 'consultar_nfse_rps',
+        ]);
     }
 
-    public function consultarLote(string $protocolo): string
+    public function consultarLote(string $protocolo): NFSeConsultaResultInterface
     {
         if (trim($protocolo) === '') {
             throw new \InvalidArgumentException('Protocolo do lote é obrigatório para consulta em Joinville.');
@@ -84,13 +91,18 @@ class PublicaProvider extends AbstractNFSeProvider implements NFSeOperationalInt
             $requestXml = $this->assinarXml($requestXml, 'consultar_lote');
         }
 
-        return $this->dispatchSoapOperation(
+        $this->dispatchSoapOperation(
             'consultar_lote',
             'ConsultarLoteRps',
             $requestXml,
             'consultar_lote',
             'consultas'
         );
+
+        return $this->normalizeConsultaResult('consultar_lote', [
+            'chave_consulta' => $protocolo,
+            'source' => 'consultar_lote',
+        ]);
     }
 
     public function cancelar(string $chave, string $motivo, ?string $protocolo = null): bool
@@ -445,6 +457,18 @@ class PublicaProvider extends AbstractNFSeProvider implements NFSeOperationalInt
             'consultar_nfse_rps',
             'cancelar_nfse',
         ];
+    }
+
+    private function normalizeConsultaResult(string $operation, array $context = []): NFSeConsultaResultInterface
+    {
+        return (new NFSeResultNormalizer())->normalizeConsulta(
+            $operation,
+            $this->lastResponseData,
+            $this->lastOperationArtifacts,
+            $context + [
+                'provider_class' => static::class,
+            ]
+        );
     }
 
     private function resolveServicoData(array $dados): array

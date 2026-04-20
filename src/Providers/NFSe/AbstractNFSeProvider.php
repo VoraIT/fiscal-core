@@ -2,7 +2,9 @@
 
 namespace sabbajohn\FiscalCore\Providers\NFSe;
 
+use sabbajohn\FiscalCore\Contracts\NFSeConsultaResultInterface;
 use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
+use sabbajohn\FiscalCore\Support\NFSeResultNormalizer;
 
 /**
  * Provider base abstrato para NFSe
@@ -63,11 +65,15 @@ abstract class AbstractNFSeProvider implements NFSeProviderConfigInterface
     /**
      * {@inheritDoc}
      */
-    public function consultar(string $chave): string
+    public function consultar(string $chave): NFSeConsultaResultInterface
     {
-        // TODO: Implementar consulta
-        // Por enquanto retorna XML vazio
-        return '<?xml version="1.0"?><consultaNfseResposta><mensagem>Implementação pendente</mensagem></consultaNfseResposta>';
+        return (new NFSeResultNormalizer())->normalizeConsulta('consultar', [
+            'status' => 'unknown',
+            'mensagens' => ['Implementação pendente'],
+            'raw_xml' => '<?xml version="1.0"?><consultaNfseResposta><mensagem>Implementação pendente</mensagem></consultaNfseResposta>',
+        ], [], [
+            'provider_class' => static::class,
+        ]);
     }
     
     /**
@@ -99,7 +105,7 @@ abstract class AbstractNFSeProvider implements NFSeProviderConfigInterface
             'homologacao' => $this->config['wsdl_homologacao'] ?? $this->config['wsdl']
         ];
         
-        return $urls[$this->ambiente];
+        return (string) ($urls[$this->ambiente] ?? '');
     }
     
     /**

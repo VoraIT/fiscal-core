@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace sabbajohn\FiscalCore\Providers\NFSe\Municipal;
 
+use sabbajohn\FiscalCore\Contracts\NFSeConsultaResultInterface;
 use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
 use sabbajohn\FiscalCore\Providers\NFSe\AbstractNFSeProvider;
 use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\NFSeResultNormalizer;
 use sabbajohn\FiscalCore\Support\NFSeSchemaResolver;
 use sabbajohn\FiscalCore\Support\NFSeSchemaValidator;
 use sabbajohn\FiscalCore\Support\NFSeSoapCurlTransport;
@@ -55,7 +57,7 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
         );
     }
 
-    public function consultarPorRps(array $identificacaoRps): string
+    public function consultarPorRps(array $identificacaoRps): NFSeConsultaResultInterface
     {
         $this->validarIdentificacaoRps($identificacaoRps);
         $baseRequestXml = $this->montarXmlConsultarNfsePorRps($identificacaoRps);
@@ -63,16 +65,21 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
             ? $this->assinarXml($baseRequestXml, 'consultar_nfse_rps')
             : $baseRequestXml;
 
-        return $this->dispatchSoapOperation(
+        $this->dispatchSoapOperation(
             'consultar_nfse_rps',
             'ConsultarNfsePorRps',
             $requestXml,
             'consultar_nfse_rps',
             $baseRequestXml
         );
+
+        return $this->normalizeConsultaResult('consultar_nfse_rps', [
+            'chave_consulta' => (string) $identificacaoRps['numero'],
+            'source' => 'consultar_nfse_rps',
+        ]);
     }
 
-    public function consultar(string $chave): string
+    public function consultar(string $chave): NFSeConsultaResultInterface
     {
         $numeroNfse = $this->extractNumeroNfseFromChave($chave);
         $baseRequestXml = $this->montarXmlConsultarNfsePorNumero($numeroNfse);
@@ -80,16 +87,22 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
             ? $this->assinarXml($baseRequestXml, 'consultar_nfse_numero')
             : $baseRequestXml;
 
-        return $this->dispatchSoapOperation(
+        $this->dispatchSoapOperation(
             'consultar_nfse_numero',
             'ConsultarNfseServicoPrestado',
             $requestXml,
             'consultar_nfse_numero',
             $baseRequestXml
         );
+
+        return $this->normalizeConsultaResult('consultar_nfse_numero', [
+            'chave_consulta' => $numeroNfse,
+            'source' => 'consultar_nfse_numero',
+            'danfse_url' => $this->resolveOfficialDanfseUrl(),
+        ]);
     }
 
-    public function consultarLote(string $protocolo): string
+    public function consultarLote(string $protocolo): NFSeConsultaResultInterface
     {
         if (trim($protocolo) === '') {
             throw new \InvalidArgumentException('Protocolo do lote é obrigatório para consulta em Belém.');
@@ -100,13 +113,19 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
             ? $this->assinarXml($baseRequestXml, 'consultar_lote')
             : $baseRequestXml;
 
-        return $this->dispatchSoapOperation(
+        $this->dispatchSoapOperation(
             'consultar_lote',
             'ConsultarLoteRps',
             $requestXml,
             'consultar_lote',
             $baseRequestXml
         );
+
+        return $this->normalizeConsultaResult('consultar_lote', [
+            'chave_consulta' => $protocolo,
+            'source' => 'consultar_lote',
+            'danfse_url' => $this->resolveOfficialDanfseUrl(),
+        ]);
     }
 
     public function cancelar(string $chave, string $motivo, ?string $protocolo = null): bool
@@ -471,6 +490,40 @@ class BelemMunicipalProvider extends AbstractNFSeProvider implements NFSeOperati
             'consultar_nfse_numero',
             'cancelar_nfse',
         ];
+    }
+
+    private function normalizeConsultaResult(string $operation, array $context = []): NFSeConsultaResultInterface
+    {
+        return (new NFSeResultNormalizer())->normalizeConsulta(
+            $operation,
+            $this->lastResponseData,
+            $this->lastOperationArtifacts,
+            $context + [
+                'provider_class' => static::class,
+            ]
+        );
+    }
+
+    private function resolveOfficialDanfseUrl(): ?string
+    {
+        $nfse = is_array($this->lastResponseData['nfse'] ?? null)
+            ? $this->lastResponseData['nfse']
+            : (is_array($this->lastResponseData['lista_nfse'][0] ?? null) ? $this->lastResponseData['lista_nfse'][0] : []);
+
+        $numero = trim((string) ($nfse['numero'] ?? ''));
+        $codigoVerificacao = trim((string) ($nfse['codigo_verificacao'] ?? ''));
+        if ($numero === '' || $codigoVerificacao === '') {
+            return null;
+        }
+
+        $prestador = $this->resolvePrestadorContext();
+
+        return \sabbajohn\FiscalCore\Support\BelemMunicipalDocumentUrlBuilder::build(
+            (string) ($prestador['cnpj'] ?? ''),
+            (string) ($prestador['inscricao_municipal'] ?? ''),
+            $numero,
+            $codigoVerificacao
+        );
     }
 
     private function resolveServicoData(array $dados): array

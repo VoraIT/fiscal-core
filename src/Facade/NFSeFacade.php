@@ -155,45 +155,58 @@ class NFSeFacade
                 }
             }
 
-            if ($this->isBelemMunicipalFlow()) {
-                return $this->emitirCompletoBelem($dados, $emissao, $emissaoData);
-            }
-
             $warnings = [];
             $consultaData = null;
             $nfseXml = $this->extractNfseXmlFromParsedResponse($emissaoData['emissao']['parsed_response'] ?? []);
+            $documento = null;
+            $impressao = null;
 
             if ($nfseXml === null) {
                 $consulta = $this->resolvePostEmissionConsultation($dados, $emissaoData);
                 if ($consulta !== null) {
                     $consultaData = $consulta->getData();
-                    $nfseXml = $this->extractNfseXmlFromParsedResponse(
-                        $consultaData['consulta']['parsed_response'] ?? []
-                    );
-                    /*TODO: Condicionar ao ambiente nacional ou ajustar fluxo  */
-                    $nfseXml = empty($nfseXml) ? 
-                        $this->extractNfseXmlFromParsedResponse(
-                            $emissaoData['emissao']['parsed_response']
-                        )
-                        : $nfseXml;
+                    $documento = is_array($consultaData['documento'] ?? null) ? $consultaData['documento'] : null;
+                    $impressao = is_array($consultaData['impressao'] ?? null) ? $consultaData['impressao'] : null;
+                    $nfseXml = $documento['xml'] ?? null;
                 }
             }
 
+            if ($documento === null && $nfseXml !== null) {
+                $documento = [
+                    'xml' => $nfseXml,
+                    'numero' => $this->extractNodeValue($nfseXml, 'Numero')
+                        ?? $this->resolveParsedResponseNfseValue($consultaData, $emissaoData, 'numero'),
+                    'codigo_verificacao' => $this->extractNodeValue($nfseXml, 'CodigoVerificacao')
+                        ?? $this->resolveParsedResponseNfseValue($consultaData, $emissaoData, 'codigo_verificacao'),
+                    'protocolo' => $this->resolveParsedResponseNfseValue($consultaData, $emissaoData, 'protocolo'),
+                    'status_autorizacao' => 'autorizada',
+                    'data_emissao' => $this->extractNodeValue($nfseXml, 'DataEmissao'),
+                    'chave_consulta' => $this->resolveParsedResponseNfseValue($consultaData, $emissaoData, 'numero'),
+                ];
+            }
+
             $flowStatus = 'parcial';
-            $danfseData = null;
-            if ($nfseXml !== null) {
+            if (($impressao['disponivel'] ?? false) !== true && ($officialUrl = $this->resolveOfficialDocumentUrl($consultaData, $emissaoData)) !== null) {
+                $impressao = [
+                    'disponivel' => true,
+                    'modo' => 'url',
+                    'url' => $officialUrl,
+                    'pdf_base64' => null,
+                    'content_type' => 'text/uri-list',
+                    'filename' => null,
+                    'source' => 'official_url',
+                ];
+            }
+
+            if (($impressao['disponivel'] ?? false) !== true && $nfseXml !== null) {
                 $danfse = $this->gerarDanfse($nfseXml);
                 if ($danfse->isSuccess()) {
-                    $danfseData = $danfse->getData();
+                    $impressao = $danfse->getData('impressao');
                     $flowStatus = 'completo';
                 } else {
                     $warnings[] = $danfse->getError();
                 }
-            } elseif (($officialUrl = $this->resolveOfficialDocumentUrl($consultaData, $emissaoData)) !== null) {
-                $danfseData = [
-                    'url' => $officialUrl,
-                    'source' => 'official_url',
-                ];
+            } elseif (($impressao['disponivel'] ?? false) === true) {
                 $flowStatus = 'completo';
             } else {
                 $warnings[] = 'Nao foi possivel resolver o XML final da NFSe apos a emissao.';
@@ -201,20 +214,15 @@ class NFSeFacade
 
             return FiscalResponse::success([
                 'flow_status' => $flowStatus,
+                'authorization_status' => $documento['status_autorizacao'] ?? ($impressao['disponivel'] ?? false ? 'autorizada' : 'pendente'),
                 'emissao' => [
                     'resultado' => $emissaoData['resultado'] ?? null,
                     'metadata' => $emissao->getMetadata(),
                     'introspection' => $emissaoData['emissao'] ?? null,
                 ],
                 'consulta' => $consultaData['consulta'] ?? null,
-                'nfse' => $nfseXml !== null ? [
-                    'xml' => $nfseXml,
-                    'numero' => $this->extractNodeValue($nfseXml, 'Numero')
-                        ?? $this->resolveParsedResponseNfseValue($consultaData, $emissaoData, 'numero'),
-                    'codigo_verificacao' => $this->extractNodeValue($nfseXml, 'CodigoVerificacao')
-                        ?? $this->resolveParsedResponseNfseValue($consultaData, $emissaoData, 'codigo_verificacao'),
-                ] : null,
-                'danfse' => $danfseData,
+                'documento' => $documento,
+                'impressao' => $impressao,
                 'warnings' => array_values(array_filter($warnings)),
             ], 'nfse_emission_complete', $this->buildCompatibilityMetadata());
         } catch (\Exception $e) {
@@ -255,42 +263,12 @@ class NFSeFacade
             $operation = method_exists($this->nfse, 'getLastOperationInfo')
                 ? $this->nfse->getLastOperationInfo()
                 : [];
-
-            if ($this->isBelemMunicipalFlow()) {
-                $parsedResponse = is_array($operation['parsed_response'] ?? null)
-                    ? $operation['parsed_response']
-                    : [];
-                $availability = $this->buildAvailabilityPayloadFromParsedResponse(
-                    $parsedResponse,
-                    'numero_nfse',
-                    $operation
-                );
-
-                return FiscalResponse::success(array_merge([
-                    'resultado' => [
-                        'raw_xml' => $resultado,
-                        'parsed_response' => $parsedResponse,
-                    ],
-                    'type' => 'nfse_consulta',
-                    'chave' => $chave,
-                    'municipio' => $this->municipio,
-                    'consulta' => $operation,
-                ], $availability), 'nfse_query', [
-                    'chave' => $chave,
-                    'municipio' => $this->municipio,
-                    'provider_key' => $this->providerKey,
-                    'municipio_ignored' => $this->municipioIgnored,
-                    'warnings' => $this->deprecationWarnings,
-                ]);
-            }
-
-            $resultado = json_decode($resultado, true);
-            return FiscalResponse::success([
-                'resultado' => $resultado,
+            return FiscalResponse::success(array_merge($resultado->toArray(), [
                 'type' => 'nfse_consulta',
                 'chave' => $chave,
-                'municipio' => $this->municipio
-            ], 'nfse_query', [
+                'municipio' => $this->municipio,
+                'consulta_operacao' => $operation,
+            ]), 'nfse_query', [
                 'chave' => $chave,
                 'municipio' => $this->municipio,
                 'provider_key' => $this->providerKey,
@@ -369,12 +347,11 @@ class NFSeFacade
             $operation = method_exists($this->nfse, 'getLastOperationInfo')
                 ? $this->nfse->getLastOperationInfo()
                 : [];
-            return FiscalResponse::success([
-                'resultado' => $resultado,
+            return FiscalResponse::success(array_merge($resultado->toArray(), [
                 'type' => 'nfse_consulta_rps',
                 'municipio' => $this->municipio,
-                'consulta' => $operation,
-            ], 'nfse_query_by_rps', $this->buildCompatibilityMetadata());
+                'consulta_operacao' => $operation,
+            ]), 'nfse_query_by_rps', $this->buildCompatibilityMetadata());
         } catch (\Exception $e) {
             return $this->responseHandler->handle($e, 'nfse_query_by_rps');
         }
@@ -391,13 +368,12 @@ class NFSeFacade
             $operation = method_exists($this->nfse, 'getLastOperationInfo')
                 ? $this->nfse->getLastOperationInfo()
                 : [];
-            return FiscalResponse::success([
-                'resultado' => $resultado,
+            return FiscalResponse::success(array_merge($resultado->toArray(), [
                 'type' => 'nfse_consulta_lote',
                 'protocolo' => $protocolo,
                 'municipio' => $this->municipio,
-                'consulta' => $operation,
-            ], 'nfse_query_lote', $this->buildCompatibilityMetadata());
+                'consulta_operacao' => $operation,
+            ]), 'nfse_query_lote', $this->buildCompatibilityMetadata());
         } catch (\Exception $e) {
             return $this->responseHandler->handle($e, 'nfse_query_lote');
         }
@@ -430,14 +406,11 @@ class NFSeFacade
 
         try {
             $resultado = $this->nfse->baixarDanfse($chave);
-            return FiscalResponse::success([
-                'resultado' => $resultado,
+            return FiscalResponse::success(array_merge($resultado->toArray(), [
                 'type' => 'nfse_danfse_download',
                 'chave' => $chave,
                 'municipio' => $this->municipio,
-                'content_type' => 'application/pdf',
-                'filename' => 'danfse_' . strtolower($this->municipio) . '_' . date('Ymd_His') . '.pdf',
-            ], 'nfse_generate_danfse', $this->buildCompatibilityMetadata());
+            ]), 'nfse_generate_danfse', $this->buildCompatibilityMetadata());
         } catch (\Exception $e) {
             return $this->responseHandler->handle($e, 'nfse_download_danfse');
         }
@@ -463,11 +436,22 @@ class NFSeFacade
             $renderer = (new MunicipalDanfseRendererResolver())->resolve($this->providerKey);
             $pdf = $renderer->render($xmlNfse);
 
-            return FiscalResponse::success([
-                'pdf_base64' => base64_encode($pdf),
-                'content_type' => 'application/pdf',
-                'filename' => 'danfse_' . strtolower($this->municipio) . '_' . date('Ymd_His') . '.pdf',
-            ], 'nfse_generate_danfse', $this->buildCompatibilityMetadata());
+            $printResult = (new \sabbajohn\FiscalCore\Support\NFSeResultNormalizer())->normalizePdfBase64(
+                base64_encode($pdf),
+                [
+                    'provider_key' => $this->providerKey,
+                    'municipio' => $this->municipio,
+                    'filename' => 'danfse_' . strtolower($this->municipio) . '_' . date('Ymd_His') . '.pdf',
+                    'source' => 'render_local',
+                ],
+                [
+                    'response_xml' => $xmlNfse,
+                ]
+            );
+
+            return FiscalResponse::success(array_merge($printResult->toArray(), [
+                'type' => 'nfse_generate_danfse',
+            ]), 'nfse_generate_danfse', $this->buildCompatibilityMetadata());
         } catch (\Exception $e) {
             return $this->responseHandler->handle($e, 'nfse_generate_danfse');
         }
@@ -1025,8 +1009,8 @@ class NFSeFacade
         array &$warnings
     ): array {
         $consultaData = $consulta->getData();
-        $parsedResponse = is_array($consultaData['consulta']['parsed_response'] ?? null)
-            ? $consultaData['consulta']['parsed_response']
+        $parsedResponse = is_array($consultaData['raw']['parsed_response'] ?? null)
+            ? $consultaData['raw']['parsed_response']
             : [];
 
         $warnings = array_merge($warnings, $source === 'rps' ? ['Consulta por RPS utilizada como fallback da disponibilidade em Belem.'] : []);
@@ -1034,7 +1018,7 @@ class NFSeFacade
         return $this->buildAvailabilityPayloadFromParsedResponse(
             $parsedResponse,
             $source,
-            $consultaData['consulta'] ?? null,
+            $consultaData['consulta_operacao'] ?? null,
             $warnings
         );
     }
@@ -1196,8 +1180,9 @@ class NFSeFacade
         if ($protocolo !== '') {
             $consultaLote = $this->consultarLote($protocolo);
             if ($consultaLote->isSuccess()) {
-                $nfseXml = $this->extractNfseXmlFromParsedResponse($consultaLote->getData('consulta')['parsed_response'] ?? []);
-                if ($nfseXml !== null) {
+                $documento = is_array($consultaLote->getData('documento') ?? null) ? $consultaLote->getData('documento') : [];
+                $statusAutorizacao = (string) ($consultaLote->getData('consulta')['status_autorizacao'] ?? '');
+                if (($documento['numero'] ?? null) !== null || $statusAutorizacao === 'autorizada') {
                     return $consultaLote;
                 }
             }
@@ -1211,7 +1196,9 @@ class NFSeFacade
             'id' => $dados['id'] ?? null,
         ], static fn (mixed $value): bool => $value !== null && $value !== '');
 
-        if (count($consultaRpsPayload) === 4) {
+        if (
+            isset($consultaRpsPayload['numero'], $consultaRpsPayload['serie'], $consultaRpsPayload['tipo'])
+        ) {
             return $this->consultarPorRps($consultaRpsPayload);
         }
 
@@ -1261,7 +1248,7 @@ class NFSeFacade
 
     private function resolveParsedResponseNfseValue(?array $consultaData, array $emissaoData, string $field): ?string
     {
-        $consultaParsed = $consultaData['consulta']['parsed_response']['nfse'][$field] ?? null;
+        $consultaParsed = $consultaData['raw']['parsed_response']['nfse'][$field] ?? null;
         if (is_string($consultaParsed) && trim($consultaParsed) !== '') {
             return trim($consultaParsed);
         }
@@ -1277,13 +1264,38 @@ class NFSeFacade
     private function resolveOfficialDocumentUrl(?array $consultaData, array $emissaoData): ?string
     {
         $candidates = [
-            $consultaData['consulta']['parsed_response']['nfse_url'] ?? null,
+            $consultaData['raw']['parsed_response']['nfse_url'] ?? null,
             $emissaoData['emissao']['parsed_response']['nfse_url'] ?? null,
         ];
 
         foreach ($candidates as $candidate) {
             if (is_string($candidate) && trim($candidate) !== '') {
                 return trim($candidate);
+            }
+        }
+
+        if ($this->isBelemMunicipalFlow()) {
+            $parsedCandidates = [
+                [
+                    'parsed' => is_array($consultaData['raw']['parsed_response'] ?? null) ? $consultaData['raw']['parsed_response'] : null,
+                    'consulta' => is_array($consultaData['consulta_operacao'] ?? null) ? $consultaData['consulta_operacao'] : null,
+                ],
+                [
+                    'parsed' => is_array($emissaoData['emissao']['parsed_response'] ?? null) ? $emissaoData['emissao']['parsed_response'] : null,
+                    'consulta' => is_array($emissaoData['emissao'] ?? null) ? $emissaoData['emissao'] : null,
+                ],
+            ];
+
+            foreach ($parsedCandidates as $candidateData) {
+                $parsed = $candidateData['parsed'] ?? null;
+                if (!is_array($parsed)) {
+                    continue;
+                }
+
+                $nfseData = $this->extractAvailabilityNfseData($parsed);
+                if (($nfseData['numero'] ?? null) !== null && ($nfseData['codigo_verificacao'] ?? null) !== null) {
+                    return $this->buildBelemOfficialDocumentUrl($nfseData, $parsed, $candidateData['consulta'] ?? null);
+                }
             }
         }
 

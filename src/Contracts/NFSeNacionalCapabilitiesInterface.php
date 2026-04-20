@@ -9,15 +9,15 @@ namespace sabbajohn\FiscalCore\Contracts;
  */
 interface NFSeNacionalCapabilitiesInterface
 {
-    public function consultarPorRps(array $identificacaoRps): string;
+    public function consultarPorRps(array $identificacaoRps): NFSeConsultaResultInterface;
 
-    public function consultarLote(string $protocolo): string;
+    public function consultarLote(string $protocolo): NFSeConsultaResultInterface;
 
     public function substituir(string $nfseOriginal, array $dadosSubstituicao): string;
 
     public function baixarXml(string $chave): string;
 
-    public function baixarDanfse(string $chave): string;
+    public function baixarDanfse(string $chave): NFSeImpressaoResultInterface;
 
     /**
      * @return array{data: array, metadata?: array}

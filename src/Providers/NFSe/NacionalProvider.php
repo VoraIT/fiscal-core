@@ -2,11 +2,14 @@
 
 namespace sabbajohn\FiscalCore\Providers\NFSe;
 
+use sabbajohn\FiscalCore\Contracts\NFSeConsultaResultInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeImpressaoResultInterface;
 use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
 use sabbajohn\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
 use sabbajohn\FiscalCore\Services\NFSe\NacionalCatalogService;
 use sabbajohn\FiscalCore\Support\Cache\FileCacheStore;
 use sabbajohn\FiscalCore\Support\CertificateManager;
+use sabbajohn\FiscalCore\Support\NFSeResultNormalizer;
 use NFePHP\Common\Certificate;
 use NFePHP\Common\Signer;
 
@@ -111,7 +114,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         }
     }
 
-    public function consultar(string $chave): string
+    public function consultar(string $chave): NFSeConsultaResultInterface
     {
         if ($chave === '') {
             throw new \InvalidArgumentException('Chave da NFSe é obrigatória');
@@ -122,7 +125,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         $parsed = $this->processarResposta($response);
         $this->storeOperationState('consultar', null, $response, $parsed, ['chave_acesso' => $chave]);
 
-        return json_encode($parsed);
+        return $this->normalizeConsultaResult('consultar', $parsed, ['chave_consulta' => $chave]);
     }
 
     public function cancelar(string $chave, string $motivo, ?string $protocolo = null): bool
@@ -155,7 +158,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         return $this->enviarOperacao('substituir', $xml);
     }
 
-    public function consultarPorRps(array $identificacaoRps): string
+    public function consultarPorRps(array $identificacaoRps): NFSeConsultaResultInterface
     {
         foreach (['numero', 'serie', 'tipo', 'id'] as $campo) {
             if (!isset($identificacaoRps[$campo])) {
@@ -177,7 +180,10 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
             $parsed = $this->processarResposta($response);
             $this->storeOperationState('consultar_dps', null, $response, $parsed, ['id_dps' => $id]);
 
-            return $response;
+            return $this->normalizeConsultaResult('consultar_dps', $parsed, [
+                'chave_consulta' => $id,
+                'source' => 'consultar_dps',
+            ]);
         }
 
         $xml = $this->buildConsultaRpsXml($identificacaoRps);
@@ -185,10 +191,13 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         $parsed = $this->processarResposta($response);
         $this->storeOperationState('consultar_rps', $xml, $response, $parsed, ['rps' => $identificacaoRps]);
 
-        return $response;
+        return $this->normalizeConsultaResult('consultar_rps', $parsed, [
+            'chave_consulta' => (string) $identificacaoRps['numero'],
+            'source' => 'consultar_rps',
+        ]);
     }
 
-    public function consultarLote(string $protocolo): string
+    public function consultarLote(string $protocolo): NFSeConsultaResultInterface
     {
         if ($protocolo === '') {
             throw new \InvalidArgumentException('Protocolo do lote é obrigatório');
@@ -199,7 +208,10 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         $parsed = $this->processarResposta($response);
         $this->storeOperationState('consultar_lote', $xml, $response, $parsed, ['protocolo' => $protocolo]);
 
-        return $response;
+        return $this->normalizeConsultaResult('consultar_lote', $parsed, [
+            'chave_consulta' => $protocolo,
+            'source' => 'consultar_lote',
+        ]);
     }
 
     public function baixarXml(string $chave): string
@@ -216,7 +228,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         return json_encode($parsed);
     }
 
-    public function baixarDanfse(string $chave): string
+    public function baixarDanfse(string $chave): NFSeImpressaoResultInterface
     {
         if ($chave === '') {
             throw new \InvalidArgumentException('Chave é obrigatória');
@@ -227,7 +239,11 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         $parsed = $this->processarResposta($response);
         $this->storeOperationState('baixar_danfse', $xml, $response, $parsed, ['chave_acesso' => $chave]);
 
-        return json_encode($parsed);
+        return $this->normalizePrintResult($parsed, [
+            'chave_consulta' => $chave,
+            'filename' => 'danfse_nfse_nacional_' . date('Ymd_His') . '.pdf',
+            'print_source' => 'download_danfse',
+        ]);
     }
 
     public function listarMunicipiosNacionais(bool $forceRefresh = false): array
@@ -2321,11 +2337,63 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         return [
             'emitir',
             'consultar',
+            'consultar_rps',
+            'consultar_lote',
             'cancelar',
             'consultar_dps',
             'baixar_xml',
             'baixar_danfse',
         ];
+    }
+
+    private function normalizeConsultaResult(string $operation, array $parsedResponse, array $context = []): NFSeConsultaResultInterface
+    {
+        return (new NFSeResultNormalizer())->normalizeConsulta(
+            $operation,
+            $parsedResponse,
+            $this->lastOperationArtifacts,
+            $context + [
+                'provider_class' => static::class,
+            ]
+        );
+    }
+
+    private function normalizePrintResult(array $parsedResponse, array $context = []): NFSeImpressaoResultInterface
+    {
+        $normalizer = new NFSeResultNormalizer();
+        $filename = $context['filename'] ?? null;
+        $provider = [
+            'provider_class' => static::class,
+        ];
+        $raw = [
+            'parsed_response' => $parsedResponse,
+            'request_payload' => null,
+            'request_xml' => $this->lastOperationArtifacts['request_xml'] ?? null,
+            'response_body' => $this->lastOperationArtifacts['response_raw'] ?? null,
+            'response_xml' => $this->lastOperationArtifacts['response_xml'] ?? ($parsedResponse['raw_xml'] ?? null),
+        ];
+
+        if (!empty($parsedResponse['pdf_base64'])) {
+            return $normalizer->normalizePdfBase64((string) $parsedResponse['pdf_base64'], [
+                'provider_class' => static::class,
+                'filename' => $filename,
+                'source' => $context['print_source'] ?? 'download_danfse',
+            ], $raw);
+        }
+
+        if (!empty($parsedResponse['nfse_url'])) {
+            return $normalizer->normalizeUrl((string) $parsedResponse['nfse_url'], [
+                'provider_class' => static::class,
+                'filename' => $filename,
+                'source' => $context['print_source'] ?? 'official_url',
+            ], $raw);
+        }
+
+        return $normalizer->normalizeIndisponivel([
+            'provider_class' => static::class,
+            'filename' => $filename,
+            'source' => $context['print_source'] ?? 'download_danfse',
+        ], $raw);
     }
 
     private function storeOperationState(

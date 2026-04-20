@@ -118,16 +118,17 @@ final class NFSeBelemRoutingTest extends TestCase
         $adapter = new NFSeAdapter('belem', $provider);
 
         $consulta = $adapter->consultar(NFSeBelemMunicipalFixtures::chaveNfse());
-        $this->assertStringContainsString('ConsultarNfseServicoPrestadoResponse', $consulta);
+        $this->assertStringContainsString('ConsultarNfseServicoPrestadoResponse', (string) ($consulta->getRaw()['response_xml'] ?? ''));
+        $this->assertSame('1105', $consulta->getDocumento()['numero'] ?? null);
         $this->assertSame('consultar', $adapter->getLastOperationInfo()['operation']);
         $this->assertSame('success', $adapter->getLastOperationInfo()['parsed_response']['status'] ?? null);
 
         $consultaRps = $adapter->consultarPorRps(NFSeBelemMunicipalFixtures::consultaRps());
-        $this->assertStringContainsString('ConsultarNfsePorRpsResponse', $consultaRps);
+        $this->assertStringContainsString('ConsultarNfsePorRpsResponse', (string) ($consultaRps->getRaw()['response_xml'] ?? ''));
         $this->assertSame('consultar_por_rps', $adapter->getLastOperationInfo()['operation']);
 
         $consultaLote = $adapter->consultarLote(NFSeBelemMunicipalFixtures::loteProtocolo());
-        $this->assertStringContainsString('ConsultarLoteRpsResponse', $consultaLote);
+        $this->assertStringContainsString('ConsultarLoteRpsResponse', (string) ($consultaLote->getRaw()['response_xml'] ?? ''));
         $this->assertSame('consultar_lote', $adapter->getLastOperationInfo()['operation']);
 
         $cancelado = $adapter->cancelar(
@@ -168,7 +169,7 @@ final class NFSeBelemRoutingTest extends TestCase
 
         $consulta = $facade->consultarLote(NFSeBelemMunicipalFixtures::loteProtocolo());
         $this->assertTrue($consulta->isSuccess());
-        $this->assertSame('consultar_lote', $consulta->getData('consulta')['operation']);
+        $this->assertSame('consultar_lote', $consulta->getData('consulta_operacao')['operation']);
 
         $cancelamento = $facade->cancelar(
             NFSeBelemMunicipalFixtures::cancelamentoNumeroNfse(),
@@ -204,15 +205,15 @@ final class NFSeBelemRoutingTest extends TestCase
         $response = $facade->consultar(NFSeBelemMunicipalFixtures::chaveNfse());
 
         $this->assertTrue($response->isSuccess(), (string) $response->getError());
-        $this->assertSame('autorizada', $response->getData('authorization_status'));
-        $this->assertTrue($response->getData('disponivel'));
-        $this->assertSame('numero_nfse', $response->getData('source'));
-        $this->assertSame('1105', $response->getData('nfse')['numero'] ?? null);
-        $this->assertSame('consultar', $response->getData('consulta')['operation'] ?? null);
-        $this->assertNotEmpty($response->getData('resultado')['raw_xml'] ?? null);
+        $this->assertSame('autorizada', $response->getData('consulta')['status_autorizacao'] ?? null);
+        $this->assertTrue($response->getData('consulta')['disponivel'] ?? false);
+        $this->assertSame('consultar_nfse_numero', $response->getData('consulta')['source'] ?? null);
+        $this->assertSame('1105', $response->getData('documento')['numero'] ?? null);
+        $this->assertSame('consultar', $response->getData('consulta_operacao')['operation'] ?? null);
+        $this->assertNotEmpty($response->getData('raw')['response_xml'] ?? null);
         $this->assertSame(
             'https://notafiscal.belem.pa.gov.br/notafiscal-ws/servico/notafiscal/autenticacao/cpfCnpj/12345678000195/inscricaoMunicipal/4007197/numeroNota/1105/codigoVerificacao/ABC123XYZ',
-            $response->getData('danfse_url')
+            $response->getData('impressao')['url'] ?? null
         );
     }
 
@@ -249,12 +250,11 @@ final class NFSeBelemRoutingTest extends TestCase
         $this->assertTrue($response->isSuccess(), (string) $response->getError());
         $this->assertSame('completo', $response->getData('flow_status'));
         $this->assertSame('autorizada', $response->getData('authorization_status'));
-        $this->assertTrue($response->getData('disponivel'));
         $this->assertSame('consultar_lote', $response->getData('consulta')['operation'] ?? null);
-        $this->assertSame('1105', $response->getData('nfse')['numero'] ?? null);
+        $this->assertSame('1105', $response->getData('documento')['numero'] ?? null);
         $this->assertSame(
             'https://notafiscal.belem.pa.gov.br/notafiscal-ws/servico/notafiscal/autenticacao/cpfCnpj/12345678000195/inscricaoMunicipal/4007197/numeroNota/1105/codigoVerificacao/ABC123XYZ',
-            $response->getData('danfse_url')
+            $response->getData('impressao')['url'] ?? null
         );
     }
 
@@ -292,9 +292,9 @@ final class NFSeBelemRoutingTest extends TestCase
         $this->assertTrue($response->isSuccess(), (string) $response->getError());
         $this->assertSame('completo', $response->getData('flow_status'));
         $this->assertSame('autorizada', $response->getData('authorization_status'));
-        $this->assertSame('consultar_por_rps', $response->getData('consulta')['operation'] ?? null);
-        $this->assertSame('1105', $response->getData('nfse')['numero'] ?? null);
-        $this->assertNotEmpty($response->getData('danfse_url'));
+        $this->assertSame('consultar_nfse_rps', $response->getData('consulta')['operation'] ?? null);
+        $this->assertSame('1105', $response->getData('documento')['numero'] ?? null);
+        $this->assertNotEmpty($response->getData('impressao')['url'] ?? null);
     }
 
     public function testBelemFacadeEmitirCompletoReturnsPartialWhenConsultationDoesNotResolveNfse(): void
@@ -330,8 +330,7 @@ final class NFSeBelemRoutingTest extends TestCase
         $this->assertTrue($response->isSuccess(), (string) $response->getError());
         $this->assertSame('parcial', $response->getData('flow_status'));
         $this->assertSame('pendente', $response->getData('authorization_status'));
-        $this->assertFalse($response->getData('disponivel'));
-        $this->assertNull($response->getData('danfse_url'));
+        $this->assertSame('indisponivel', $response->getData('impressao')['modo'] ?? null);
         $this->assertNotEmpty($response->getData('warnings'));
     }
 

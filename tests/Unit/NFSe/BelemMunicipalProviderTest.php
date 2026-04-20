@@ -136,7 +136,7 @@ final class BelemMunicipalProviderTest extends TestCase
         $provider = $this->makeProvider($transport);
         $responseXml = $provider->consultarLote(NFSeBelemMunicipalFixtures::loteProtocolo());
 
-        $this->assertStringContainsString('ConsultarLoteRpsResponse', $responseXml);
+        $this->assertStringContainsString('ConsultarLoteRpsResponse', (string) ($responseXml->getRaw()['response_xml'] ?? ''));
         $this->assertCount(1, $transport->calls);
         $this->assertStringContainsString('<svc:ConsultarLoteRps>', $provider->getLastSoapEnvelope());
 
@@ -354,7 +354,7 @@ XML;
         $provider = $this->makeProvider($transport);
         $responseXml = $provider->consultarPorRps(NFSeBelemMunicipalFixtures::consultaRps());
 
-        $this->assertStringContainsString('faultstring', $responseXml);
+        $this->assertStringContainsString('faultstring', (string) ($responseXml->getRaw()['response_xml'] ?? ''));
         $this->assertCount(6, $transport->calls);
 
         $artifacts = $provider->getLastOperationArtifacts();

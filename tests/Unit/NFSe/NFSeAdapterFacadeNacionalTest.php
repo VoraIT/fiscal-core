@@ -3,9 +3,12 @@
 namespace Tests\Unit\NFSe;
 
 use sabbajohn\FiscalCore\Adapters\NF\NFSeAdapter;
+use sabbajohn\FiscalCore\Contracts\NFSeConsultaResultInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeImpressaoResultInterface;
 use sabbajohn\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
 use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
 use sabbajohn\FiscalCore\Facade\NFSeFacade;
+use sabbajohn\FiscalCore\Support\NFSeResultNormalizer;
 use PHPUnit\Framework\TestCase;
 
 class NFSeAdapterFacadeNacionalTest extends TestCase
@@ -17,9 +20,9 @@ class NFSeAdapterFacadeNacionalTest extends TestCase
             {
                 return '<ok />';
             }
-            public function consultar(string $chave): string
+            public function consultar(string $chave): NFSeConsultaResultInterface
             {
-                return '<ok />';
+                return (new NFSeResultNormalizer())->normalizeConsulta('consultar', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<ok />'], [], ['chave_consulta' => $chave]);
             }
             public function cancelar(string $chave, string $motivo, ?string $protocolo = null): bool
             {
@@ -133,9 +136,9 @@ class NFSeAdapterFacadeNacionalTest extends TestCase
             {
                 return '<ok />';
             }
-            public function consultar(string $chave): string
+            public function consultar(string $chave): NFSeConsultaResultInterface
             {
-                return '<consulta />';
+                return (new NFSeResultNormalizer())->normalizeConsulta('consultar', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<consulta />'], [], ['chave_consulta' => $chave]);
             }
             public function cancelar(string $chave, string $motivo, ?string $protocolo = null): bool
             {
@@ -181,21 +184,21 @@ class NFSeAdapterFacadeNacionalTest extends TestCase
             {
                 return true;
             }
-            public function consultarPorRps(array $identificacaoRps): string
+            public function consultarPorRps(array $identificacaoRps): NFSeConsultaResultInterface
             {
-                return '<consulta-rps />';
+                return (new NFSeResultNormalizer())->normalizeConsulta('consultar_rps', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<consulta-rps />'], [], ['chave_consulta' => (string) ($identificacaoRps['numero'] ?? '')]);
             }
-            public function consultarLote(string $protocolo): string
+            public function consultarLote(string $protocolo): NFSeConsultaResultInterface
             {
-                return '<consulta-lote />';
+                return (new NFSeResultNormalizer())->normalizeConsulta('consultar_lote', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<consulta-lote />'], [], ['chave_consulta' => $protocolo]);
             }
             public function baixarXml(string $chave): string
             {
                 return '<xml-download />';
             }
-            public function baixarDanfse(string $chave): string
+            public function baixarDanfse(string $chave): NFSeImpressaoResultInterface
             {
-                return '<danfse-download />';
+                return (new NFSeResultNormalizer())->normalizePdfBase64(base64_encode('pdf'));
             }
             public function listarMunicipiosNacionais(bool $forceRefresh = false): array
             {
@@ -291,9 +294,9 @@ class NFSeAdapterFacadeNacionalTest extends TestCase
                 return '<ok />';
             }
 
-            public function consultar(string $chave): string
+            public function consultar(string $chave): NFSeConsultaResultInterface
             {
-                return '<consulta />';
+                return (new NFSeResultNormalizer())->normalizeConsulta('consultar', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<consulta />'], [], ['chave_consulta' => $chave]);
             }
 
             public function cancelar(string $chave, string $motivo, ?string $protocolo = null): bool
@@ -351,14 +354,14 @@ class NFSeAdapterFacadeNacionalTest extends TestCase
                 return true;
             }
 
-            public function consultarPorRps(array $identificacaoRps): string
+            public function consultarPorRps(array $identificacaoRps): NFSeConsultaResultInterface
             {
-                return '<consulta-rps />';
+                return (new NFSeResultNormalizer())->normalizeConsulta('consultar_rps', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<consulta-rps />'], [], ['chave_consulta' => (string) ($identificacaoRps['numero'] ?? '')]);
             }
 
-            public function consultarLote(string $protocolo): string
+            public function consultarLote(string $protocolo): NFSeConsultaResultInterface
             {
-                return '<consulta-lote />';
+                return (new NFSeResultNormalizer())->normalizeConsulta('consultar_lote', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<consulta-lote />'], [], ['chave_consulta' => $protocolo]);
             }
 
             public function baixarXml(string $chave): string
@@ -366,9 +369,9 @@ class NFSeAdapterFacadeNacionalTest extends TestCase
                 return '<xml-download />';
             }
 
-            public function baixarDanfse(string $chave): string
+            public function baixarDanfse(string $chave): NFSeImpressaoResultInterface
             {
-                return '<danfse-download />';
+                return (new NFSeResultNormalizer())->normalizePdfBase64(base64_encode('pdf'));
             }
 
             public function listarMunicipiosNacionais(bool $forceRefresh = false): array

@@ -3,10 +3,13 @@
 namespace Tests\Unit\NFSe;
 
 use sabbajohn\FiscalCore\Adapters\NF\NFSeAdapter;
+use sabbajohn\FiscalCore\Contracts\NFSeConsultaResultInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeImpressaoResultInterface;
 use sabbajohn\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
 use sabbajohn\FiscalCore\Contracts\NFSeProviderConfigInterface;
 use sabbajohn\FiscalCore\Facade\NFSeFacade;
 use sabbajohn\FiscalCore\Support\NFSeProviderResolver;
+use sabbajohn\FiscalCore\Support\NFSeResultNormalizer;
 use sabbajohn\FiscalCore\Support\ProviderRegistry;
 use sabbajohn\FiscalCore\Providers\NFSe\NacionalProvider;
 use PHPUnit\Framework\TestCase;
@@ -34,7 +37,7 @@ class NFSeNationalOnlyModeTest extends TestCase
     {
         $provider = new class implements NFSeProviderConfigInterface, NFSeNacionalCapabilitiesInterface {
             public function emitir(array $dados): string { return '<ok />'; }
-            public function consultar(string $chave): string { return '<ok />'; }
+            public function consultar(string $chave): NFSeConsultaResultInterface { return (new NFSeResultNormalizer())->normalizeConsulta('consultar', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<ok />'], [], ['chave_consulta' => $chave]); }
             public function cancelar(string $chave, string $motivo, ?string $protocolo = null): bool { return true; }
             public function substituir(string $chave, array $dados): string { return '<ok />'; }
             public function getWsdlUrl(): string { return 'https://example.test'; }
@@ -46,10 +49,10 @@ class NFSeNationalOnlyModeTest extends TestCase
             public function getAuthConfig(): array { return []; }
             public function getNationalApiBaseUrl(): string { return 'https://api.local'; }
             public function validarDados(array $dados): bool { return true; }
-            public function consultarPorRps(array $identificacaoRps): string { return '<ok />'; }
-            public function consultarLote(string $protocolo): string { return '<ok />'; }
+            public function consultarPorRps(array $identificacaoRps): NFSeConsultaResultInterface { return (new NFSeResultNormalizer())->normalizeConsulta('consultar_rps', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<ok />'], [], ['chave_consulta' => (string) ($identificacaoRps['numero'] ?? '')]); }
+            public function consultarLote(string $protocolo): NFSeConsultaResultInterface { return (new NFSeResultNormalizer())->normalizeConsulta('consultar_lote', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<ok />'], [], ['chave_consulta' => $protocolo]); }
             public function baixarXml(string $chave): string { return '<ok />'; }
-            public function baixarDanfse(string $chave): string { return '<ok />'; }
+            public function baixarDanfse(string $chave): NFSeImpressaoResultInterface { return (new NFSeResultNormalizer())->normalizePdfBase64(base64_encode('pdf')); }
             public function listarMunicipiosNacionais(bool $forceRefresh = false): array { return ['data' => [], 'metadata' => []]; }
             public function consultarAliquotasMunicipio(string $codigoMunicipio, ?string $codigoServico = null, ?string $competencia = null, bool $forceRefresh = false): array { return ['data' => [], 'metadata' => []]; }
             public function consultarContribuinteCnc(string $cpfCnpj): array { return ['documento' => $cpfCnpj, 'habilitado' => true]; }
@@ -75,7 +78,7 @@ class NFSeNationalOnlyModeTest extends TestCase
     {
         $provider = new class implements NFSeProviderConfigInterface, NFSeNacionalCapabilitiesInterface {
             public function emitir(array $dados): string { return '<ok />'; }
-            public function consultar(string $chave): string { return '<ok />'; }
+            public function consultar(string $chave): NFSeConsultaResultInterface { return (new NFSeResultNormalizer())->normalizeConsulta('consultar', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<ok />'], [], ['chave_consulta' => $chave]); }
             public function cancelar(string $chave, string $motivo, ?string $protocolo = null): bool { return true; }
             public function substituir(string $chave, array $dados): string { return '<ok />'; }
             public function getWsdlUrl(): string { return 'https://example.test'; }
@@ -87,10 +90,10 @@ class NFSeNationalOnlyModeTest extends TestCase
             public function getAuthConfig(): array { return []; }
             public function getNationalApiBaseUrl(): string { return 'https://api.local'; }
             public function validarDados(array $dados): bool { return true; }
-            public function consultarPorRps(array $identificacaoRps): string { return '<ok />'; }
-            public function consultarLote(string $protocolo): string { return '<ok />'; }
+            public function consultarPorRps(array $identificacaoRps): NFSeConsultaResultInterface { return (new NFSeResultNormalizer())->normalizeConsulta('consultar_rps', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<ok />'], [], ['chave_consulta' => (string) ($identificacaoRps['numero'] ?? '')]); }
+            public function consultarLote(string $protocolo): NFSeConsultaResultInterface { return (new NFSeResultNormalizer())->normalizeConsulta('consultar_lote', ['status' => 'success', 'numero' => '1', 'codigo_verificacao' => 'ABC', 'raw_xml' => '<ok />'], [], ['chave_consulta' => $protocolo]); }
             public function baixarXml(string $chave): string { return '<ok />'; }
-            public function baixarDanfse(string $chave): string { return '<ok />'; }
+            public function baixarDanfse(string $chave): NFSeImpressaoResultInterface { return (new NFSeResultNormalizer())->normalizePdfBase64(base64_encode('pdf')); }
             public function listarMunicipiosNacionais(bool $forceRefresh = false): array { return ['data' => [], 'metadata' => []]; }
             public function consultarAliquotasMunicipio(string $codigoMunicipio, ?string $codigoServico = null, ?string $competencia = null, bool $forceRefresh = false): array { return ['data' => [], 'metadata' => []]; }
             public function consultarContribuinteCnc(string $cpfCnpj): array { return ['documento' => $cpfCnpj, 'habilitado' => true]; }

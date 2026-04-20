@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace sabbajohn\FiscalCore\Providers\NFSe\Municipal;
 
+use sabbajohn\FiscalCore\Contracts\NFSeConsultaResultInterface;
 use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
 use sabbajohn\FiscalCore\Providers\NFSe\AbstractNFSeProvider;
+use sabbajohn\FiscalCore\Support\NFSeResultNormalizer;
 use sabbajohn\FiscalCore\Support\NFSeSchemaResolver;
 use sabbajohn\FiscalCore\Support\NFSeSchemaValidator;
 use sabbajohn\FiscalCore\Support\NFSeSoapCurlTransport;
@@ -40,7 +42,7 @@ final class IsswebProvider extends AbstractNFSeProvider implements NFSeOperation
         return $this->dispatchOperation('emitir', $requestXml);
     }
 
-    public function consultar(string $chave): string
+    public function consultar(string $chave): NFSeConsultaResultInterface
     {
         if (trim($chave) === '' || preg_match('/^\d+$/', trim($chave)) !== 1) {
             throw new \InvalidArgumentException('ISSWEB requer o numero da nota para consulta.');
@@ -48,7 +50,18 @@ final class IsswebProvider extends AbstractNFSeProvider implements NFSeOperation
 
         $requestXml = $this->montarXmlConsultarNota($chave);
 
-        return $this->dispatchOperation('consultar', $requestXml);
+        $this->dispatchOperation('consultar', $requestXml);
+
+        return (new NFSeResultNormalizer())->normalizeConsulta(
+            'consultar',
+            $this->lastResponseData,
+            $this->lastOperationArtifacts,
+            [
+                'provider_class' => static::class,
+                'chave_consulta' => $chave,
+                'source' => 'consultar',
+            ]
+        );
     }
 
     public function cancelar(string $chave, string $motivo, ?string $protocolo = null): bool

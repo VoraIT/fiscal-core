@@ -2,6 +2,8 @@
 
 namespace sabbajohn\FiscalCore\Adapters\NF;
 
+use sabbajohn\FiscalCore\Contracts\NFSeConsultaResultInterface;
+use sabbajohn\FiscalCore\Contracts\NFSeImpressaoResultInterface;
 use sabbajohn\FiscalCore\Contracts\NotaServicoInterface;
 use sabbajohn\FiscalCore\Contracts\NFSeNacionalCapabilitiesInterface;
 use sabbajohn\FiscalCore\Contracts\NFSeOperationalIntrospectionInterface;
@@ -65,11 +67,12 @@ class NFSeAdapter implements NotaServicoInterface
         return $result;
     }
 
-    public function consultar(string $chave): string
+    public function consultar(string $chave): NFSeConsultaResultInterface
     {
         $result = $this->provider->consultar($chave);
         $this->lastOperationInfo = $this->buildProviderOperationInfo('consultar', $this->provider, [
             'chave' => $chave,
+            'result' => $result,
         ]);
 
         return $result;
@@ -93,7 +96,7 @@ class NFSeAdapter implements NotaServicoInterface
         return $this->provider->substituir($chave, $dados);
     }
 
-    public function consultarPorRps(array $identificacaoRps): string
+    public function consultarPorRps(array $identificacaoRps): NFSeConsultaResultInterface
     {
         if ($this->provider instanceof NFSeNacionalCapabilitiesInterface) {
             $result = $this->provider->consultarPorRps($identificacaoRps);
@@ -107,12 +110,13 @@ class NFSeAdapter implements NotaServicoInterface
 
         $this->lastOperationInfo = $this->buildProviderOperationInfo('consultar_por_rps', $this->provider, [
             'identificacao_rps' => $identificacaoRps,
+            'result' => $result,
         ]);
 
         return $result;
     }
 
-    public function consultarLote(string $protocolo): string
+    public function consultarLote(string $protocolo): NFSeConsultaResultInterface
     {
         if ($this->provider instanceof NFSeNacionalCapabilitiesInterface) {
             $result = $this->provider->consultarLote($protocolo);
@@ -126,6 +130,7 @@ class NFSeAdapter implements NotaServicoInterface
 
         $this->lastOperationInfo = $this->buildProviderOperationInfo('consultar_lote', $this->provider, [
             'protocolo' => $protocolo,
+            'result' => $result,
         ]);
 
         return $result;
@@ -136,7 +141,7 @@ class NFSeAdapter implements NotaServicoInterface
         return $this->requireNacionalCapabilities()->baixarXml($chave);
     }
 
-    public function baixarDanfse(string $chave): string
+    public function baixarDanfse(string $chave): NFSeImpressaoResultInterface
     {
         return $this->requireNacionalCapabilities()->baixarDanfse($chave);
     }
@@ -276,6 +281,13 @@ class NFSeAdapter implements NotaServicoInterface
                 ? $provider->getLastResponseData()
                 : null,
         ] + $context;
+
+        foreach ($context as $value) {
+            if ($value instanceof NFSeConsultaResultInterface || $value instanceof NFSeImpressaoResultInterface) {
+                $info['parsed_response'] = $value->getRaw()['parsed_response'] ?? null;
+                break;
+            }
+        }
 
         if ($provider instanceof NFSeOperationalIntrospectionInterface) {
             $info['artifacts'] = $provider->getLastOperationArtifacts();

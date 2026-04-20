@@ -185,7 +185,7 @@ export IBPT_UF="SP"
 - `provider_config_overrides` no catálogo aplica merge sobre a família técnica no runtime
 - `payload_defaults` no catálogo acelera exemplos e homologação sem duplicar a família
 - Emissão classificada como MEI usa sempre o provider nacional
-- Para Belém, o DANFSe é disponibilizado pela prefeitura em URL oficial; a biblioteca retorna status/disponibilidade e a `danfse_url`
+- Para Belém, o DANFSe é disponibilizado pela prefeitura em URL oficial; a biblioteca retorna isso no contrato canônico em `impressao.modo = url` e `impressao.url`
 - O playbook canônico para implementação municipal está em [docs/NFSE-MUNICIPAL-PROVIDER-PLAYBOOK.md](docs/NFSE-MUNICIPAL-PROVIDER-PLAYBOOK.md)
 - A migração de município municipal para nacional está em [docs/NFSE-MIGRACAO-MUNICIPAL-PARA-NACIONAL.md](docs/NFSE-MIGRACAO-MUNICIPAL-PARA-NACIONAL.md)
 - A matriz operacional de famílias e providers está em [docs/NFSE-PROVIDER-MATRIX.md](docs/NFSE-PROVIDER-MATRIX.md)
@@ -255,8 +255,8 @@ $nfse = $fiscal->nfse('belem');
 $resultado = $nfse->emitirCompleto($dadosServico);
 if ($resultado->isSuccess()) {
     echo $resultado->getData('flow_status');
-    echo $resultado->getData('nfse')['numero'] ?? '';
-    echo $resultado->getData('danfse')['filename'] ?? '';
+    echo $resultado->getData('documento')['numero'] ?? '';
+    echo $resultado->getData('impressao')['modo'] ?? '';
 }
 ```
 
@@ -265,11 +265,21 @@ if ($resultado->isSuccess()) {
 ```php
 use sabbajohn\FiscalCore\Facade\NFSeFacade;
 
-$nfse = new NFSeFacade('belem');
-$danfse = $nfse->gerarDanfse($xmlNfse);
+$nfse = new NFSeFacade('joinville');
+$consulta = $nfse->consultarPorRps([
+    'numero' => '1001',
+    'serie' => 'A1',
+    'tipo' => '1',
+]);
 
-if ($danfse->isSuccess()) {
-    $pdfBase64 = $danfse->getData('pdf_base64');
+if ($consulta->isSuccess()) {
+    $documento = $consulta->getData('documento');
+    $impressao = $consulta->getData('impressao');
+
+    echo $documento['status_autorizacao'] ?? '';
+    echo $impressao['modo'] ?? '';
+    echo $impressao['url'] ?? '';
+    echo $impressao['pdf_base64'] ?? '';
 }
 ```
 
