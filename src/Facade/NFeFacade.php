@@ -11,6 +11,7 @@ use sabbajohn\FiscalCore\Adapters\NF\Builder\NotaFiscalBuilder;
 use sabbajohn\FiscalCore\Adapters\NF\Core\NotaFiscal;
 use sabbajohn\FiscalCore\Support\ToolsFactory;
 use NFePHP\NFe\Tools;
+use NFePHP\NFe\Complements;
 use sabbajohn\FiscalCore\Support\FiscalDocumentResultNormalizer;
 
 /**
@@ -96,18 +97,25 @@ class NFeFacade
 
             $xmlAssinado = $this->nfe->getLastSignedXml();
             $xmlRetorno = $this->nfe->getLastResponseXml() ?? $result;
+            $xmlAutorizado = $this->buildAuthorizedXml($xmlAssinado, $xmlRetorno);
+            $sefazRetorno = \sabbajohn\FiscalCore\Support\XmlUtils::parseSefazRetorno($xmlRetorno);
+            $protocolo = $sefazRetorno['protocolo']['nProt'] ?? null;
+            $chaveAcesso = $this->extrairChaveAcesso($xmlAutorizado ?? $result);
+            $situacao = $this->extrairSituacao($xmlAutorizado ?? $xmlRetorno);
 
             return $this->resultNormalizer->normalizeEmissao(
                 'nfe',
                 'emissao_nfe',
                 $xmlRetorno,
                 $xmlAssinado,
-                $this->extrairChaveAcesso($result),
-                $this->extrairSituacao($xmlRetorno),
+                $chaveAcesso,
+                $situacao,
                 [
                     'modelo' => 55,
                     'ambiente' => $dados['identificacao']['tpAmb'] ?? 2,
-                ]
+                ],
+                $xmlAutorizado,
+                is_string($protocolo) && trim($protocolo) !== '' ? $protocolo : null
             );
         }, 'emissao_nfe');
     }
@@ -417,11 +425,24 @@ class NFeFacade
     
     private function extrairChaveAcesso(string $xml): ?string
     {
+        if ($xml === '') {
+            return null;
+        }
+
         try {
             $dom = new \DOMDocument();
             $dom->loadXML($xml);
             $xpath = new \DOMXPath($dom);
-            $node = $xpath->query('//chNFe')->item(0);
+            $node = $xpath->query("//*[local-name()='chNFe']")->item(0);
+            if (!$node instanceof \DOMNode) {
+                $node = $xpath->query("//*[local-name()='infNFe']")->item(0);
+                if ($node instanceof \DOMElement) {
+                    $id = (string) $node->getAttribute('Id');
+                    if (str_starts_with($id, 'NFe') && strlen($id) >= 47) {
+                        return substr($id, 3, 44);
+                    }
+                }
+            }
             return $node ? $node->nodeValue : null;
         } catch (\Exception $e) {
             return null;
@@ -430,14 +451,49 @@ class NFeFacade
     
     private function extrairSituacao(string $xml): string
     {
+        if ($xml === '') {
+            return 'Status não identificado';
+        }
+
         try {
             $dom = new \DOMDocument();
             $dom->loadXML($xml);
             $xpath = new \DOMXPath($dom);
-            $node = $xpath->query('//xMotivo')->item(0);
+            $queries = [
+                "//*[local-name()='infProt']/*[local-name()='xMotivo']",
+                "//*[local-name()='protNFe']//*[local-name()='xMotivo']",
+                "//*[local-name()='xMotivo']",
+            ];
+
+            $node = null;
+            foreach ($queries as $query) {
+                $candidate = $xpath->query($query)->item(0);
+                if ($candidate instanceof \DOMNode) {
+                    $node = $candidate;
+                    break;
+                }
+            }
             return $node ? $node->nodeValue : 'Status não identificado';
         } catch (\Exception $e) {
             return 'Erro ao extrair situação';
+        }
+    }
+
+    private function buildAuthorizedXml(?string $xmlAssinado, string $xmlRetorno): ?string
+    {
+        if (!is_string($xmlAssinado) || trim($xmlAssinado) === '') {
+            return null;
+        }
+
+        $parsed = \sabbajohn\FiscalCore\Support\XmlUtils::parseSefazRetorno($xmlRetorno);
+        if (($parsed['autorizado'] ?? false) !== true) {
+            return null;
+        }
+
+        try {
+            return Complements::toAuthorize($xmlAssinado, $xmlRetorno);
+        } catch (\Throwable) {
+            return null;
         }
     }
     

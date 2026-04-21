@@ -2408,7 +2408,7 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         $this->lastOperationArtifacts = [
             'operation' => $operation,
             'request_xml' => $requestXml,
-            'response_xml' => $parsedResponse['raw_xml'] ?? null,
+            'response_xml' => $this->looksLikeXml($responseRaw) ? $responseRaw : null,
             'response_raw' => $responseRaw,
             'parsed_response' => $parsedResponse,
             'transport' => array_merge([
@@ -2426,6 +2426,13 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
         }
 
         return null;
+    }
+
+    private function looksLikeXml(string $payload): bool
+    {
+        $payload = trim($payload);
+
+        return $payload !== '' && str_starts_with($payload, '<');
     }
 
     private function extractProcessingMessages(array $json): array

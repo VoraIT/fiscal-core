@@ -51,16 +51,14 @@
         </style>
     </head>
     <body>
-        <h2>Provider Config</h2>
+        <h2>NFe Facade Response Shape (Tests\Unit\NFeFacadeResponseShape)</h2>
         <ul>
-            <li class="success">Facade loads pilot provider info for belem</li>
-            <li class="success">Facade lists active municipios from current catalog</li>
-            <li class="success">Facade maps joinville to publica</li>
-            <li class="success">Facade falls back to national for unknown municipio</li>
-            <li class="success">Facade maps presidente figueiredo to issweb</li>
-            <li class="success">Facade maps rio preto da eva to issweb</li>
-            <li class="defect">Facade maps manaus to national provider</li>
-            <li class="success">Facade homologation readiness uses national provider config for manaus</li>
+            <li class="success">Emitir returns authorized nfeproc as document xml</li>
+            <li class="success">Emitir builds authorized document when sefaz response is wrapped in soap</li>
+            <li class="success">Emitir rejected keeps document xml null and preserves raw response</li>
+            <li class="success">Consultar returns canonical document shape</li>
+            <li class="success">Gerar danfe returns xml and pdf in canonical shape</li>
+            <li class="success">Baixar xml returns canonical document shape</li>
         </ul>
     </body>
 </html>

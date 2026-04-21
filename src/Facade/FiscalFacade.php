@@ -87,9 +87,41 @@ class FiscalFacade
         return $this->nfce->consultar($chave);
     }
 
+    public function consultarDocumentoPorChave(string $chave): FiscalResponse
+    {
+        $modelo = $this->detectDocumentModelFromChave($chave);
+
+        return match ($modelo) {
+            '55' => $this->consultarNFe($chave),
+            '65' => $this->consultarNFCe($chave),
+            default => FiscalResponse::error(
+                "Modelo '{$modelo}' não suportado para consulta por chave",
+                'UNSUPPORTED_DOCUMENT_MODEL',
+                'consulta_documento_por_chave',
+                ['chave_acesso' => $chave, 'modelo' => $modelo]
+            ),
+        };
+    }
+
     public function baixarXmlNFCe(string $chave): FiscalResponse
     {
         return $this->nfce->baixarXml($chave);
+    }
+
+    public function baixarXmlDocumentoPorChave(string $chave): FiscalResponse
+    {
+        $modelo = $this->detectDocumentModelFromChave($chave);
+
+        return match ($modelo) {
+            '55' => $this->baixarXmlNFe($chave),
+            '65' => $this->baixarXmlNFCe($chave),
+            default => FiscalResponse::error(
+                "Modelo '{$modelo}' não suportado para download de XML por chave",
+                'UNSUPPORTED_DOCUMENT_MODEL',
+                'download_xml_documento_por_chave',
+                ['chave_acesso' => $chave, 'modelo' => $modelo]
+            ),
+        };
     }
 
     /**
@@ -265,5 +297,16 @@ class FiscalFacade
     public function tributacao(): TributacaoFacade
     {
         return $this->tributacao;
+    }
+
+    public function detectDocumentModelFromChave(string $chave): string
+    {
+        $chave = preg_replace('/\D/', '', $chave);
+
+        if (strlen($chave) !== 44) {
+            throw new \InvalidArgumentException('Chave de acesso deve ter 44 dígitos');
+        }
+
+        return substr($chave, 20, 2);
     }
 }

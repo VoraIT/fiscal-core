@@ -13,26 +13,37 @@ class FiscalDocumentResultNormalizer
         array $raw = [],
         array $extra = []
     ): array {
-        return array_merge([
-            'documento' => array_merge([
+        $normalizedDocumento = array_merge([
                 'modelo' => $modelo,
                 'xml' => null,
                 'chave_acesso' => null,
                 'situacao' => null,
-            ], $documento),
+                'protocolo' => null,
+            ], $documento);
+        $normalizedRaw = array_merge([
+                'request_payload' => null,
+                'request_xml' => null,
+                'response_body' => null,
+                'response_xml' => null,
+                'parsed_response' => null,
+            ], $raw);
+
+        return array_merge([
+            'documento' => $normalizedDocumento,
             'impressao' => array_merge($this->emptyImpressao(), $impressao),
             'provider' => array_merge([
                 'type' => 'sefaz',
                 'modelo' => $modelo,
                 'operation' => $operation,
             ], $provider),
-            'raw' => array_merge([
-                'request_payload' => null,
-                'request_xml' => null,
-                'response_body' => null,
-                'response_xml' => null,
-                'parsed_response' => null,
-            ], $raw),
+            'raw' => $normalizedRaw,
+            // Aliases legados seguros: apontam para o documento fiscal canônico.
+            'xml' => $normalizedDocumento['xml'],
+            'chave_acesso' => $normalizedDocumento['chave_acesso'],
+            'situacao' => $normalizedDocumento['situacao'],
+            'protocolo' => $normalizedDocumento['protocolo'],
+            // Alias explícito do retorno bruto para facilitar migração do consumidor.
+            'xml_retorno' => $normalizedRaw['response_xml'],
         ], $extra);
     }
 
@@ -68,15 +79,18 @@ class FiscalDocumentResultNormalizer
         ?string $xmlAssinado,
         ?string $chaveAcesso,
         ?string $situacao,
-        array $extra = []
+        array $extra = [],
+        ?string $xmlDocumento = null,
+        ?string $protocolo = null
     ): array {
         return $this->normalizeDocumentoFiscal(
             $modelo,
             $operation,
             [
-                'xml' => $xmlRetorno,
+                'xml' => $xmlDocumento,
                 'chave_acesso' => $chaveAcesso,
                 'situacao' => $situacao,
+                'protocolo' => $protocolo,
             ],
             $this->emptyImpressao(),
             [],

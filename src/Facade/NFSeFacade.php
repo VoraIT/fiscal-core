@@ -388,16 +388,12 @@ class NFSeFacade
         try {
             $rawResult = $this->nfse->baixarXml($chave);
             $parsed = json_decode($rawResult, true);
-            $documentoXml = null;
-
-            if (is_array($parsed)) {
-                $documentoXml = $parsed['raw_xml']
-                    ?? $parsed['xml']
-                    ?? $parsed['xml_retorno']
-                    ?? null;
-            } elseif (is_string($rawResult) && str_starts_with(ltrim($rawResult), '<')) {
-                $documentoXml = $rawResult;
-            }
+            $documentoXml = is_array($parsed)
+                ? $this->extractNfseXmlFromParsedResponse($parsed)
+                : $this->extractFiscalXmlFromCandidate($rawResult);
+            $responseXml = is_string($rawResult) && str_starts_with(ltrim($rawResult), '<')
+                ? $rawResult
+                : null;
 
             return FiscalResponse::success([
                 'documento' => [
@@ -423,8 +419,8 @@ class NFSeFacade
                     'parsed_response' => is_array($parsed) ? $parsed : null,
                     'request_payload' => null,
                     'request_xml' => null,
-                    'response_body' => is_array($parsed) ? $rawResult : null,
-                    'response_xml' => $documentoXml,
+                    'response_body' => $rawResult,
+                    'response_xml' => $responseXml,
                 ],
                 'type' => 'nfse_xml_download',
                 'chave' => $chave,
@@ -1244,13 +1240,47 @@ class NFSeFacade
 
     private function extractNfseXmlFromParsedResponse(array $parsedResponse): ?string
     {
-        $rawXml = trim((string) ($parsedResponse['raw_xml'] ?? ''));
-        if ($rawXml === '') {
+        $candidates = [
+            $parsedResponse['raw_xml'] ?? null,
+            $parsedResponse['xml'] ?? null,
+            $parsedResponse['xml_retorno'] ?? null,
+        ];
+
+        foreach ($candidates as $candidate) {
+            $xml = $this->extractFiscalXmlFromCandidate($candidate);
+            if ($xml !== null) {
+                return $xml;
+            }
+        }
+
+        $gzipFields = [
+            $parsedResponse['nfseXmlGZipB64'] ?? null,
+            $parsedResponse['dados']['nfseXmlGZipB64'] ?? null,
+        ];
+
+        foreach ($gzipFields as $gzipField) {
+            $xml = $this->decodeGZipBase64ToFiscalXml($gzipField);
+            if ($xml !== null) {
+                return $xml;
+            }
+        }
+
+        return null;
+    }
+
+    private function extractFiscalXmlFromCandidate(mixed $candidate): ?string
+    {
+        if (!is_string($candidate)) {
+            return null;
+        }
+
+        $candidate = trim($candidate);
+        if ($candidate === '' || !str_starts_with(ltrim($candidate), '<')) {
             return null;
         }
 
         $dom = new \DOMDocument();
-        if (!@$dom->loadXML($rawXml)) {
+        if (!@$dom->loadXML($candidate)) {
             return null;
         }
 
@@ -1263,6 +1293,25 @@ class NFSeFacade
         }
 
         return null;
+    }
+
+    private function decodeGZipBase64ToFiscalXml(mixed $candidate): ?string
+    {
+        if (!is_string($candidate) || trim($candidate) === '') {
+            return null;
+        }
+
+        $decoded = base64_decode(trim($candidate), true);
+        if ($decoded === false || $decoded === '') {
+            return null;
+        }
+
+        $xml = @gzdecode($decoded);
+        if ($xml === false) {
+            $xml = @gzinflate(substr($decoded, 10));
+        }
+
+        return $this->extractFiscalXmlFromCandidate($xml);
     }
 
     private function extractNodeValue(string $xml, string $localName): ?string

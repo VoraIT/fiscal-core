@@ -321,6 +321,25 @@ foreach ([$xmlNfe, $xmlNfce, $xmlNfse] as $response) {
 }
 ```
 
+### 7.1) **Contrato canônico e reconciliação de XML antigo**
+
+- `documento.xml` agora representa somente o XML fiscal imprimível.
+- `raw.response_body` preserva payload bruto textual/JSON retornado pelo provedor.
+- `raw.response_xml` preserva XML técnico bruto de transporte/resposta, quando existir.
+
+Se você já salvou registros antigos com o XML errado na base:
+
+- NFe:
+  - Se houver `raw.parsed_response.xml_assinado` e `raw.response_xml`, tente remontar o `nfeProc` com `NFePHP\NFe\Complements::toAuthorize(...)`.
+  - Se não houver material suficiente, reconsulte/baixe pela chave de acesso e substitua o registro pelo `documento.xml` canônico.
+- NFSe:
+  - Se o registro salvo contiver JSON, XML administrativo ou envelope SOAP, tente reextrair o documento fiscal a partir de `nfseXmlGZipB64`, `raw_xml` ou por nova consulta com chave/protocolo/RPS.
+
+Critérios práticos para identificar registros corrompidos:
+
+- NFe: raiz `retEnviNFe`, `retConsReciNFe`, `retConsSitNFe` ou ausência de `NFe/infNFe`.
+- NFSe: JSON, `<string>`, envelope SOAP sem `CompNfse/Nfse/InfNfse` ou XML administrativo sem a nota final.
+
 ### 8) **Consultas Públicas**
 
 ```php

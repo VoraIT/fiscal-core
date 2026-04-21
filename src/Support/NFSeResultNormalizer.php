@@ -201,7 +201,7 @@ final class NFSeResultNormalizer
             'request_payload' => $context['request_payload'] ?? $artifacts['request_payload'] ?? null,
             'request_xml' => $artifacts['request_xml'] ?? null,
             'response_body' => $artifacts['response_raw'] ?? null,
-            'response_xml' => $artifacts['response_xml'] ?? $parsedResponse['raw_xml'] ?? null,
+            'response_xml' => $artifacts['response_xml'] ?? null,
         ];
     }
 
@@ -221,20 +221,17 @@ final class NFSeResultNormalizer
 
     private function extractXml(array $parsedResponse, array $context): ?string
     {
-        foreach ([
-            $context['xml'] ?? null,
-            $parsedResponse['raw_xml'] ?? null,
-        ] as $candidate) {
-            if (!is_string($candidate) || trim($candidate) === '') {
-                continue;
-            }
-
-            if (str_starts_with(ltrim($candidate), '<')) {
-                return $candidate;
-            }
+        $explicitXml = $this->normalizeFiscalXml($context['xml'] ?? null);
+        if ($explicitXml !== null) {
+            return $explicitXml;
         }
 
-        return null;
+        $rawXml = $this->extractFiscalXmlFromCandidate($parsedResponse['raw_xml'] ?? null);
+        if ($rawXml !== null) {
+            return $rawXml;
+        }
+
+        return $this->extractFiscalXmlFromGZipField($parsedResponse['nfseXmlGZipB64'] ?? null);
     }
 
     private function resolveStatusAutorizacao(array $parsedResponse, ?string $numero, ?string $codigoVerificacao): string
@@ -266,5 +263,61 @@ final class NFSeResultNormalizer
         }
 
         return null;
+    }
+
+    private function normalizeFiscalXml(mixed $candidate): ?string
+    {
+        if (!is_string($candidate)) {
+            return null;
+        }
+
+        $candidate = trim($candidate);
+        if ($candidate === '' || !str_starts_with(ltrim($candidate), '<')) {
+            return null;
+        }
+
+        return $candidate;
+    }
+
+    private function extractFiscalXmlFromCandidate(mixed $candidate): ?string
+    {
+        $candidate = $this->normalizeFiscalXml($candidate);
+        if ($candidate === null) {
+            return null;
+        }
+
+        $dom = new \DOMDocument();
+        if (!@$dom->loadXML($candidate)) {
+            return null;
+        }
+
+        $xpath = new \DOMXPath($dom);
+        foreach (['CompNfse', 'Nfse', 'InfNfse'] as $nodeName) {
+            $node = $xpath->query("//*[local-name()='{$nodeName}']")->item(0);
+            if ($node instanceof \DOMNode) {
+                return $dom->saveXML($node) ?: null;
+            }
+        }
+
+        return null;
+    }
+
+    private function extractFiscalXmlFromGZipField(mixed $candidate): ?string
+    {
+        if (!is_string($candidate) || trim($candidate) === '') {
+            return null;
+        }
+
+        $decoded = base64_decode(trim($candidate), true);
+        if ($decoded === false || $decoded === '') {
+            return null;
+        }
+
+        $xml = @gzdecode($decoded);
+        if ($xml === false) {
+            $xml = @gzinflate(substr($decoded, 10));
+        }
+
+        return $this->extractFiscalXmlFromCandidate($xml);
     }
 }

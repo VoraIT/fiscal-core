@@ -1,10 +1,8 @@
-Provider Config
- [x] Facade loads pilot provider info for belem
- [x] Facade lists active municipios from current catalog
- [x] Facade maps joinville to publica
- [x] Facade falls back to national for unknown municipio
- [x] Facade maps presidente figueiredo to issweb
- [x] Facade maps rio preto da eva to issweb
- [ ] Facade maps manaus to national provider
- [x] Facade homologation readiness uses national provider config for manaus
+NFe Facade Response Shape (Tests\Unit\NFeFacadeResponseShape)
+ [x] Emitir returns authorized nfeproc as document xml
+ [x] Emitir builds authorized document when sefaz response is wrapped in soap
+ [x] Emitir rejected keeps document xml null and preserves raw response
+ [x] Consultar returns canonical document shape
+ [x] Gerar danfe returns xml and pdf in canonical shape
+ [x] Baixar xml returns canonical document shape
 

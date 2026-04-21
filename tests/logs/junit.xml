@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="ProviderConfigTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/ProviderConfigTest.php" tests="8" assertions="44" errors="0" failures="1" skipped="0" time="3.278680">
-    <testcase name="testFacadeLoadsPilotProviderInfoForBelem" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/ProviderConfigTest.php" line="53" class="ProviderConfigTest" classname="ProviderConfigTest" assertions="5" time="0.201506"/>
-    <testcase name="testFacadeListsActiveMunicipiosFromCurrentCatalog" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/ProviderConfigTest.php" line="67" class="ProviderConfigTest" classname="ProviderConfigTest" assertions="9" time="0.132490"/>
-    <testcase name="testFacadeMapsJoinvilleToPublica" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/ProviderConfigTest.php" line="85" class="ProviderConfigTest" classname="ProviderConfigTest" assertions="5" time="0.099911"/>
-    <testcase name="testFacadeFallsBackToNationalForUnknownMunicipio" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/ProviderConfigTest.php" line="99" class="ProviderConfigTest" classname="ProviderConfigTest" assertions="4" time="2.098874"/>
-    <testcase name="testFacadeMapsPresidenteFigueiredoToIssweb" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/ProviderConfigTest.php" line="112" class="ProviderConfigTest" classname="ProviderConfigTest" assertions="5" time="0.235872"/>
-    <testcase name="testFacadeMapsRioPretoDaEvaToIssweb" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/ProviderConfigTest.php" line="126" class="ProviderConfigTest" classname="ProviderConfigTest" assertions="5" time="0.214314"/>
-    <testcase name="testFacadeMapsManausToNationalProvider" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/ProviderConfigTest.php" line="140" class="ProviderConfigTest" classname="ProviderConfigTest" assertions="5" time="0.161882">
-      <failure type="PHPUnit\Framework\ExpectationFailedException">ProviderConfigTest::testFacadeMapsManausToNationalProvider
-Failed asserting that an array contains 'consultar_por_rps'.
-
-/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/ProviderConfigTest.php:151
-/Users/johnsabba/Projects/Freeline/fiscal-core/vendor/bin/phpunit:122</failure>
-    </testcase>
-    <testcase name="testFacadeHomologationReadinessUsesNationalProviderConfigForManaus" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFSe/ProviderConfigTest.php" line="154" class="ProviderConfigTest" classname="ProviderConfigTest" assertions="6" time="0.133832"/>
+  <testsuite name="/Users/johnsabba/Projects/Freeline/fiscal-core/phpunit.xml" tests="6" assertions="42" errors="0" failures="0" skipped="0" time="0.025931">
+    <testsuite name="Unit" tests="6" assertions="42" errors="0" failures="0" skipped="0" time="0.025931">
+      <testsuite name="Tests\Unit\NFeFacadeResponseShapeTest" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFeFacadeResponseShapeTest.php" tests="6" assertions="42" errors="0" failures="0" skipped="0" time="0.025931">
+        <testcase name="test_emitir_returns_authorized_nfeproc_as_document_xml" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFeFacadeResponseShapeTest.php" line="12" class="Tests\Unit\NFeFacadeResponseShapeTest" classname="Tests.Unit.NFeFacadeResponseShapeTest" assertions="10" time="0.019680"/>
+        <testcase name="test_emitir_builds_authorized_document_when_sefaz_response_is_wrapped_in_soap" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFeFacadeResponseShapeTest.php" line="72" class="Tests\Unit\NFeFacadeResponseShapeTest" classname="Tests.Unit.NFeFacadeResponseShapeTest" assertions="6" time="0.001503"/>
+        <testcase name="test_emitir_rejected_keeps_document_xml_null_and_preserves_raw_response" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFeFacadeResponseShapeTest.php" line="138" class="Tests\Unit\NFeFacadeResponseShapeTest" classname="Tests.Unit.NFeFacadeResponseShapeTest" assertions="5" time="0.001428"/>
+        <testcase name="test_consultar_returns_canonical_document_shape" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFeFacadeResponseShapeTest.php" line="177" class="Tests\Unit\NFeFacadeResponseShapeTest" classname="Tests.Unit.NFeFacadeResponseShapeTest" assertions="7" time="0.001234"/>
+        <testcase name="test_gerar_danfe_returns_xml_and_pdf_in_canonical_shape" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFeFacadeResponseShapeTest.php" line="198" class="Tests\Unit\NFeFacadeResponseShapeTest" classname="Tests.Unit.NFeFacadeResponseShapeTest" assertions="7" time="0.000770"/>
+        <testcase name="test_baixar_xml_returns_canonical_document_shape" file="/Users/johnsabba/Projects/Freeline/fiscal-core/tests/Unit/NFeFacadeResponseShapeTest.php" line="220" class="Tests\Unit\NFeFacadeResponseShapeTest" classname="Tests.Unit.NFeFacadeResponseShapeTest" assertions="7" time="0.001317"/>
+      </testsuite>
+    </testsuite>
   </testsuite>
 </testsuites>
