@@ -2381,6 +2381,16 @@ class NacionalProvider extends AbstractNFSeProvider implements NFSeNacionalCapab
             ], $raw);
         }
 
+        
+        if (!empty($parsedResponse['dados']['pdf_base64'])) {
+            return $normalizer->normalizePdfBase64((string) $parsedResponse['dados']['pdf_base64'], [
+                'provider_class' => static::class,
+                'filename' => $filename,
+                'source' => $context['print_source'] ?? 'download_danfse',
+            ], $raw);
+        }
+
+
         if (!empty($parsedResponse['nfse_url'])) {
             return $normalizer->normalizeUrl((string) $parsedResponse['nfse_url'], [
                 'provider_class' => static::class,
