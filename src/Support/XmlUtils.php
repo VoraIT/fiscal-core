@@ -4,6 +4,52 @@ namespace sabbajohn\FiscalCore\Support;
 
 class XmlUtils
 {
+    public static function buildNfeProc(?string $signedXml, ?string $responseXml): ?string
+    {
+        $signedXml = is_string($signedXml) ? trim($signedXml) : '';
+        $responseXml = is_string($responseXml) ? trim($responseXml) : '';
+
+        if ($signedXml === '' && $responseXml === '') {
+            return null;
+        }
+
+        if ($responseXml !== '') {
+            $existingProc = self::extractFirstElementXml($responseXml, 'nfeProc');
+            if ($existingProc !== null) {
+                return $existingProc;
+            }
+        }
+
+        $nfeXml = self::extractFirstElementXml($signedXml, 'NFe');
+        $protXml = self::extractFirstElementXml($responseXml, 'protNFe');
+
+        if ($nfeXml === null || $protXml === null) {
+            return null;
+        }
+
+        $proc = new \DOMDocument('1.0', 'UTF-8');
+        $proc->formatOutput = false;
+        $root = $proc->createElementNS('http://www.portalfiscal.inf.br/nfe', 'nfeProc');
+        $root->setAttribute('versao', '4.00');
+        $proc->appendChild($root);
+
+        $nfeDom = new \DOMDocument();
+        $protDom = new \DOMDocument();
+        libxml_use_internal_errors(true);
+        $loadedNfe = $nfeDom->loadXML($nfeXml);
+        $loadedProt = $protDom->loadXML($protXml);
+        libxml_clear_errors();
+
+        if (!$loadedNfe || !$loadedProt || !$nfeDom->documentElement || !$protDom->documentElement) {
+            return null;
+        }
+
+        $root->appendChild($proc->importNode($nfeDom->documentElement, true));
+        $root->appendChild($proc->importNode($protDom->documentElement, true));
+
+        return $proc->saveXML() ?: null;
+    }
+
     /**
      * Normaliza retorno XML da SEFAZ para estrutura amigável.
      *
@@ -221,5 +267,29 @@ class XmlUtils
 
         $value = trim((string) $nodes->item(0)?->textContent);
         return $value === '' ? null : $value;
+    }
+
+    private static function extractFirstElementXml(string $xml, string $localName): ?string
+    {
+        if (trim($xml) === '') {
+            return null;
+        }
+
+        $dom = new \DOMDocument();
+        libxml_use_internal_errors(true);
+        if (!$dom->loadXML($xml)) {
+            libxml_clear_errors();
+            return null;
+        }
+        libxml_clear_errors();
+
+        $xpath = new \DOMXPath($dom);
+        $nodes = $xpath->query("//*[local-name()='{$localName}']");
+        if (!$nodes || $nodes->length === 0) {
+            return null;
+        }
+
+        $node = $nodes->item(0);
+        return $node instanceof \DOMElement ? $dom->saveXML($node) ?: null : null;
     }
 }
