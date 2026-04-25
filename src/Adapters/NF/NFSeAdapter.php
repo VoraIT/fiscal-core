@@ -238,6 +238,7 @@ class NFSeAdapter implements NotaServicoInterface
             'api_base_url' => $this->provider->getNationalApiBaseUrl(),
             'timeout' => $this->provider->getTimeout(),
             'aliquota_format' => $this->provider->getAliquotaFormat(),
+            'form_policy' => $this->buildFormPolicy(),
             'routing_rules' => $routingRules,
             'supported_operations' => $supportedOperations,
             'certificate_loaded' => (($this->provider->getConfig()['certificate'] ?? null) instanceof Certificate),
@@ -255,6 +256,94 @@ class NFSeAdapter implements NotaServicoInterface
     public function getLastOperationInfo(): array
     {
         return $this->lastOperationInfo;
+    }
+
+    private function buildFormPolicy(): array
+    {
+        $config = $this->provider->getConfig();
+        $providerKey = $this->providerKey;
+        $layoutFamily = (string) ($config['layout_family'] ?? '');
+        $municipioIbge = (string) ($this->provider->getCodigoMunicipio() ?: ($config['codigo_municipio'] ?? ''));
+        $municipioNome = (string) ($config['municipio_nome'] ?? $this->municipio);
+        $normalizedProviderKey = strtolower($providerKey);
+        $normalizedLayoutFamily = strtoupper($layoutFamily);
+        $providerClass = get_class($this->provider);
+
+        $labels = [
+            'service.municipal_code' => 'Código Serviço Municipal',
+            'service.national_tax_code' => 'Código Tributação Nacional',
+            'service.nbs' => 'Código NBS',
+            'prestador.op_simp_nac' => 'Simples Nacional',
+        ];
+
+        $hints = [
+            'service.municipal_code' => 'Código municipal do serviço aceito pelo provider NFSe.',
+            'service.national_tax_code' => 'Código nacional de tributação do serviço.',
+            'service.nbs' => 'Nomenclatura Brasileira de Serviços exigida pelo layout nacional.',
+            'prestador.op_simp_nac' => 'Opção do Simples Nacional exigida pelo layout nacional.',
+        ];
+
+        if ($providerKey === ProviderRegistry::NFSE_NATIONAL_KEY || $normalizedLayoutFamily === 'NACIONAL') {
+            return [
+                'provider_key' => $providerKey,
+                'layout_family' => $layoutFamily !== '' ? $layoutFamily : 'NACIONAL',
+                'municipio_ibge' => $municipioIbge,
+                'municipio_nome' => $municipioNome,
+                'policy_source' => 'nfse_nacional_policy',
+                'required_fields' => [
+                    'service.municipal_code',
+                    'service.national_tax_code',
+                    'service.nbs',
+                    'prestador.op_simp_nac',
+                ],
+                'visible_fields' => [
+                    'service.municipal_code',
+                    'service.national_tax_code',
+                    'service.nbs',
+                    'prestador.op_simp_nac',
+                ],
+                'labels' => $labels,
+                'hints' => $hints,
+            ];
+        }
+
+        if (
+            $providerKey === 'BELEM_MUNICIPAL_2025'
+            || $municipioIbge === '1501402'
+            || str_contains($providerClass, 'BelemMunicipalProvider')
+        ) {
+            return [
+                'provider_key' => $providerKey,
+                'layout_family' => $layoutFamily !== '' ? $layoutFamily : 'ABRASF_203',
+                'municipio_ibge' => $municipioIbge,
+                'municipio_nome' => $municipioNome,
+                'policy_source' => 'belem_municipal_policy',
+                'required_fields' => [
+                    'service.municipal_code',
+                ],
+                'visible_fields' => [
+                    'service.municipal_code',
+                ],
+                'labels' => $labels,
+                'hints' => $hints,
+            ];
+        }
+
+        return [
+            'provider_key' => $providerKey,
+            'layout_family' => $layoutFamily,
+            'municipio_ibge' => $municipioIbge,
+            'municipio_nome' => $municipioNome,
+            'policy_source' => 'default_provider_policy',
+            'required_fields' => [
+                'service.municipal_code',
+            ],
+            'visible_fields' => [
+                'service.municipal_code',
+            ],
+            'labels' => $labels,
+            'hints' => $hints,
+        ];
     }
 
     private function requireNacionalCapabilities(): NFSeNacionalCapabilitiesInterface
